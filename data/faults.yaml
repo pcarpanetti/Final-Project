@@ -8,9 +8,9 @@
   corrected_at: "2020-01-17T09:30"
 - id: F2_stale_repeat
   type: stale_repeat
-  as_of: "2020-02-11"
+  as_of: "2020-02-19"
   asset: Utils
-  corrected_at: "2020-02-13T09:30"
+  corrected_at: "2020-02-21T09:30"
 - id: F3_late_file
   type: late_file
   as_of: "2020-03-04"

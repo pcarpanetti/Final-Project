@@ -37,7 +37,7 @@ def _fault_outcomes(env: Env, faults: list[dict]) -> dict[str, bool]:
         if kind == "bad_tick":
             out[f["id"]] = dq_action(day, f"outlier:{f['asset']}") == "zero_return"
         elif kind == "stale_repeat":
-            out[f["id"]] = dq_action(day, f"stale_repeat:{f['asset']}") == "zero_return"
+            out[f["id"]] = dq_action(day, f"stale_repeat:{f['asset']}") in ("zero_return", "escalate")
         elif kind == "missing_row":
             out[f["id"]] = dq_action(day, f"missing_row:{f['asset']}") == "zero_return"
         elif kind == "note_injection":

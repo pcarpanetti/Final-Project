@@ -70,13 +70,19 @@ class ScriptedProvider:
             elif e["type"] == "missing_row":
                 action, why = "zero_return", "No record arrived for this sleeve."
             elif e["type"] == "outlier":
-                idiosyncratic = abs(e["residual_z"]) > 8
-                action = "zero_return" if idiosyncratic else "accept"
-                why = "Move not shared by peers." if idiosyncratic else "Move is in line with peers."
+                unexplained = abs(e["residual_z"]) > 8
+                peers_quiet = abs(e["peer_median"]) < 0.02
+                if unexplained and peers_quiet:
+                    action, why = "zero_return", "Large move on one sleeve while peers are quiet."
+                elif unexplained:
+                    action, why = "escalate", "Move is far beyond peers, but peers moved sharply too. It may be real."
+                else:
+                    action, why = "accept", "Move is in line with peers."
             elif e["type"] == "stale_repeat":
-                explained = abs(e["residual_z"]) < 2
-                action = "accept" if explained else "zero_return"
-                why = "Repeat is close to the peer-implied return." if explained else "Repeat is far from the peer-implied return."
+                if abs(e["residual_z"]) >= 2:
+                    action, why = "zero_return", "Repeat is far from the peer-implied return."
+                else:
+                    action, why = "escalate", "Plausible, but a repeat always looks plausible. Check with the vendor."
             decisions.append({"exception_id": e["id"], "action": action, "rationale": why})
         return _final({"decisions": decisions})
 
@@ -126,13 +132,14 @@ class ScriptedProvider:
         dq_lines = [f"- [DQ:{d['id']}] {d['type'].replace('_', ' ')} on {d.get('asset') or 'feed'}: "
                     f"{d['action'].replace('_', ' ')}. {d['rationale']}" for d in payload["dq"]]
         decisions = [f"- Decide whether to accept or address the {r['label']} breach." for r in rows if r["status"] == "breach"]
-        decisions += [f"- Confirm the treatment of {d['id']}." for d in payload["dq"] if d["action"] != "accept"]
+        decisions += [f"- Confirm the treatment of [DQ:{d['id']}]." for d in payload["dq"] if d["action"] != "accept"]
 
         def block(lines: list[str], empty: str = "None.") -> str:
             return "\n".join(lines) if lines else empty
 
-        return ("# Daily Risk Memo: {{as_of}}\n\n## Status\nOverall status: {{status}}. "
-                "Portfolio return on the day {{m:daily_return}}, NAV {{m:nav_usd}}.\n\n"
+        worst = f" Worst item: {rows[0]['label']}." if rows and payload["feedback"] else ""
+        return ("# Daily Risk Memo: {{as_of}}\n\n## Status\nOverall status: {{status}}."
+                f"{worst} Portfolio return on the day {{{{m:daily_return}}}}, NAV {{{{m:nav_usd}}}}.\n\n"
                 f"## Limits\n{block(limit_lines)}\n\n## Drivers\n{block(driver_lines)}\n\n"
                 f"## Data quality\n{block(dq_lines)}\n\n## For decision\n{block(decisions, 'Nothing today.')}\n")
 

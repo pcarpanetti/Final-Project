@@ -87,7 +87,7 @@ def ingest(ctx) -> None:
     applied = []
     for o in ctx.state.q("SELECT * FROM dq_overrides WHERE as_of < ? ORDER BY as_of, asset", as_of):
         current = snap.published.at[o["as_of"], o["asset"]] if o["as_of"] in snap.published.index else None
-        if isinstance(current, str) and current == o["judged_published_at"] or not isinstance(current, str):
+        if not isinstance(current, str) or current == o["judged_published_at"]:
             returns.at[o["as_of"], o["asset"]] = 0.0
             applied.append({"as_of": o["as_of"], "asset": o["asset"], "action": o["action"]})
 
@@ -291,14 +291,18 @@ ANALYST_CHECKS = {"evidence_claims", "every_active_limit_explained"}
 
 
 def _feedback(ctx, only_checks: set[str] | None = None) -> list[dict]:
-    """Feedback for this round. The analyst sees only its own failures, so an unchanged request
-    hits the LLM journal instead of paying for an identical call."""
+    """Feedback for this round, optionally limited to the checks one role can actually fix."""
     name = f"feedback.r{ctx.round}.json"
     items = ctx.read_json(name) if ctx.exists(name) else []
     return [i for i in items if only_checks is None or i.get("check") in only_checks]
 
 
 def analyst(ctx) -> None:
+    feedback = _feedback(ctx, ANALYST_CHECKS)
+    if ctx.round > 0 and not feedback:
+        # Nothing here was criticised, so carry the findings forward rather than pay for a repeat.
+        ctx.write_json(f"analysis.r{ctx.round}.json", ctx.read_json(f"analysis.r{ctx.round - 1}.json"))
+        return
     metrics = metrics_with_backtest(ctx)
     prior = previous_metrics(ctx) or {}
     for mid, m in metrics.items():
@@ -306,7 +310,7 @@ def analyst(ctx) -> None:
             m["prior_value"] = prior[mid]["value"]
     payload = {"as_of": _day_label(ctx), "metrics": metrics, "limits": ctx.read_json("limit_status.json")["rows"],
                "delta": ctx.read_json("breach_delta.json"), "backtest": ctx.read_json("backtest.json"),
-               "dq": ctx.read_json("dq_summary.json")["items"], "feedback": _feedback(ctx, ANALYST_CHECKS)}
+               "dq": ctx.read_json("dq_summary.json")["items"], "feedback": feedback}
     ctx.write_json(f"analysis.r{ctx.round}.json", ctx.agent("risk_analyst", payload))
 
 
@@ -329,17 +333,17 @@ def verify(ctx) -> None:
                         for c in result["checks"] if not c["passed"]])
 
 
-def _resolved_memo(ctx, rnd: int) -> str:
+def _resolved_memo(ctx, rnd: int, day: str | None = None) -> str:
     limit_status = ctx.read_json("limit_status.json")
     limits = {r["limit_id"]: r for r in limit_status["rows"]}
-    return resolve(ctx.read_text(f"memo_draft.r{rnd}.md"), metrics_with_backtest(ctx), limits, ctx.run["as_of"],
-                   limit_status["status"])
+    return resolve(ctx.read_text(f"memo_draft.r{rnd}.md"), metrics_with_backtest(ctx), limits,
+                   day or ctx.run["as_of"], limit_status["status"])
 
 
 def reviewer(ctx) -> None:
     """Sees the finished memo and source facts only: no drafts, findings or analyst reasoning."""
     limit_status = ctx.read_json("limit_status.json")
-    payload = {"memo": _resolved_memo(ctx, ctx.round), "status": limit_status["status"],
+    payload = {"memo": _resolved_memo(ctx, ctx.round, _day_label(ctx)), "status": limit_status["status"],
                "limits": limit_status["rows"], "dq": ctx.read_json("dq_summary.json")["items"],
                "backtest": ctx.read_json("backtest.json")}
     out = ctx.agent("reviewer", payload)
