@@ -198,3 +198,34 @@ def test_no_role_has_a_tool_that_writes(bundle):
     available = {n for n in dir(Tools) if n.startswith("get_")}
     for spec in bundle["agents"]["roles"].values():
         assert set(spec["tools"]) <= available
+
+
+def test_material_restatement_waits_for_approval_then_issues_a_notice(make_env, paths, bundle):
+    """The fixed replay's three corrections are all immaterial, so this path is forced here."""
+    from riskwatch.config import deep_merge
+    env = make_env(the_bundle=deep_merge(bundle, {"policy": {"restatement": {"material_var_change": 0.0}}}))
+    env.state.set_kv("book_start", "2020-01-16")
+    replay_day(env, "2020-01-16")
+    tick(env, "2020-01-17T09:30")
+    row = env.state.one("SELECT run_id, status FROM runs WHERE workflow = 'restate'")
+    assert row["status"] == "awaiting_approval"
+    assert not (paths.published / "restatements").exists()
+    assert Controller(env).decide(row["run_id"], "approve", "cro") == "completed"
+    assert (paths.published / "restatements" / f"{row['run_id']}.md").exists()
+
+
+def test_wall_clock_limit_halts_the_run_and_escalates(make_env, bundle):
+    from riskwatch.config import deep_merge
+    env = make_env(the_bundle=deep_merge(bundle, {"policy": {"budgets": {"per_run": {"max_wall_seconds": -1}}}}))
+    _, run_id, status = eod(env, "2020-03-16")
+    assert status == "halted_budget"
+    assert env.state.q("SELECT 1 FROM escalations WHERE run_id = ?", run_id)
+
+
+def test_daily_cost_limit_stops_agents_across_runs(make_env, bundle, monkeypatch):
+    from riskwatch.config import deep_merge
+    monkeypatch.setenv("LLM_PRICE_IN_PER_MTOK", "1")
+    env = make_env(the_bundle=deep_merge(bundle, {"policy": {"budgets": {"per_day": {"max_cost_usd": 0.001}}}}))
+    _, run_id, status = eod(env, "2020-03-16")
+    assert status == "awaiting_approval"
+    assert "per-day" in env.state.run(run_id)["degraded_reason"]

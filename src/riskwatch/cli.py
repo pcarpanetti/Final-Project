@@ -12,7 +12,7 @@ import yaml
 from .config import ROOT, default_paths, deep_merge, load_source_bundle
 from .controller import Controller, Env
 from .improve import versions
-from .llm.providers import build_provider, load_dotenv
+from .llm.providers import PermanentError, build_provider, load_dotenv
 from .replay import load_scenario, replay
 from .scheduler import circuit_open, status_summary, tick
 
@@ -226,7 +226,7 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
         args.fn(args)
-    except versions.VersionError as e:
+    except (versions.VersionError, PermanentError) as e:
         sys.exit(f"error: {e}")
     return 0
 
