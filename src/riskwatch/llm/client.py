@@ -20,8 +20,10 @@ class ProviderFailed(RuntimeError):
     """Retries are exhausted or the error is permanent; the stage's on_failure rule decides what happens."""
 
 
-def request_hash(provider: str, model: str, messages: list[dict]) -> str:
-    text = json.dumps([provider, model, messages], sort_keys=True, ensure_ascii=False)
+def request_hash(provider: str, model: str, stage: str, rnd: int, messages: list[dict]) -> str:
+    """Identity of one logical call. Round is part of it: a revision round is a new question even
+    if the text repeats, so it must not replay the verdict of the round it is trying to fix."""
+    text = json.dumps([provider, model, stage, rnd, messages], sort_keys=True, ensure_ascii=False)
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
@@ -58,7 +60,7 @@ class LLMClient:
     def complete(self, *, run_id: str, stage: str, role: str, messages: list[dict], max_tokens: int,
                  meta: dict, day: str, started_at: float) -> str:
         provider = self.provider_for(role)
-        key = request_hash(provider.name, provider.model, messages)
+        key = request_hash(provider.name, provider.model, stage, meta["round"], messages)
         cached = self.state.llm_lookup(run_id, key)
         if cached is not None:
             self.state.event(run_id, stage, "llm_replayed", {"role": role})
