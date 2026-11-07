@@ -1,0 +1,4 @@
+hypothesis: A gentler age decay of 0.995 keeps part of the coverage gain while staying inside the VaR guardrail. Chosen after seeing age_weighted_var fail that guardrail on this same window.
+overlay:
+  risk_model:
+    var: {method: age_weighted, age_decay: 0.995}

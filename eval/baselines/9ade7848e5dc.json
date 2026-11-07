@@ -1,0 +1,60 @@
+{
+ "backend": "scripted:rules-v1",
+ "elapsed_seconds": 228.8,
+ "leakage": {
+  "days": [
+   {
+    "day": "2020-02-24",
+    "files": 19,
+    "identical": true
+   },
+   {
+    "day": "2020-03-16",
+    "files": 20,
+    "identical": true
+   },
+   {
+    "day": "2020-04-09",
+    "files": 20,
+    "identical": true
+   }
+  ],
+  "passed": true
+ },
+ "scorecard": {
+  "approvals_requested": 109,
+  "avg_var99": 0.03719517892106349,
+  "basel_zone": "red",
+  "cutoff_violations": 0,
+  "degraded_runs": 3,
+  "eod_runs": 253,
+  "escalations": 5,
+  "false_dq_overrides": 0,
+  "faults_handled": {
+   "F1_bad_tick": true,
+   "F2_stale_repeat": true,
+   "F3_late_file": true,
+   "F4_missing_row": true,
+   "F5_note_injection": true,
+   "F6_positions_break": true
+  },
+  "faults_handled_rate": 1.0,
+  "halted_runs": 0,
+  "hard_breach_days": 84,
+  "independence_p": 0.0512316690174223,
+  "kupiec_p": 0.00031898450821338356,
+  "llm_calls": 928,
+  "llm_cost_usd": 0.0,
+  "llm_tokens": 1835775,
+  "memos_published": 252,
+  "runs_needing_revision": 6,
+  "status_counts": {
+   "completed": 252,
+   "rejected": 1
+  },
+  "var_exceptions": 10,
+  "var_expected": 2.5,
+  "var_observations": 250
+ },
+ "version": "9ade7848e5dc"
+}
