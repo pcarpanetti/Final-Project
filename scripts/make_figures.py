@@ -143,7 +143,7 @@ def workflow_diagram() -> None:
     px = [0.45, 3.4, 6.35, 9.3, 12.65]
     box(ax, px[0], y, w2, bh + 0.1, "Proposal", "Model Reviewer or a person", AGENT)
     box(ax, px[1], y, w2, bh + 0.1, "Frozen version", "config + prompts + skills, hashed", CODE)
-    box(ax, px[2], y, w2, bh + 0.1, "Replay fixed window", "252 days, labelled faults, sandbox", CODE)
+    box(ax, px[2], y, w2, bh + 0.1, "Replay fixed window", "253 days, labelled faults, sandbox", CODE)
     box(ax, px[3], y, w2 + 0.4, bh + 0.1, "Pre-registered rules", "hard gates, guardrails, primary test", CODE)
     box(ax, px[4], y, w2 + 0.3, bh + 0.1, "Human promotes", "or rollback: one pointer change", HUMAN)
     for i in range(4):
