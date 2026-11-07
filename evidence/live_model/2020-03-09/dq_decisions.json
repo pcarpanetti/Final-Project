@@ -1,0 +1,9 @@
+{
+ "decisions": [
+  {
+   "action": "escalate",
+   "exception_id": "outlier:Enrgy",
+   "rationale": "Enrgy return -19.68% (z -6.84) has residual_z -9.28 (above ~8), but peer_median is -7.18%, so peers are also moving sharply. Per triage rules this is the dangerous case: a sector may be genuinely collapsing in a sell-off, and zero_return would hide a real loss. Not a quiet-peer bad tick, so escalate to a human. No vendor notes were supplied, so there were no instructions to ignore."
+  }
+ ]
+}

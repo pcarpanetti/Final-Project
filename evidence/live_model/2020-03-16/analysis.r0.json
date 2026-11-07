@@ -1,0 +1,107 @@
+{
+ "findings": [
+  {
+   "evidence": [
+    {
+     "claim": "rose",
+     "metric": "var99_1d"
+    },
+    {
+     "claim": "above_warn",
+     "metric": "var99_1d"
+    },
+    {
+     "claim": "positive",
+     "metric": "var99_change_window"
+    },
+    {
+     "claim": "negative",
+     "metric": "var99_change_positions"
+    },
+    {
+     "claim": "negative",
+     "metric": "daily_return"
+    }
+   ],
+   "id": "F1",
+   "limit_id": "var99",
+   "statement": "This is a new warning. The rise in value at risk came almost entirely from the market data window, where a large loss entered the sample, while position changes slightly reduced it. The book did not drive the move. Backtest exceptions are above what is expected and the tests flag clustering, so the model may be understating risk."
+  },
+  {
+   "evidence": [
+    {
+     "claim": "rose",
+     "metric": "es975_1d"
+    },
+    {
+     "claim": "above_warn",
+     "metric": "es975_1d"
+    },
+    {
+     "claim": "negative",
+     "metric": "daily_return"
+    }
+   ],
+   "id": "F2",
+   "limit_id": "es975",
+   "statement": "The expected shortfall warning continues and tail risk increased further today, in line with the large negative portfolio return on the day."
+  },
+  {
+   "evidence": [
+    {
+     "claim": "rose",
+     "metric": "vol_ann_ewma"
+    },
+    {
+     "claim": "above_warn",
+     "metric": "vol_ann_ewma"
+    },
+    {
+     "claim": "above_hard",
+     "metric": "vol_ann_ewma"
+    }
+   ],
+   "id": "F3",
+   "limit_id": "vol",
+   "statement": "The volatility breach continues and worsened, with the exponentially weighted volatility estimate rising well beyond the hard limit after the large loss day."
+  },
+  {
+   "evidence": [
+    {
+     "claim": "rose",
+     "metric": "drawdown"
+    },
+    {
+     "claim": "above_warn",
+     "metric": "drawdown"
+    },
+    {
+     "claim": "above_hard",
+     "metric": "drawdown"
+    },
+    {
+     "claim": "fell",
+     "metric": "nav_usd"
+    },
+    {
+     "claim": "negative",
+     "metric": "daily_return"
+    }
+   ],
+   "id": "F4",
+   "limit_id": "drawdown",
+   "statement": "The drawdown breach continues and deepened as net asset value fell on a large negative return, leaving the drawdown far beyond the hard limit."
+  },
+  {
+   "evidence": [
+    {
+     "claim": "above_warn",
+     "metric": "var_exceptions_250"
+    }
+   ],
+   "id": "F5",
+   "limit_id": "general",
+   "statement": "The backtest is in the yellow zone with more exceptions than expected, an exception occurred today, and both the frequency and independence tests reject the model. Exceptions appear to cluster, so the model may be understating risk and passing limits should not be taken as reassurance."
+  }
+ ]
+}

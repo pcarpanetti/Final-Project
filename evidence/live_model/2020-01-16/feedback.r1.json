@@ -1,0 +1,22 @@
+[
+ {
+  "fix": "Remove the risk-share claim, or cite a supplied risk-contribution figure. State only the supported facts: the largest sleeve weight is 24.71%, up from 24.61%, with 0.29 points of headroom to the 25% hard limit. Name the sleeve only if the source facts identify it.",
+  "problem": "F1 says the high tech sleeve's \"share of risk is well above its weight\". The facts contain no risk-contribution metric. The facts also never name the largest sleeve as \"high tech\", because the limit only reports weight_max. Both statements are asserted without evidence.",
+  "source": "reviewer"
+ },
+ {
+  "fix": "Drop the causal claim. Say instead that 1-day 99% VaR is essentially unchanged (3.19% against 3.19% prior, hard limit 4.5%) and that the backtest is green with 0 exceptions against 1.38 expected.",
+  "problem": "F3 says the small VaR change \"came from position moves, not from the market data window\". No metric in the facts supports this attribution. The VaR moved only from 3.187% to 3.189%. The provisional zeroing of the Telcm return is itself a market-data adjustment, so the claim is also doubtful.",
+  "source": "reviewer"
+ },
+ {
+  "fix": "Show two decimals, for example 3.04 days against a 3.00 warning, up from 3.03 the prior day.",
+  "problem": "The liquidity line reads \"3.0 days against a warning of 3.0 days\", which is rounded so that it looks like no warning exists. A reader cannot see why it is flagged.",
+  "source": "reviewer"
+ },
+ {
+  "fix": "Add a sentence saying the figures assume the move is a bad tick. If the move is genuine, VaR, ES and the other figures would be understated until the review is complete.",
+  "problem": "The data-quality item shows the zeroed Telcm return, but the memo does not say that the effect on the reported metrics is unquantified. An 18.7% raw move treated as zero could understate risk if the move is real.",
+  "source": "reviewer"
+ }
+]

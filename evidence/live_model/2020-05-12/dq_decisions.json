@@ -1,0 +1,9 @@
+{
+ "decisions": [
+  {
+   "action": "escalate",
+   "exception_id": "suspicious_note:0",
+   "rationale": "Exception type is suspicious_note for asset Hlth. Per triage policy this is always escalated as a security event rather than a data question. The vendor_notes_untrusted list in the payload is empty, so no note text was available to read, and I did not follow any instructions from vendor text. A human should review it."
+  }
+ ]
+}

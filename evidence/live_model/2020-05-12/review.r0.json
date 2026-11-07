@@ -1,0 +1,13 @@
+{
+ "issues": [
+  {
+   "fix": "Delete the attribution and state only what the figures show: VaR is essentially flat (4.97% against 4.97%) and still above the 4.50% hard limit. Add a decomposition only if the facts provide one.",
+   "problem": "Causation, F1: the memo says VaR's small change \"came from position moves, not from the market data window\". No metric or fact in the source supports this attribution. The source gives only VaR values (0.04967 prior, 0.04965 now) and no decomposition between position changes and the data window."
+  },
+  {
+   "fix": "Remove the variance claim and the \"not adding more risk\" conclusion. Report only that the weight is 24.80%, a warning, with 0.20 points of headroom to the hard limit. Cite a variance-contribution fact if one exists.",
+   "problem": "Reassurance and causation, F4: the memo says the largest sleeve's \"share of variance roughly matches its weight, so it is not adding more risk than its size suggests\". The facts contain no variance-contribution or risk-contribution metric. This is an unsupported reassurance on a sleeve that is in warning at 24.80% against a 25.00% hard limit, with only 0.20 points of headroom."
+  }
+ ],
+ "verdict": "revise"
+}

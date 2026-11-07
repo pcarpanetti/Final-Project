@@ -346,7 +346,7 @@ def reviewer(ctx) -> None:
     prior = previous_metrics(ctx)
     limits = [{**r, "prior_value": prior[r["metric"]]["value"] if prior else None} for r in limit_status["rows"]]
     payload = {"memo": _resolved_memo(ctx, ctx.round, _day_label(ctx)), "status": limit_status["status"],
-               "limits": limits, "delta": ctx.read_json("breach_delta.json"),
+               "metrics": metrics_with_backtest(ctx), "limits": limits, "delta": ctx.read_json("breach_delta.json"),
                "dq": ctx.read_json("dq_summary.json")["items"], "backtest": ctx.read_json("backtest.json"),
                "first_day_of_history": prior is None}
     out = ctx.agent("reviewer", payload)

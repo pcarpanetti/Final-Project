@@ -50,10 +50,10 @@ You can watch progress, and **Stop** then **Resume** carries on without repeatin
 
 | Period | Offline demo | Real model, roughly |
 |---|---|---|
-| Quick look (5 days) | 10 seconds | 5 minutes, 20 calls |
-| Crash month (19 days) | 40 seconds | 25 minutes, 70 calls |
-| First half of 2020 | 4 minutes | 2.5 hours, 460 calls |
-| Full year | 9 minutes | 5 hours, 930 calls |
+| Quick look (5 days) | 10 seconds | 6 minutes, 25 calls |
+| Crash month (19 days) | 40 seconds | 25 minutes, 95 calls |
+| First half of 2020 | 4 minutes | 2.5 hours, 600 calls |
+| Full year | 9 minutes | 5 hours, 1,250 calls |
 
 Start small with a real model, because long runs use a lot of your plan or budget.
 

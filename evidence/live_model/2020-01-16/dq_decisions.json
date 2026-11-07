@@ -1,0 +1,9 @@
+{
+ "decisions": [
+  {
+   "action": "zero_return",
+   "exception_id": "outlier:Telcm",
+   "rationale": "Outlier with ret 18.7% (z 45.62) and residual_z 38.38, far above the ~8 threshold. Peers are quiet: peer_median is 0.62%, within the ~2% band, and expected_ret is 0.30%. The move is not shared by peers and is not explained by beta, so it is likely a bad tick. Treat the sleeve as unchanged provisionally for human review. No vendor notes were supplied, so there was no embedded instruction to ignore."
+  }
+ ]
+}

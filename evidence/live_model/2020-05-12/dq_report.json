@@ -1,0 +1,9 @@
+{
+ "exceptions": [
+  {
+   "asset": "Hlth",
+   "id": "suspicious_note:0",
+   "type": "suspicious_note"
+  }
+ ]
+}

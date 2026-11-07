@@ -1,0 +1,23 @@
+{
+ "as_of": "2020-03-09",
+ "limits": [
+  {
+   "hard": 0.4,
+   "label": "Annualised EWMA volatility",
+   "limit_id": "vol",
+   "metric": "vol_ann_ewma",
+   "status": "breach",
+   "value": 0.4430887851046732,
+   "warn": 0.25
+  },
+  {
+   "hard": 0.15,
+   "label": "Drawdown from NAV peak",
+   "limit_id": "drawdown",
+   "metric": "drawdown",
+   "status": "breach",
+   "value": 0.19041184943621114,
+   "warn": 0.1
+  }
+ ]
+}

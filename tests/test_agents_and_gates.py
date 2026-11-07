@@ -92,6 +92,13 @@ def test_reviewer_is_told_what_is_new_and_the_prior_values(make_env):
     facts = next(json.loads(t)["payload"] for t in requests if '"memo"' in t and t.startswith("{"))
     assert facts["first_day_of_history"] is False and "new" in facts["delta"]
     assert all(row["prior_value"] is not None for row in facts["limits"])
+    assert {"var99_change_window", "ctr_HiTec", "top_risk_asset"} <= set(facts["metrics"])
+
+
+def test_a_value_just_over_its_limit_does_not_round_down_to_the_limit():
+    """Regression: a real reviewer spotted '3.0 days against a warning of 3.0 days'."""
+    from riskwatch.memo import format_value
+    assert format_value(3.04, "days") == "3.04 days"
 
 
 @pytest.mark.parametrize("fault,calls_expected", [("outage", 0), ("bad_key", 0)])

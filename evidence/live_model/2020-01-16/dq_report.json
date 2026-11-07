@@ -1,0 +1,14 @@
+{
+ "exceptions": [
+  {
+   "asset": "Telcm",
+   "expected_ret": 0.002974,
+   "id": "outlier:Telcm",
+   "peer_median": 0.0062,
+   "residual_z": 38.38,
+   "ret": 0.187,
+   "type": "outlier",
+   "z": 45.62
+  }
+ ]
+}

@@ -94,7 +94,9 @@ def main() -> None:
             bad = [c["id"] for c in json.loads(path.read_text(encoding="utf-8"))["checks"] if not c["passed"]]
             failed.append(f"{path.stem.split('.')[1]}: {', '.join(bad) or 'all passed'}")
         reviews = [json.loads(p.read_text(encoding="utf-8"))["verdict"] for p in sorted(folder.glob("review.r*.json"))]
-        details.append(f"- **{day}.** Checks by round: {'; '.join(failed)}. Reviewer: {', '.join(reviews) or 'did not run'}.")
+        final = (folder / "memo_final.md").read_text(encoding="utf-8")
+        note = " Issued with open reviewer concerns for the approver." if "## Open reviewer concerns" in final else ""
+        details.append(f"- **{day}.** Checks by round: {'; '.join(failed)}. Reviewer: {', '.join(reviews) or 'did not run'}.{note}")
     lines += ["", *details, "", f"Data steward judgement: {'all correct' if all_ok else 'at least one WRONG'}."]
     (OUT / "report.md").write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
     print("\n".join(lines))

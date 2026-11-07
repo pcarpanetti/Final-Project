@@ -1,0 +1,11 @@
+{
+ "outbox": [
+  {
+   "destination": "memos/2020-01-16.md",
+   "key": "memo:eod-2020-01-16",
+   "kind": "memo",
+   "sha256": "24c8ba49ccfceccb4df56b89352345625cadb21c49ad7152dfd456f4cb2aab98",
+   "status": "delivered"
+  }
+ ]
+}

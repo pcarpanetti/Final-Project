@@ -12,7 +12,7 @@ def format_value(value, unit: str) -> str:
     if unit == "usd":
         return f"${value / 1e6:,.1f}m"
     if unit == "days":
-        return f"{value:.1f} days"
+        return f"{value:.2f} days"
     if unit == "count":
         return str(int(value))
     if unit == "ratio":

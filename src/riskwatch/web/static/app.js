@@ -52,13 +52,13 @@ function formatMetric(metric) {
   const { value, unit } = metric;
   if (unit === "pct") return pct(value);
   if (unit === "usd") return usd(value);
-  if (unit === "days") return `${value.toFixed(1)} days`;
+  if (unit === "days") return `${value.toFixed(2)} days`;
   if (unit === "ratio") return value.toFixed(2);
   return String(value);
 }
 
 function limitValue(row, value) {
-  return row.metric === "liq_days_max" ? `${value.toFixed(1)} days` : row.metric.startsWith("beta") ? value.toFixed(2) : pct(value);
+  return row.metric === "liq_days_max" ? `${value.toFixed(2)} days` : row.metric.startsWith("beta") ? value.toFixed(2) : pct(value);
 }
 
 const STATUS = {
@@ -328,7 +328,7 @@ const PERIODS = [
   ["full", "Full year", "July 2019 to June 2020, every scenario.", "2019-07-01", "2020-06-30"],
   ["custom", "Choose dates", "Any period in the data.", "", ""],
 ];
-const CALLS_PER_DAY = 3.7;
+const CALLS_PER_DAY = 5;
 const SECONDS_PER_DAY_OFFLINE = 2;
 const SECONDS_PER_DAY_LIVE = 75;
 

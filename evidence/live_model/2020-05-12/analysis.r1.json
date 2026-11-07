@@ -1,0 +1,110 @@
+{
+ "findings": [
+  {
+   "evidence": [
+    {
+     "claim": "above_hard",
+     "metric": "var99_1d"
+    },
+    {
+     "claim": "fell",
+     "metric": "var99_1d"
+    },
+    {
+     "claim": "negative",
+     "metric": "var99_change_positions"
+    }
+   ],
+   "id": "F1",
+   "limit_id": "var99",
+   "statement": "The one-day 99% VaR remains in breach of its hard limit, a continuing breach. It edged down slightly, and the small change came entirely from position moves, with no contribution from the market data window."
+  },
+  {
+   "evidence": [
+    {
+     "claim": "above_hard",
+     "metric": "es975_1d"
+    },
+    {
+     "claim": "fell",
+     "metric": "es975_1d"
+    }
+   ],
+   "id": "F2",
+   "limit_id": "es975",
+   "statement": "Expected shortfall remains in breach of its hard limit, a continuing breach, and was essentially unchanged from the prior day."
+  },
+  {
+   "evidence": [
+    {
+     "claim": "above_hard",
+     "metric": "vol_ann_ewma"
+    },
+    {
+     "claim": "fell",
+     "metric": "vol_ann_ewma"
+    },
+    {
+     "claim": "negative",
+     "metric": "daily_return"
+    }
+   ],
+   "id": "F3",
+   "limit_id": "vol",
+   "statement": "Annualised EWMA volatility remains above its hard limit, a continuing breach, though it eased a little from the prior day even as the portfolio posted a loss on the day."
+  },
+  {
+   "evidence": [
+    {
+     "claim": "above_warn",
+     "metric": "weight_max"
+    },
+    {
+     "claim": "fell",
+     "metric": "weight_max"
+    },
+    {
+     "claim": "positive",
+     "metric": "ctr_HiTec"
+    }
+   ],
+   "id": "F4",
+   "limit_id": "single_name",
+   "statement": "The largest sleeve, high technology, remains above its warning threshold but below the hard limit, a continuing warning. It also carries the largest variance share, roughly matching its weight, so it is not doing more than its size suggests."
+  },
+  {
+   "evidence": [
+    {
+     "claim": "above_warn",
+     "metric": "drawdown"
+    },
+    {
+     "claim": "rose",
+     "metric": "drawdown"
+    },
+    {
+     "claim": "negative",
+     "metric": "daily_return"
+    },
+    {
+     "claim": "fell",
+     "metric": "nav_usd"
+    }
+   ],
+   "id": "F5",
+   "limit_id": "drawdown",
+   "statement": "Drawdown from the NAV peak is above its warning level and rose, a continuing warning, as the portfolio lost value on the day and net asset value fell."
+  },
+  {
+   "evidence": [
+    {
+     "claim": "positive",
+     "metric": "var_exceptions_250"
+    }
+   ],
+   "id": "F6",
+   "limit_id": "general",
+   "statement": "The backtest is in the yellow zone with more exceptions than expected and statistical tests that reject the model, so the model may be understating risk and the passing limits should not be taken as reassurance. Separately, a suspicious vendor note on the health care sleeve was escalated for human review, and no vendor text was acted on."
+  }
+ ]
+}
