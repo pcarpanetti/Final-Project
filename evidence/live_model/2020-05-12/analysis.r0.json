@@ -17,7 +17,7 @@
    ],
    "id": "F1",
    "limit_id": "var99",
-   "statement": "The one-day 99% VaR remains in breach of its hard limit, a continuing breach. It edged down slightly, and the small change came entirely from position moves, with no contribution from the market data window."
+   "statement": "The one-day VaR breach is continuing and is essentially unchanged, slipping slightly. The tiny move came entirely from position changes, with no contribution from the market data window, so the book and the sample both stayed put while the measure remains above its hard limit."
   },
   {
    "evidence": [
@@ -32,7 +32,7 @@
    ],
    "id": "F2",
    "limit_id": "es975",
-   "statement": "Expected shortfall remains in breach of its hard limit, a continuing breach, and was essentially unchanged from the prior day."
+   "statement": "The expected shortfall breach is continuing, with a marginal decline from the prior day. It remains above its hard limit, consistent with the tail risk that VaR shows."
   },
   {
    "evidence": [
@@ -43,15 +43,11 @@
     {
      "claim": "fell",
      "metric": "vol_ann_ewma"
-    },
-    {
-     "claim": "negative",
-     "metric": "daily_return"
     }
    ],
    "id": "F3",
    "limit_id": "vol",
-   "statement": "Annualised EWMA volatility remains above its hard limit, a continuing breach, though it eased a little from the prior day even as the portfolio posted a loss on the day."
+   "statement": "Annualised EWMA volatility eased a little but is still a continuing breach above the hard limit. The portfolio is running at a high risk level, and a one-day easing does not resolve it."
   },
   {
    "evidence": [
@@ -64,13 +60,13 @@
      "metric": "weight_max"
     },
     {
-     "claim": "positive",
+     "claim": "fell",
      "metric": "ctr_HiTec"
     }
    ],
    "id": "F4",
    "limit_id": "single_name",
-   "statement": "The largest sleeve, high technology, remains above its warning threshold but below the hard limit, a continuing warning. It also carries the largest variance share, roughly matching its weight, so it is not doing more than its size suggests."
+   "statement": "The largest sleeve, HiTec, remains above the warning level but below the hard limit, and its weight edged down. HiTec also carries the largest share of portfolio variance, which is roughly in line with its weight, so it is large rather than disproportionately risky."
   },
   {
    "evidence": [
@@ -93,7 +89,7 @@
    ],
    "id": "F5",
    "limit_id": "drawdown",
-   "statement": "Drawdown from the NAV peak is above its warning level and rose, a continuing warning, as the portfolio lost value on the day and net asset value fell."
+   "statement": "The drawdown warning continues and deepened because the portfolio had a sizeable loss on the day and net asset value fell. It is now closer to the hard limit but has not crossed it."
   },
   {
    "evidence": [
@@ -104,7 +100,13 @@
    ],
    "id": "F6",
    "limit_id": "general",
-   "statement": "The backtest is in the yellow zone with more exceptions than expected and statistical tests that reject the model, so the model may be understating risk and the passing limits should not be taken as reassurance. Separately, a suspicious vendor note on the health care sleeve was escalated for human review, and no vendor text was acted on."
+   "statement": "The backtest is in the yellow zone with more VaR exceptions than expected, and the exception tests reject both the expected frequency and independence. The model may be understating risk, so the VaR figure should not be taken as reassurance."
+  },
+  {
+   "evidence": [],
+   "id": "F7",
+   "limit_id": "general",
+   "statement": "A data quality item for the Hlth sleeve was flagged as a suspicious note and escalated to a human as a security event. No note text was supplied, and nothing from it was acted on."
   }
  ]
 }

@@ -1,7 +1,0 @@
-[
- {
-  "check": "no_typed_numbers",
-  "detail": "typed figures: ['99th']",
-  "source": "verifier"
- }
-]

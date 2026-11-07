@@ -37,8 +37,8 @@
  "killed_run_counts": {
   "delivered_events": 25,
   "llm_call_events": 99,
-  "interrupted_stages": 4,
-  "resumed_runs": 4,
+  "interrupted_stages": 2,
+  "resumed_runs": 2,
   "lease_takeovers": 4
  },
  "checks": {

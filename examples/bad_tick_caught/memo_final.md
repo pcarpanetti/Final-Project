@@ -5,7 +5,7 @@ Overall status: WARNING. Portfolio return on the day 0.76%, NAV $112.7m.
 
 ## Limits
 - [L:single_name] Largest sleeve weight 24.71% against a hard limit of 25.00% (warning).
-- [L:liquidity] Days to liquidate 3.0 days against a hard limit of 5.0 days (warning).
+- [L:liquidity] Days to liquidate 3.04 days against a hard limit of 5.00 days (warning).
 
 ## Drivers
 - [F:F1] Largest sleeve weight is a continuing warning.

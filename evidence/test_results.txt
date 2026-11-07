@@ -4,14 +4,15 @@ rootdir: D:\WPS Office\WPSDrive\WPS Cloud\WPSDrive\1740238052\WPS企业云盘\�
 configfile: pyproject.toml
 testpaths: tests
 plugins: anyio-4.15.1
-collected 162 items
+collected 187 items
 
-tests\test_agents_and_gates.py .....................                     [ 12%]
-tests\test_data_and_triggers.py .........................                [ 28%]
-tests\test_providers.py ............................                     [ 45%]
-tests\test_recovery.py ................................................. [ 75%]
-..............                                                           [ 84%]
-tests\test_risk_engine.py ........                                       [ 89%]
-tests\test_versions_and_eval.py .................                        [100%]
+tests\test_agents_and_gates.py ........................                  [ 12%]
+tests\test_data_and_triggers.py .........................                [ 26%]
+tests\test_providers.py ............................                     [ 41%]
+tests\test_recovery.py ................................................. [ 67%]
+..............                                                           [ 74%]
+tests\test_risk_engine.py ........                                       [ 79%]
+tests\test_versions_and_eval.py .................                        [ 88%]
+tests\test_web.py ......................                                 [100%]
 
-============================ 162 passed
+======================= 187 passed

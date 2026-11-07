@@ -46,9 +46,9 @@
    "passed": true
   },
   {
-   "detail": "F5: var_exceptions_250 above_warn is false",
+   "detail": "",
    "id": "evidence_claims",
-   "passed": false
+   "passed": true
   },
   {
    "detail": "",
@@ -66,5 +66,5 @@
    "passed": true
   }
  ],
- "passed": false
+ "passed": true
 }

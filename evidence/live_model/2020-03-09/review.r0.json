@@ -1,4 +1,17 @@
 {
- "issues": [],
- "verdict": "pass"
+ "issues": [
+  {
+   "fix": "Remove the list of portfolio actions. Say only that the two hard breaches need a management response: reduce, hold with a documented exception and review date, or other. Leave the choice of action to the portfolio manager. If energy is mentioned, tie it to the data-quality decision, not to hedging.",
+   "problem": "Scope (rubric 5): the decision item suggests \"hedging the energy exposure\" as an option for the portfolio manager. That is a trade suggestion, and the facts do not support it. Energy is only 4.78% of weight and the energy-collapse stress loss is 5.4%. The worst scenario is the broad selloff at 20.2%, and HiTec carries the largest variance share at 24.9%."
+  },
+  {
+   "fix": "State only the levels: energy is 4.78% of weight and 8.40% of variance. Or drop the rose/fell claim unless prior-day values are supplied.",
+   "problem": "Causation (rubric 3): F3 says energy's variance share \"rose (8.40%)\" while its weight \"fell (4.78%)\". The facts give only today's values for ctr_Enrgy and w_Enrgy, with no prior values or changes. The directions are asserted without support, and they imply energy is a growing risk contributor."
+  },
+  {
+   "fix": "Add one sentence saying whether the vol and drawdown breaches would persist if the energy return were corrected (energy at 4.78% weight with a -19.68% return is roughly -0.9 points of the -7.80% day). Qualify F2 as \"on the reported data\". Mention the 6.49% parametric VaR as the reason the 3.20% pass is not comfort.",
+   "problem": "Reassurance and decision usefulness: the memo does not show how far the open energy-outlier decision matters. The reader cannot tell whether the two breaches depend on accepting the -19.68% print. F2 also says the drawdown breach is \"a market loss\" with certainty, while the same memo says the vendor error cannot be ruled out. Separately, the memo reports 99% VaR at 3.20% against the 4.5% limit, with a one-day loss of -7.80%. It omits that the parametric 99% VaR is 6.49%, above that limit, which weakens the \"pass should not be read as reassurance\" caveat."
+  }
+ ],
+ "verdict": "revise"
 }

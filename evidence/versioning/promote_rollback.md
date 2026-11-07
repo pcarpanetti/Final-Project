@@ -18,6 +18,6 @@ Promoting a rejected candidate was refused with:
 Registry events written:
 
 ```json
-{"at": "2026-11-07T07:25:21Z", "by": "demo-script (not a human decision)", "event": "promoted", "from": "9ade7848e5dc", "version": "8ff0abcc6c98"}
-{"at": "2026-11-07T07:25:21Z", "by": "demo-script (not a human decision)", "event": "rolled_back", "from": "8ff0abcc6c98", "reason": "demonstration of rollback", "version": "9ade7848e5dc"}
+{"at": "2026-11-07T08:14:38Z", "by": "demo-script (not a human decision)", "event": "promoted", "from": "9ade7848e5dc", "version": "8ff0abcc6c98"}
+{"at": "2026-11-07T08:14:38Z", "by": "demo-script (not a human decision)", "event": "rolled_back", "from": "8ff0abcc6c98", "reason": "demonstration of rollback", "version": "9ade7848e5dc"}
 ```

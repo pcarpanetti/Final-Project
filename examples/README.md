@@ -1,7 +1,8 @@
 # Example outputs
 
 These are real artifacts from the full replay in `evidence/replay/`, copied here by `scripts/export_evidence.py`. Agent
-text comes from the offline scripted backend, so it is template-like. The figures come from the risk engine.
+text comes from the offline scripted backend, so it is template-like. The figures come from the risk engine. For memos
+written by a real model, see [evidence/live_model/](../evidence/live_model/report.md).
 Each folder includes `events.jsonl`, the run's event log.
 
 | Folder | Date | What it shows | Start with |

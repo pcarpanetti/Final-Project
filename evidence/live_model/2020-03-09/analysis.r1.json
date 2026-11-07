@@ -1,0 +1,85 @@
+{
+ "findings": [
+  {
+   "evidence": [
+    {
+     "claim": "rose",
+     "metric": "vol_ann_ewma"
+    },
+    {
+     "claim": "above_warn",
+     "metric": "vol_ann_ewma"
+    },
+    {
+     "claim": "above_hard",
+     "metric": "vol_ann_ewma"
+    },
+    {
+     "claim": "negative",
+     "metric": "daily_return"
+    },
+    {
+     "claim": "fell",
+     "metric": "daily_return"
+    }
+   ],
+   "id": "F1",
+   "limit_id": "vol",
+   "statement": "Annualised volatility escalated into a hard breach as a very large one-day portfolio loss fed into the volatility estimate. The energy sleeve, flagged as a data outlier that a human must review, contributed to the move, and the backtest is in the yellow zone, so the model may be understating risk."
+  },
+  {
+   "evidence": [
+    {
+     "claim": "rose",
+     "metric": "drawdown"
+    },
+    {
+     "claim": "above_warn",
+     "metric": "drawdown"
+    },
+    {
+     "claim": "above_hard",
+     "metric": "drawdown"
+    },
+    {
+     "claim": "fell",
+     "metric": "nav_usd"
+    },
+    {
+     "claim": "negative",
+     "metric": "daily_return"
+    }
+   ],
+   "id": "F2",
+   "limit_id": "drawdown",
+   "statement": "Drawdown from the NAV peak escalated into a hard breach because the portfolio lost heavily on the day and net asset value fell. This is a loss in the book's value, not a change in position sizes, which barely moved."
+  },
+  {
+   "evidence": [
+    {
+     "claim": "rose",
+     "metric": "ctr_Enrgy"
+    },
+    {
+     "claim": "fell",
+     "metric": "w_Enrgy"
+    },
+    {
+     "claim": "positive",
+     "metric": "var99_change_window"
+    },
+    {
+     "claim": "negative",
+     "metric": "var99_change_positions"
+    },
+    {
+     "claim": "rose",
+     "metric": "var99_param"
+    }
+   ],
+   "id": "F3",
+   "limit_id": "general",
+   "statement": "The energy sleeve return is flagged as an outlier that needs a human decision, since peers also fell sharply and a vendor error cannot be established. Its share of portfolio variance rose even as its weight fell. The VaR limit passes, but VaR exceptions are clustering with a new exception today and the backtest is in the yellow zone, so that pass should not be read as reassurance. The VaR rise came from the market data window, not from positions."
+  }
+ ]
+}

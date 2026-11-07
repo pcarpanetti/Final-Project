@@ -12,7 +12,7 @@
 {"detail": {"model": "rules-v1", "provider": "scripted", "role": "memo_writer", "tokens_in": 1499, "tokens_out": 409}, "sim_ts": "2020-03-19T20:00", "stage": "writer", "type": "llm_call"}
 {"detail": {"round": 0}, "sim_ts": "2020-03-19T20:00", "stage": "writer", "type": "stage_done"}
 {"detail": {"round": 0}, "sim_ts": "2020-03-19T20:00", "stage": "verify", "type": "stage_done"}
-{"detail": {"model": "rules-v1", "provider": "scripted", "role": "reviewer", "tokens_in": 1378, "tokens_out": 16}, "sim_ts": "2020-03-19T20:00", "stage": "reviewer", "type": "llm_call"}
+{"detail": {"model": "rules-v1", "provider": "scripted", "role": "reviewer", "tokens_in": 2647, "tokens_out": 16}, "sim_ts": "2020-03-19T20:00", "stage": "reviewer", "type": "llm_call"}
 {"detail": {"round": 0}, "sim_ts": "2020-03-19T20:00", "stage": "reviewer", "type": "stage_done"}
 {"detail": {"round": 0}, "sim_ts": "2020-03-19T20:00", "stage": "finalise_memo", "type": "stage_done"}
 {"detail": {"round": 0}, "sim_ts": "2020-03-19T20:00", "stage": "gate_policy", "type": "stage_done"}
@@ -23,7 +23,7 @@
 {"detail": {"model": "rules-v1", "provider": "scripted", "role": "memo_writer", "tokens_in": 1526, "tokens_out": 415}, "sim_ts": "2020-03-19T20:00", "stage": "writer", "type": "llm_call"}
 {"detail": {"round": 1}, "sim_ts": "2020-03-19T20:00", "stage": "writer", "type": "stage_done"}
 {"detail": {"round": 1}, "sim_ts": "2020-03-19T20:00", "stage": "verify", "type": "stage_done"}
-{"detail": {"model": "rules-v1", "provider": "scripted", "role": "reviewer", "tokens_in": 1385, "tokens_out": 16}, "sim_ts": "2020-03-19T20:00", "stage": "reviewer", "type": "llm_call"}
+{"detail": {"model": "rules-v1", "provider": "scripted", "role": "reviewer", "tokens_in": 2654, "tokens_out": 16}, "sim_ts": "2020-03-19T20:00", "stage": "reviewer", "type": "llm_call"}
 {"detail": {"round": 1}, "sim_ts": "2020-03-19T20:00", "stage": "reviewer", "type": "stage_done"}
 {"detail": {"round": 0}, "sim_ts": "2020-03-19T20:00", "stage": "finalise_memo", "type": "stage_done"}
 {"detail": {"round": 0}, "sim_ts": "2020-03-19T20:00", "stage": "gate_policy", "type": "stage_done"}

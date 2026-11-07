@@ -29,8 +29,8 @@ then resumed by re-running the same command. The result is compared with an unin
 |---|---|---|
 | delivered_events | 25 | 25 |
 | llm_call_events | 99 | 99 |
-| interrupted_stages | 0 | 4 |
-| resumed_runs | 0 | 4 |
+| interrupted_stages | 0 | 2 |
+| resumed_runs | 0 | 2 |
 | lease_takeovers | 0 | 4 |
 
 448 artifact files and 25 published files compared by SHA-256.

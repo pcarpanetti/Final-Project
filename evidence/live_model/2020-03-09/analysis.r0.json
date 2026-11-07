@@ -21,15 +21,11 @@
     {
      "claim": "fell",
      "metric": "daily_return"
-    },
-    {
-     "claim": "rose",
-     "metric": "ctr_Enrgy"
     }
    ],
    "id": "F1",
    "limit_id": "vol",
-   "statement": "Annualised EWMA volatility escalated into a hard breach, rising sharply from the prior day after the portfolio suffered a very large one-day loss. The Energy sleeve, which had an outlier return flagged for human review, added to its share of variance."
+   "statement": "Annualised volatility escalated into a hard breach as a very large one-day portfolio loss fed into the volatility estimate. The energy sleeve, flagged as a data outlier that a human must review, contributed to the move, and the backtest is in the yellow zone, so the model may be understating risk."
   },
   {
    "evidence": [
@@ -56,10 +52,18 @@
    ],
    "id": "F2",
    "limit_id": "drawdown",
-   "statement": "Drawdown from the NAV peak escalated into a hard breach as the large one-day loss pushed net asset value lower. This is a market-driven loss rather than a change in positions, since sleeve weights barely moved."
+   "statement": "Drawdown from the NAV peak escalated into a hard breach because the portfolio lost heavily on the day and net asset value fell. This is a loss in the book's value, not a change in position sizes, which barely moved."
   },
   {
    "evidence": [
+    {
+     "claim": "rose",
+     "metric": "ctr_Enrgy"
+    },
+    {
+     "claim": "fell",
+     "metric": "w_Enrgy"
+    },
     {
      "claim": "positive",
      "metric": "var99_change_window"
@@ -71,15 +75,11 @@
     {
      "claim": "rose",
      "metric": "var99_param"
-    },
-    {
-     "claim": "rose",
-     "metric": "var99_1d"
     }
    ],
    "id": "F3",
    "limit_id": "general",
-   "statement": "Historical VaR and expected shortfall pass their limits, but this should not be read as reassurance. The VaR change came from the market data window rather than the book, a VaR exception occurred today, exceptions are above the expected count, and the backtest is in the yellow zone, so the model may be understating risk. The parametric VaR is far higher than the historical figure, and the Energy return outlier was escalated to a human because peers are also moving sharply and it may be a real loss."
+   "statement": "The energy sleeve return is flagged as an outlier that needs a human decision, since peers also fell sharply and a vendor error cannot be established. Its share of portfolio variance rose even as its weight fell. The VaR limit passes, but VaR exceptions are clustering with a new exception today and the backtest is in the yellow zone, so that pass should not be read as reassurance. The VaR rise came from the market data window, not from positions."
   }
  ]
 }

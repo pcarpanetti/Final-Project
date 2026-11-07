@@ -1,22 +1,22 @@
 # Daily Risk Memo: {{as_of}}
 
 ## Status
-Overall status: {{status}}. Two limits are in hard breach after a large one-day market loss, and the VaR backtest is in the yellow zone.
+Overall status: {{status}}. Two limits are in hard breach, volatility and drawdown, after a large one-day portfolio loss.
 
 ## Limits
-- [L:vol] Annualised EWMA volatility is {{m:vol_ann_ewma}} against a hard limit of {{h:vol}} (warning {{w:vol}}). Status: breach.
-- [L:drawdown] Drawdown from the NAV peak is {{m:drawdown}} against a hard limit of {{h:drawdown}} (warning {{w:drawdown}}). Status: breach.
-- All other limits are within their warning levels.
+- [L:vol] Annualised EWMA volatility is {{m:vol_ann_ewma}} against a hard limit of {{h:vol}} and a warning level of {{w:vol}}. Escalated from warning to breach.
+- [L:drawdown] Drawdown from the NAV peak is {{m:drawdown}} against a hard limit of {{h:drawdown}} and a warning level of {{w:drawdown}}. Escalated from warning to breach.
+- All other limits are within their warning levels. One-day VaR at the ninety-ninth percentile is {{m:var99_1d}} against a hard limit of {{h:var99}}.
 
 ## Drivers
-- [F:F1] Volatility moved from escalated to a hard breach after a very large one-day loss. The Energy sleeve added to its share of variance (contribution {{m:ctr_Enrgy}}). Daily return was {{m:daily_return}}.
-- [F:F2] Drawdown moved to a hard breach as the loss lowered NAV to {{m:nav_usd}}. The cause is the market move, not a change in positions. Sleeve weights barely moved.
-- [F:F3] Historical VaR ({{m:var99_1d}}, hard limit {{h:var99}}) and expected shortfall ({{m:es975_1d}}, hard limit {{h:es975}}) pass their limits. This is not reassurance. The VaR change came from the market data window, not from the book. A VaR exception occurred today. Exceptions are above the expected count. The backtest zone is {{m:backtest_zone}}, so the model may understate risk. Parametric VaR is {{m:var99_param}}, well above the historical figure.
+- [F:F1] Volatility moved into a hard breach because a very large one-day loss (daily return {{m:daily_return}}) fed into the volatility estimate. The energy sleeve contributed. The VaR backtest zone is {{m:backtest_zone}}, so the model may understate risk.
+- [F:F2] Drawdown moved into a hard breach because the book lost value on the day. NAV is now {{m:nav_usd}}. This is a market loss, not a change in position sizes.
+- [F:F3] The energy sleeve return is flagged as an outlier and needs a human decision. Peers also fell sharply, so a vendor error cannot be established. Its share of variance rose ({{m:ctr_Enrgy}}) while its weight fell ({{m:w_Enrgy}}). The VaR limit passes, but there is a new VaR exception today and the backtest is outside the green zone. Exceptions over the last window: {{m:var_exceptions_250}}. The pass should not be read as reassurance. The VaR rise came from the market data window, not from positions.
 
 ## Data quality
-- [DQ:outlier:Enrgy] The Energy return was flagged as an extreme outlier. Peers are also moving sharply, so it may be a real loss and not a bad tick. It was not zeroed or corrected. It is escalated to a human for review.
+- [DQ:outlier:Enrgy] The energy return was flagged as an extreme outlier. Peers moved sharply in the same direction, and the expected return points the same way. The item was escalated and the data was not overwritten, because replacing it could hide a real loss.
 
 ## For decision
-- Decide whether the portfolio manager should present options to bring volatility and drawdown back inside limits. This memo does not recommend specific trades.
-- Assign a human to confirm whether the Energy return is genuine.
-- Decide whether to review the VaR model, given the yellow backtest zone.
+- Decide whether the energy return is accepted as genuine or treated as a vendor error. Until then, the figures above use the reported value.
+- Decide how to respond to the two hard breaches. Options for the portfolio manager include reducing overall risk, hedging the energy exposure, or holding with a documented exception and review date.
+- Decide whether to request a review of the VaR model, given the backtest is outside the green zone.

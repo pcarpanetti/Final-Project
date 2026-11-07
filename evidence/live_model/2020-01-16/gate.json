@@ -2,8 +2,7 @@
  "approval_required": true,
  "deliverable": "memo_final.md",
  "reasons": [
-  "dq_override",
-  "degraded_memo"
+  "dq_override"
  ],
- "sha256": "24c8ba49ccfceccb4df56b89352345625cadb21c49ad7152dfd456f4cb2aab98"
+ "sha256": "4e931fa20f4c8e37fa8dcc8b499b8e2eae7207a9acb1a90468045ab1b3861b1e"
 }

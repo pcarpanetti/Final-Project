@@ -1,22 +1,22 @@
 # Daily Risk Memo: 2020-03-09
 
 ## Status
-Overall status: BREACH. Two limits are in hard breach after a large one-day market loss, and the VaR backtest is in the yellow zone.
+Overall status: BREACH. Two hard limits are breached, volatility and drawdown, after a one-day portfolio return of -7.80%.
 
 ## Limits
-- [L:vol] Annualised EWMA volatility is 44.31% against a hard limit of 40.00% (warning 25.00%). Status: breach.
-- [L:drawdown] Drawdown from the NAV peak is 19.04% against a hard limit of 15.00% (warning 10.00%). Status: breach.
-- All other limits are within their warning levels.
+- [L:vol] Annualised EWMA volatility is 44.31% against a warning of 25.00% and a hard limit of 40.00%. Breach.
+- [L:drawdown] Drawdown from the NAV peak is 19.04% against a warning of 10.00% and a hard limit of 15.00%. Breach.
+- All other limits are within their warning levels. One-day VaR at the top confidence level is 3.20% against a hard limit of 4.50%.
 
 ## Drivers
-- [F:F1] Volatility moved from escalated to a hard breach after a very large one-day loss. The Energy sleeve added to its share of variance (contribution 8.40%). Daily return was -7.80%.
-- [F:F2] Drawdown moved to a hard breach as the loss lowered NAV to $93.3m. The cause is the market move, not a change in positions. Sleeve weights barely moved.
-- [F:F3] Historical VaR (3.20%, hard limit 4.50%) and expected shortfall (3.43%, hard limit 5.00%) pass their limits. This is not reassurance. The VaR change came from the market data window, not from the book. A VaR exception occurred today. Exceptions are above the expected count. The backtest zone is yellow, so the model may understate risk. Parametric VaR is 6.49%, well above the historical figure.
+- [F:F1] Volatility moved into a hard breach as the large one-day loss fed the volatility estimate. The energy return is an open data item (see Data quality). The VaR backtest is in the yellow zone, so the model may understate risk.
+- [F:F2] On the reported data, drawdown is in a hard breach because NAV fell on the day. Position sizes barely moved. The loss is in market value, not in positioning.
+- [F:F3] The energy return is flagged as an outlier. Peers also fell sharply, so a vendor error cannot be established. Energy is 4.78% of weight and 8.40% of variance. The VaR limit passes, but the parametric VaR is 6.49%, above the hard limit of 4.50%. VaR exceptions are clustering, with a new one today and 5 in the window. The pass is not comfort. The VaR rise came from the market data window, not from positions.
+- Sensitivity: at the energy weight, the flagged return explains only a small part of the day's -7.80%. The drawdown breach would very likely persist if the energy return were corrected. The volatility margin is narrower, so rerun it once the data decision is made.
 
 ## Data quality
-- [DQ:outlier:Enrgy] The Energy return was flagged as an extreme outlier. Peers are also moving sharply, so it may be a real loss and not a bad tick. It was not zeroed or corrected. It is escalated to a human for review.
+- [DQ:outlier:Enrgy] The energy return was flagged as an extreme outlier. The peer median also fell sharply and the expected return points the same way. No vendor notes were supplied. Overwriting the value could hide a real loss, so it was escalated and left unchanged pending a human decision.
 
 ## For decision
-- Decide whether the portfolio manager should present options to bring volatility and drawdown back inside limits. This memo does not recommend specific trades.
-- Assign a human to confirm whether the Energy return is genuine.
-- Decide whether to review the VaR model, given the yellow backtest zone.
+- Decide how to treat the energy return: accept it as reported, or override it. Rerun the metrics after the decision.
+- The two hard breaches need a management response. Options are to reduce risk, to hold with a documented exception and review date, or another course. The portfolio manager chooses the action.

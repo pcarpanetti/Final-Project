@@ -1,27 +1,29 @@
 # Daily Risk Memo: {{as_of}}
 
 ## Status
-Overall status: {{status}}. Three hard limits remain breached for another day, and two warnings continue.
+Overall status: {{status}}. Three hard limits stay in breach and two warnings continue, with no new or escalated items.
 
 ## Limits
-- [L:var99] One-day 99% VaR {{m:var99_1d}} against a hard limit of {{h:var99}}. Warning level is {{w:var99}}. Breach.
-- [L:es975] One-day 97.5% expected shortfall {{m:es975_1d}} against a hard limit of {{h:es975}}. Warning level is {{w:es975}}. Breach.
-- [L:vol] Annualised EWMA volatility {{m:vol_ann_ewma}} against a hard limit of {{h:vol}}. Warning level is {{w:vol}}. Breach.
-- [L:single_name] Largest sleeve weight {{m:weight_max}} against a warning level of {{w:single_name}} and a hard limit of {{h:single_name}}. Warning.
-- [L:drawdown] Drawdown from NAV peak {{m:drawdown}} against a warning level of {{w:drawdown}} and a hard limit of {{h:drawdown}}. Warning.
+- [L:var99] One-day VaR at the 99% level is {{m:var99_1d}} against a hard limit of {{h:var99}}. Breach.
+- [L:es975] One-day expected shortfall at the 97.5% level is {{m:es975_1d}} against a hard limit of {{h:es975}}. Breach.
+- [L:vol] Annualised EWMA volatility is {{m:vol_ann_ewma}} against a hard limit of {{h:vol}}. Breach.
+- [L:single_name] Largest sleeve weight is {{m:weight_max}} against a warning level of {{w:single_name}} and a hard limit of {{h:single_name}}. Warning.
+- [L:drawdown] Drawdown from the NAV peak is {{m:drawdown}} against a warning level of {{w:drawdown}} and a hard limit of {{h:drawdown}}. Warning.
 
 ## Drivers
-- [F:F1] VaR remains above its hard limit, a continuing breach. It edged down. The small change came from position moves, not from the market data window.
-- [F:F2] Expected shortfall remains above its hard limit, a continuing breach. It was essentially unchanged from the prior day.
-- [F:F3] Volatility remains above its hard limit, a continuing breach. It eased a little even though the portfolio lost money on the day. Daily return was {{m:daily_return}}.
-- [F:F4] The largest sleeve, high technology, is above its warning level and below the hard limit. Its share of variance roughly matches its weight, so it is not adding more risk than its size suggests.
-- [F:F5] Drawdown is above its warning level and rose. The portfolio lost value on the day and NAV fell to {{m:nav_usd}}.
-- [F:F6] The VaR backtest is in the {{m:backtest_zone}} zone, outside the green zone. There were {{m:var_exceptions_250}} exceptions, more than expected. The statistical tests reject the model. The model may understate risk, so passing limits are not reassurance.
+- [F:F1] The VaR breach continues and is almost unchanged. The small decline came from position changes, not from the market data window.
+- [F:F2] The expected shortfall breach continues. It fell marginally and stays above its hard limit, in line with the VaR tail signal.
+- [F:F3] Volatility eased a little but is still above its hard limit. One day of easing does not resolve the breach.
+- [F:F4] The largest sleeve, HiTec, is above the warning level and below the hard limit. Its weight edged down. Its share of portfolio variance is roughly in line with its weight, so it is large but not disproportionately risky.
+- [F:F5] The drawdown warning deepened after a loss on the day, with daily return at {{m:daily_return}} and NAV lower at {{m:nav_usd}}. It is closer to the hard limit but has not crossed it.
+- [F:F6] The VaR backtest is in the yellow zone, outside the green zone. There are {{m:var_exceptions_250}} exceptions in the window, more than expected. The tests reject both the expected frequency and independence. The model may understate risk, so the VaR figure is not reassurance.
+- [F:F7] A data quality item for the Hlth sleeve was escalated as a security event. No note text was supplied and nothing was acted on.
 
 ## Data quality
-- [DQ:suspicious_note:0] A suspicious vendor note was flagged on the health care sleeve. It was escalated as a security event for human review. No note text was available, and no vendor text was acted on.
+- [DQ:suspicious_note:0] A suspicious note was flagged for Hlth. Under triage policy it is a security event, so it was escalated to a human. The vendor note list was empty, so there was no text to read, and no note content was followed.
 
 ## For decision
-- Decide whether to ask the portfolio manager for options to bring VaR, expected shortfall and volatility back inside hard limits. Options could include reducing gross risk or the largest sleeve. The portfolio manager chooses the action.
-- Decide whether to treat the backtest result as a trigger for a model review.
-- Confirm that security owns the review of the health care vendor note.
+- Decide whether the portfolio manager must present a plan to bring VaR, expected shortfall and volatility back inside hard limits, and by what date.
+- Options for the portfolio manager to consider: reduce overall risk, reduce the HiTec sleeve, or ask for a formal exception with a stated rationale and end date.
+- Decide whether to commission a review of the VaR model, given the yellow-zone backtest.
+- Confirm that the Hlth security event has an owner in the security function.
