@@ -25,7 +25,7 @@ def make_env(mode: str = "live", scenario: dict | None = None) -> Env:
 
 
 def cmd_init(args) -> None:
-    env = make_env()
+    env = make_env()  # a replay sets this itself; init is for `tick`-driven operation
     env.state.set_kv("book_start", args.start)
     print(f"Book start {args.start}, version {env.version}, state in {env.paths.db}")
 
@@ -39,7 +39,7 @@ def cmd_tick(args) -> None:
 def cmd_replay(args) -> None:
     scenario = load_scenario(ROOT)
     env = make_env("replay", scenario)
-    replay(env, scenario, args.start, args.end, lambda d: print(d, status_summary(env), flush=True))
+    replay(env, scenario, args.start, args.end, lambda d: print(d, status_summary(env), flush=True), args.takeover)
     print(status_summary(env))
 
 
@@ -173,6 +173,7 @@ def build_parser() -> argparse.ArgumentParser:
     s = sub.add_parser("replay", help="run history on a simulated clock")
     s.add_argument("--start")
     s.add_argument("--end")
+    s.add_argument("--takeover", action="store_true", help="take the lease from a crashed controller")
     s.set_defaults(fn=cmd_replay)
 
     s = sub.add_parser("status", help="show runs, or the stages of one run")
