@@ -1,0 +1,25 @@
+{"detail": {"cutoff": "2020-03-16T20:00", "trigger": "schedule:eod", "version": "9ade7848e5dc"}, "sim_ts": "2020-03-16T20:00", "stage": null, "type": "run_created"}
+{"detail": {"round": 0}, "sim_ts": "2020-03-16T20:00", "stage": "ingest", "type": "stage_done"}
+{"detail": {"round": 0}, "sim_ts": "2020-03-16T20:00", "stage": "dq_checks", "type": "stage_done"}
+{"detail": {"round": 0}, "sim_ts": "2020-03-16T20:00", "stage": "dq_triage", "type": "stage_skipped"}
+{"detail": {"round": 0}, "sim_ts": "2020-03-16T20:00", "stage": "dq_apply", "type": "stage_done"}
+{"detail": {"round": 0}, "sim_ts": "2020-03-16T20:00", "stage": "risk_engine", "type": "stage_done"}
+{"detail": {"round": 0}, "sim_ts": "2020-03-16T20:00", "stage": "limit_check", "type": "stage_done"}
+{"detail": {"round": 0}, "sim_ts": "2020-03-16T20:00", "stage": "register", "type": "stage_done"}
+{"detail": {"model": "rules-v1", "provider": "scripted", "role": "risk_analyst", "tokens_in": 2920, "tokens_out": 19}, "sim_ts": "2020-03-16T20:00", "stage": "analyst", "type": "llm_call"}
+{"detail": {"model": "rules-v1", "provider": "scripted", "role": "risk_analyst", "tokens_in": 2966, "tokens_out": 234}, "sim_ts": "2020-03-16T20:00", "stage": "analyst", "type": "llm_call"}
+{"detail": {"round": 0}, "sim_ts": "2020-03-16T20:00", "stage": "analyst", "type": "stage_done"}
+{"detail": {"model": "rules-v1", "provider": "scripted", "role": "memo_writer", "tokens_in": 1473, "tokens_out": 324}, "sim_ts": "2020-03-16T20:00", "stage": "writer", "type": "llm_call"}
+{"detail": {"round": 0}, "sim_ts": "2020-03-16T20:00", "stage": "writer", "type": "stage_done"}
+{"detail": {"round": 0}, "sim_ts": "2020-03-16T20:00", "stage": "verify", "type": "stage_done"}
+{"detail": {"model": "rules-v1", "provider": "scripted", "role": "reviewer", "tokens_in": 1300, "tokens_out": 16}, "sim_ts": "2020-03-16T20:00", "stage": "reviewer", "type": "llm_call"}
+{"detail": {"round": 0}, "sim_ts": "2020-03-16T20:00", "stage": "reviewer", "type": "stage_done"}
+{"detail": {"round": 0}, "sim_ts": "2020-03-16T20:00", "stage": "finalise_memo", "type": "stage_done"}
+{"detail": {"round": 0}, "sim_ts": "2020-03-16T20:00", "stage": "gate_policy", "type": "stage_done"}
+{"detail": {"reasons": ["hard_breach", "new_warning"]}, "sim_ts": "2020-03-16T20:00", "stage": "approval", "type": "approval_requested"}
+{"detail": {"round": 0}, "sim_ts": "2020-03-16T20:00", "stage": "approval", "type": "stage_waiting"}
+{"detail": {"by": "replay-policy", "decision": "approve", "note": ""}, "sim_ts": "2020-03-16T20:00", "stage": "approval", "type": "human_decision"}
+{"detail": {"round": 0}, "sim_ts": "2020-03-16T20:00", "stage": "approval", "type": "stage_done"}
+{"detail": {"destination": "memos/2020-03-16.md", "key": "memo:eod-2020-03-16"}, "sim_ts": "2020-03-16T20:00", "stage": "publish", "type": "delivered"}
+{"detail": {"round": 0}, "sim_ts": "2020-03-16T20:00", "stage": "publish", "type": "stage_done"}
+{"detail": {}, "sim_ts": "2020-03-16T20:00", "stage": null, "type": "run_completed"}

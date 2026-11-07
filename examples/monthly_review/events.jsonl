@@ -1,0 +1,13 @@
+{"detail": {"cutoff": "2020-04-01T09:00", "trigger": "schedule:month_end", "version": "9ade7848e5dc"}, "sim_ts": "2020-04-01T09:30", "stage": null, "type": "run_created"}
+{"detail": {"round": 0}, "sim_ts": "2020-04-01T09:30", "stage": "backtest_review", "type": "stage_done"}
+{"detail": {"model": "rules-v1", "provider": "scripted", "role": "model_reviewer", "tokens_in": 607, "tokens_out": 13}, "sim_ts": "2020-04-01T09:30", "stage": "model_reviewer", "type": "llm_call"}
+{"detail": {"model": "rules-v1", "provider": "scripted", "role": "model_reviewer", "tokens_in": 687, "tokens_out": 66}, "sim_ts": "2020-04-01T09:30", "stage": "model_reviewer", "type": "llm_call"}
+{"detail": {"round": 0}, "sim_ts": "2020-04-01T09:30", "stage": "model_reviewer", "type": "stage_done"}
+{"detail": {"round": 0}, "sim_ts": "2020-04-01T09:30", "stage": "gate_policy", "type": "stage_done"}
+{"detail": {"reasons": ["model_review"]}, "sim_ts": "2020-04-01T09:30", "stage": "approval", "type": "approval_requested"}
+{"detail": {"round": 0}, "sim_ts": "2020-04-01T09:30", "stage": "approval", "type": "stage_waiting"}
+{"detail": {"by": "replay-policy", "decision": "approve", "note": ""}, "sim_ts": "2020-04-01T09:30", "stage": "approval", "type": "human_decision"}
+{"detail": {"round": 0}, "sim_ts": "2020-04-01T09:30", "stage": "approval", "type": "stage_done"}
+{"detail": {"destination": "reviews/2020-03.md", "key": "review:monthly-2020-03"}, "sim_ts": "2020-04-01T09:30", "stage": "publish", "type": "delivered"}
+{"detail": {"round": 0}, "sim_ts": "2020-04-01T09:30", "stage": "publish", "type": "stage_done"}
+{"detail": {}, "sim_ts": "2020-04-01T09:30", "stage": null, "type": "run_completed"}

@@ -1,0 +1,56 @@
+{
+ "findings": [
+  {
+   "evidence": [
+    {
+     "claim": "above_warn",
+     "metric": "var99_1d"
+    },
+    {
+     "claim": "positive",
+     "metric": "var99_change_window"
+    }
+   ],
+   "id": "F1",
+   "limit_id": "var99",
+   "statement": "1-day 99% VaR is a new warning. The move comes from the market data window rather than from the book."
+  },
+  {
+   "evidence": [
+    {
+     "claim": "above_warn",
+     "metric": "es975_1d"
+    },
+    {
+     "claim": "positive",
+     "metric": "var99_change_window"
+    }
+   ],
+   "id": "F2",
+   "limit_id": "es975",
+   "statement": "1-day 97.5% expected shortfall is a continuing warning. The move comes from the market data window rather than from the book."
+  },
+  {
+   "evidence": [
+    {
+     "claim": "above_hard",
+     "metric": "vol_ann_ewma"
+    }
+   ],
+   "id": "F3",
+   "limit_id": "vol",
+   "statement": "Annualised EWMA volatility is a continuing breach."
+  },
+  {
+   "evidence": [
+    {
+     "claim": "above_hard",
+     "metric": "drawdown"
+    }
+   ],
+   "id": "F4",
+   "limit_id": "drawdown",
+   "statement": "Drawdown from NAV peak is a continuing breach."
+  }
+ ]
+}

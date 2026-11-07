@@ -1,0 +1,9 @@
+{
+ "approval_required": true,
+ "deliverable": "memo_final.md",
+ "reasons": [
+  "hard_breach",
+  "degraded_memo"
+ ],
+ "sha256": "a7f8433f8385d03b534a444424d80e7386068b00cf6fd654f66faf7e379357c5"
+}

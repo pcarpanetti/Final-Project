@@ -1,0 +1,17 @@
+============================= test session starts =============================
+platform win32 -- Python 3.15.0, pytest-9.1.1, pluggy-1.7.0
+rootdir: D:\WPS Office\WPSDrive\WPS Cloud\WPSDrive\1740238052\WPS企业云盘\复旦大学\我的企业文档\M5\AIC\04 HOM\Final Project
+configfile: pyproject.toml
+testpaths: tests
+plugins: anyio-4.15.1
+collected 162 items
+
+tests\test_agents_and_gates.py .....................                     [ 12%]
+tests\test_data_and_triggers.py .........................                [ 28%]
+tests\test_providers.py ............................                     [ 45%]
+tests\test_recovery.py ................................................. [ 75%]
+..............                                                           [ 84%]
+tests\test_risk_engine.py ........                                       [ 89%]
+tests\test_versions_and_eval.py .................                        [100%]
+
+============================ 162 passed

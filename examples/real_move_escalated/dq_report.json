@@ -1,0 +1,14 @@
+{
+ "exceptions": [
+  {
+   "asset": "Enrgy",
+   "expected_ret": -0.078704,
+   "id": "outlier:Enrgy",
+   "peer_median": -0.0718,
+   "residual_z": -9.28,
+   "ret": -0.1968,
+   "type": "outlier",
+   "z": -6.84
+  }
+ ]
+}

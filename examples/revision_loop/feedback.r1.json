@@ -1,0 +1,7 @@
+[
+ {
+  "check": "coverage",
+  "detail": "missing tags: ['[L:liquidity]']",
+  "source": "verifier"
+ }
+]

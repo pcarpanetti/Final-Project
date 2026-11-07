@@ -1,0 +1,57 @@
+{
+ "window": [
+  "2020-03-02",
+  "2020-03-31"
+ ],
+ "kills": [
+  {
+   "attempt": 1,
+   "after_seconds": 7.48,
+   "process_was_running": true
+  },
+  {
+   "attempt": 2,
+   "after_seconds": 4.5,
+   "process_was_running": true
+  },
+  {
+   "attempt": 3,
+   "after_seconds": 4.76,
+   "process_was_running": true
+  },
+  {
+   "attempt": 4,
+   "after_seconds": 5.53,
+   "process_was_running": true
+  }
+ ],
+ "artifact_files": 448,
+ "published_files": 25,
+ "control_counts": {
+  "delivered_events": 25,
+  "llm_call_events": 99,
+  "interrupted_stages": 0,
+  "resumed_runs": 0,
+  "lease_takeovers": 0
+ },
+ "killed_run_counts": {
+  "delivered_events": 25,
+  "llm_call_events": 99,
+  "interrupted_stages": 4,
+  "resumed_runs": 4,
+  "lease_takeovers": 4
+ },
+ "checks": {
+  "artifacts_identical": true,
+  "published_files_identical": true,
+  "table_breaches_identical": true,
+  "table_var_ledger_identical": true,
+  "table_outbox_identical": true,
+  "table_dq_overrides_identical": true,
+  "table_llm_journal_identical": true,
+  "table_runs_identical": true,
+  "each_delivery_happened_once": true,
+  "at_least_4_real_kills": true
+ },
+ "passed": true
+}

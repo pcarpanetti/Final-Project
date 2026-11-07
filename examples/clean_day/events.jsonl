@@ -1,0 +1,21 @@
+{"detail": {"cutoff": "2019-11-05T20:00", "trigger": "schedule:eod", "version": "9ade7848e5dc"}, "sim_ts": "2019-11-05T20:00", "stage": null, "type": "run_created"}
+{"detail": {"round": 0}, "sim_ts": "2019-11-05T20:00", "stage": "ingest", "type": "stage_done"}
+{"detail": {"round": 0}, "sim_ts": "2019-11-05T20:00", "stage": "dq_checks", "type": "stage_done"}
+{"detail": {"round": 0}, "sim_ts": "2019-11-05T20:00", "stage": "dq_triage", "type": "stage_skipped"}
+{"detail": {"round": 0}, "sim_ts": "2019-11-05T20:00", "stage": "dq_apply", "type": "stage_done"}
+{"detail": {"round": 0}, "sim_ts": "2019-11-05T20:00", "stage": "risk_engine", "type": "stage_done"}
+{"detail": {"round": 0}, "sim_ts": "2019-11-05T20:00", "stage": "limit_check", "type": "stage_done"}
+{"detail": {"round": 0}, "sim_ts": "2019-11-05T20:00", "stage": "register", "type": "stage_done"}
+{"detail": {"model": "rules-v1", "provider": "scripted", "role": "risk_analyst", "tokens_in": 2890, "tokens_out": 11}, "sim_ts": "2019-11-05T20:00", "stage": "analyst", "type": "llm_call"}
+{"detail": {"round": 0}, "sim_ts": "2019-11-05T20:00", "stage": "analyst", "type": "stage_done"}
+{"detail": {"model": "rules-v1", "provider": "scripted", "role": "memo_writer", "tokens_in": 1227, "tokens_out": 73}, "sim_ts": "2019-11-05T20:00", "stage": "writer", "type": "llm_call"}
+{"detail": {"round": 0}, "sim_ts": "2019-11-05T20:00", "stage": "writer", "type": "stage_done"}
+{"detail": {"round": 0}, "sim_ts": "2019-11-05T20:00", "stage": "verify", "type": "stage_done"}
+{"detail": {"model": "rules-v1", "provider": "scripted", "role": "reviewer", "tokens_in": 1058, "tokens_out": 16}, "sim_ts": "2019-11-05T20:00", "stage": "reviewer", "type": "llm_call"}
+{"detail": {"round": 0}, "sim_ts": "2019-11-05T20:00", "stage": "reviewer", "type": "stage_done"}
+{"detail": {"round": 0}, "sim_ts": "2019-11-05T20:00", "stage": "finalise_memo", "type": "stage_done"}
+{"detail": {"round": 0}, "sim_ts": "2019-11-05T20:00", "stage": "gate_policy", "type": "stage_done"}
+{"detail": {"round": 0}, "sim_ts": "2019-11-05T20:00", "stage": "approval", "type": "stage_skipped"}
+{"detail": {"destination": "memos/2019-11-05.md", "key": "memo:eod-2019-11-05"}, "sim_ts": "2019-11-05T20:00", "stage": "publish", "type": "delivered"}
+{"detail": {"round": 0}, "sim_ts": "2019-11-05T20:00", "stage": "publish", "type": "stage_done"}
+{"detail": {}, "sim_ts": "2019-11-05T20:00", "stage": null, "type": "run_completed"}

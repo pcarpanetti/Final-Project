@@ -1,0 +1,33 @@
+{"detail": {"cutoff": "2020-05-12T20:00", "trigger": "schedule:eod", "version": "9ade7848e5dc"}, "sim_ts": "2020-05-12T20:00", "stage": null, "type": "run_created"}
+{"detail": {"round": 0}, "sim_ts": "2020-05-12T20:00", "stage": "ingest", "type": "stage_done"}
+{"detail": {"round": 0}, "sim_ts": "2020-05-12T20:00", "stage": "dq_checks", "type": "stage_done"}
+{"detail": {"model": "rules-v1", "provider": "scripted", "role": "data_steward", "tokens_in": 944, "tokens_out": 41}, "sim_ts": "2020-05-12T20:00", "stage": "dq_triage", "type": "llm_call"}
+{"detail": {"round": 0}, "sim_ts": "2020-05-12T20:00", "stage": "dq_triage", "type": "stage_done"}
+{"detail": {"round": 0}, "sim_ts": "2020-05-12T20:00", "stage": "dq_apply", "type": "stage_done"}
+{"detail": {"round": 0}, "sim_ts": "2020-05-12T20:00", "stage": "risk_engine", "type": "stage_done"}
+{"detail": {"round": 0}, "sim_ts": "2020-05-12T20:00", "stage": "limit_check", "type": "stage_done"}
+{"detail": {"round": 0}, "sim_ts": "2020-05-12T20:00", "stage": "register", "type": "stage_done"}
+{"detail": {"model": "rules-v1", "provider": "scripted", "role": "risk_analyst", "tokens_in": 2958, "tokens_out": 19}, "sim_ts": "2020-05-12T20:00", "stage": "analyst", "type": "llm_call"}
+{"detail": {"model": "rules-v1", "provider": "scripted", "role": "risk_analyst", "tokens_in": 3004, "tokens_out": 214}, "sim_ts": "2020-05-12T20:00", "stage": "analyst", "type": "llm_call"}
+{"detail": {"round": 0}, "sim_ts": "2020-05-12T20:00", "stage": "analyst", "type": "stage_done"}
+{"detail": {"model": "rules-v1", "provider": "scripted", "role": "memo_writer", "tokens_in": 1493, "tokens_out": 60}, "sim_ts": "2020-05-12T20:00", "stage": "writer", "type": "llm_call"}
+{"detail": {"round": 0}, "sim_ts": "2020-05-12T20:00", "stage": "writer", "type": "stage_done"}
+{"detail": {"failed": ["status_from_token", "coverage"]}, "sim_ts": "2020-05-12T20:00", "stage": "verify", "type": "verification_failed"}
+{"detail": {"round": 0}, "sim_ts": "2020-05-12T20:00", "stage": "verify", "type": "stage_done"}
+{"detail": {"round": 0}, "sim_ts": "2020-05-12T20:00", "stage": "reviewer", "type": "stage_skipped"}
+{"detail": {"round": 1}, "sim_ts": "2020-05-12T20:00", "stage": null, "type": "revision_started"}
+{"detail": {"round": 1}, "sim_ts": "2020-05-12T20:00", "stage": "analyst", "type": "stage_done"}
+{"detail": {"model": "rules-v1", "provider": "scripted", "role": "memo_writer", "tokens_in": 1574, "tokens_out": 395}, "sim_ts": "2020-05-12T20:00", "stage": "writer", "type": "llm_call"}
+{"detail": {"round": 1}, "sim_ts": "2020-05-12T20:00", "stage": "writer", "type": "stage_done"}
+{"detail": {"round": 1}, "sim_ts": "2020-05-12T20:00", "stage": "verify", "type": "stage_done"}
+{"detail": {"model": "rules-v1", "provider": "scripted", "role": "reviewer", "tokens_in": 1405, "tokens_out": 16}, "sim_ts": "2020-05-12T20:00", "stage": "reviewer", "type": "llm_call"}
+{"detail": {"round": 1}, "sim_ts": "2020-05-12T20:00", "stage": "reviewer", "type": "stage_done"}
+{"detail": {"round": 0}, "sim_ts": "2020-05-12T20:00", "stage": "finalise_memo", "type": "stage_done"}
+{"detail": {"round": 0}, "sim_ts": "2020-05-12T20:00", "stage": "gate_policy", "type": "stage_done"}
+{"detail": {"reasons": ["hard_breach", "dq_escalation"]}, "sim_ts": "2020-05-12T20:00", "stage": "approval", "type": "approval_requested"}
+{"detail": {"round": 0}, "sim_ts": "2020-05-12T20:00", "stage": "approval", "type": "stage_waiting"}
+{"detail": {"by": "replay-policy", "decision": "approve", "note": ""}, "sim_ts": "2020-05-12T20:00", "stage": "approval", "type": "human_decision"}
+{"detail": {"round": 0}, "sim_ts": "2020-05-12T20:00", "stage": "approval", "type": "stage_done"}
+{"detail": {"destination": "memos/2020-05-12.md", "key": "memo:eod-2020-05-12"}, "sim_ts": "2020-05-12T20:00", "stage": "publish", "type": "delivered"}
+{"detail": {"round": 0}, "sim_ts": "2020-05-12T20:00", "stage": "publish", "type": "stage_done"}
+{"detail": {}, "sim_ts": "2020-05-12T20:00", "stage": null, "type": "run_completed"}

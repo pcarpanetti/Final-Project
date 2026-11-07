@@ -1,0 +1,11 @@
+{
+ "items": [
+  {
+   "action": "zero_return",
+   "asset": "Telcm",
+   "id": "outlier:Telcm",
+   "rationale": "Large move on one sleeve while peers are quiet.",
+   "type": "outlier"
+  }
+ ]
+}

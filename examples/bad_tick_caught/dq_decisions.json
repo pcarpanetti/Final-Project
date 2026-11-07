@@ -1,0 +1,9 @@
+{
+ "decisions": [
+  {
+   "action": "zero_return",
+   "exception_id": "outlier:Telcm",
+   "rationale": "Large move on one sleeve while peers are quiet."
+  }
+ ]
+}

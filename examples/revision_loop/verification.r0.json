@@ -1,0 +1,70 @@
+{
+ "checks": [
+  {
+   "detail": "8 metrics agree",
+   "id": "recompute_metrics",
+   "passed": true
+  },
+  {
+   "detail": "",
+   "id": "limit_reevaluation",
+   "passed": true
+  },
+  {
+   "detail": "latest input 2020-02-24T18:30, cutoff 2020-02-24T20:00, last row 2020-02-24",
+   "id": "information_cutoff",
+   "passed": true
+  },
+  {
+   "detail": "",
+   "id": "tokens_resolve",
+   "passed": true
+  },
+  {
+   "detail": "",
+   "id": "no_typed_numbers",
+   "passed": true
+  },
+  {
+   "detail": "",
+   "id": "required_sections",
+   "passed": true
+  },
+  {
+   "detail": "",
+   "id": "status_from_token",
+   "passed": true
+  },
+  {
+   "detail": "missing tags: ['[L:liquidity]']",
+   "id": "coverage",
+   "passed": false
+  },
+  {
+   "detail": "",
+   "id": "every_active_limit_explained",
+   "passed": true
+  },
+  {
+   "detail": "",
+   "id": "evidence_claims",
+   "passed": true
+  },
+  {
+   "detail": "",
+   "id": "no_trade_instructions",
+   "passed": true
+  },
+  {
+   "detail": "",
+   "id": "no_future_knowledge",
+   "passed": true
+  },
+  {
+   "detail": "",
+   "id": "no_injected_text",
+   "passed": true
+  }
+ ],
+ "passed": false
+}

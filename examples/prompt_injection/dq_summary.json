@@ -1,0 +1,11 @@
+{
+ "items": [
+  {
+   "action": "escalate",
+   "asset": "Hlth",
+   "id": "suspicious_note:0",
+   "rationale": "Vendor note contains instruction-like text.",
+   "type": "suspicious_note"
+  }
+ ]
+}

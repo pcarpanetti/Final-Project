@@ -1,0 +1,6 @@
+id,sim_ts,run_id,severity,reason,status,dedupe
+1,2020-03-24T20:00,eod-2020-03-24,high,degraded at reviewer: no acceptable memo after 3 rounds,open,eod-2020-03-24:degraded at reviewer: no acceptable memo after 3 rounds
+2,2020-04-03T20:00,eod-2020-04-02,medium,"approval unanswered for 14h, routed to backup approver",open,"eod-2020-04-02:approval unanswered for 14h, routed to backup approver"
+3,2020-04-21T20:00,eod-2020-04-21,high,degraded at analyst: gave up after 4 attempts: simulated provider outage,open,eod-2020-04-21:degraded at analyst: gave up after 4 attempts: simulated provider outage
+4,2020-04-23T20:00,eod-2020-04-23,high,agent risk_analyst requested forbidden tool publish_memo,open,eod-2020-04-23:agent risk_analyst requested forbidden tool publish_memo
+5,2020-05-20T20:00,eod-2020-05-20,high,degraded at analyst: simulated HTTP 401,open,eod-2020-05-20:degraded at analyst: simulated HTTP 401

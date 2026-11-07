@@ -1,0 +1,9 @@
+{
+ "decisions": [
+  {
+   "action": "escalate",
+   "exception_id": "outlier:Enrgy",
+   "rationale": "Move is far beyond peers, but peers moved sharply too. It may be real."
+  }
+ ]
+}

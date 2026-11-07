@@ -1,0 +1,86 @@
+{
+ "rows": [
+  {
+   "hard": 0.045,
+   "label": "1-day 99% VaR",
+   "limit_id": "var99",
+   "metric": "var99_1d",
+   "status": "ok",
+   "value": 0.031890036154,
+   "warn": 0.035
+  },
+  {
+   "hard": 0.05,
+   "label": "1-day 97.5% expected shortfall",
+   "limit_id": "es975",
+   "metric": "es975_1d",
+   "status": "ok",
+   "value": 0.02915583635723077,
+   "warn": 0.035
+  },
+  {
+   "hard": 0.4,
+   "label": "Annualised EWMA volatility",
+   "limit_id": "vol",
+   "metric": "vol_ann_ewma",
+   "status": "ok",
+   "value": 0.10892348444056613,
+   "warn": 0.25
+  },
+  {
+   "hard": 0.25,
+   "label": "Largest sleeve weight",
+   "limit_id": "single_name",
+   "metric": "weight_max",
+   "status": "ok",
+   "value": 0.24068377,
+   "warn": 0.245
+  },
+  {
+   "hard": 0.55,
+   "label": "Top three sleeve weights",
+   "limit_id": "top3",
+   "metric": "top3_weight",
+   "status": "ok",
+   "value": 0.48900248,
+   "warn": 0.52
+  },
+  {
+   "hard": 1.15,
+   "label": "Market beta",
+   "limit_id": "beta",
+   "metric": "beta_MktRF",
+   "status": "ok",
+   "value": 0.9763345500094895,
+   "warn": 1.05
+  },
+  {
+   "hard": 0.15,
+   "label": "Drawdown from NAV peak",
+   "limit_id": "drawdown",
+   "metric": "drawdown",
+   "status": "ok",
+   "value": 7.362742438798975e-05,
+   "warn": 0.1
+  },
+  {
+   "hard": 0.25,
+   "label": "Worst stress scenario loss",
+   "limit_id": "stress",
+   "metric": "stress_worst",
+   "status": "ok",
+   "value": 0.2055691087,
+   "warn": 0.22
+  },
+  {
+   "hard": 5.0,
+   "label": "Days to liquidate",
+   "limit_id": "liquidity",
+   "metric": "liq_days_max",
+   "status": "ok",
+   "value": 2.828535400580344,
+   "warn": 3.0
+  }
+ ],
+ "status": "NORMAL"
+}

@@ -1,0 +1,237 @@
+{
+ "beta_HML": {
+  "label": "Beta to HML",
+  "unit": "ratio",
+  "value": -0.01947661265196643
+ },
+ "beta_MktRF": {
+  "label": "Beta to MktRF",
+  "unit": "ratio",
+  "value": 0.9699082372709127
+ },
+ "beta_SMB": {
+  "label": "Beta to SMB",
+  "unit": "ratio",
+  "value": 0.013329059885878958
+ },
+ "ctr_Durbl": {
+  "label": "Variance share of Durbl",
+  "unit": "pct",
+  "value": 0.03865122599476738
+ },
+ "ctr_Enrgy": {
+  "label": "Variance share of Enrgy",
+  "unit": "pct",
+  "value": 0.05979437143044916
+ },
+ "ctr_HiTec": {
+  "label": "Variance share of HiTec",
+  "unit": "pct",
+  "value": 0.2689014886046539
+ },
+ "ctr_Hlth": {
+  "label": "Variance share of Hlth",
+  "unit": "pct",
+  "value": 0.114078115810151
+ },
+ "ctr_Manuf": {
+  "label": "Variance share of Manuf",
+  "unit": "pct",
+  "value": 0.10797362986837047
+ },
+ "ctr_NoDur": {
+  "label": "Variance share of NoDur",
+  "unit": "pct",
+  "value": 0.08048601974149157
+ },
+ "ctr_Other": {
+  "label": "Variance share of Other",
+  "unit": "pct",
+  "value": 0.1333211968113317
+ },
+ "ctr_Shops": {
+  "label": "Variance share of Shops",
+  "unit": "pct",
+  "value": 0.11228475343385817
+ },
+ "ctr_Telcm": {
+  "label": "Variance share of Telcm",
+  "unit": "pct",
+  "value": 0.04702687966249616
+ },
+ "ctr_Utils": {
+  "label": "Variance share of Utils",
+  "unit": "pct",
+  "value": 0.03748231864243064
+ },
+ "daily_return": {
+  "label": "Portfolio return on the day",
+  "unit": "pct",
+  "value": -0.11565794603100002
+ },
+ "drawdown": {
+  "label": "Drawdown from NAV peak",
+  "unit": "pct",
+  "value": 0.30275092934893055
+ },
+ "effective_n": {
+  "label": "Effective number of sleeves",
+  "unit": "ratio",
+  "value": 7.37621768447083
+ },
+ "es975_1d": {
+  "label": "1-day 97.5% expected shortfall",
+  "unit": "pct",
+  "value": 0.04821937995546154
+ },
+ "liq_days_max": {
+  "label": "Days to liquidate the slowest sleeve",
+  "unit": "days",
+  "value": 2.244024250608798
+ },
+ "nav_usd": {
+  "label": "Net asset value",
+  "unit": "usd",
+  "value": 80341983.02
+ },
+ "stress_broad_selloff": {
+  "label": "Loss under broad selloff scenario",
+  "unit": "pct",
+  "value": 0.2020829801
+ },
+ "stress_energy_collapse": {
+  "label": "Loss under energy collapse scenario",
+  "unit": "pct",
+  "value": 0.053300190299999994
+ },
+ "stress_rates_shock": {
+  "label": "Loss under rates shock scenario",
+  "unit": "pct",
+  "value": 0.07987565890000001
+ },
+ "stress_tech_derating": {
+  "label": "Loss under tech derating scenario",
+  "unit": "pct",
+  "value": 0.12271597829999999
+ },
+ "stress_worst": {
+  "label": "Worst stress scenario loss",
+  "unit": "pct",
+  "value": 0.2020829801
+ },
+ "stress_worst_name": {
+  "label": "Worst stress scenario",
+  "unit": "text",
+  "value": "broad selloff"
+ },
+ "top3_weight": {
+  "label": "Top three sleeve weights",
+  "unit": "pct",
+  "value": 0.50839066
+ },
+ "top_risk_asset": {
+  "label": "Sleeve with largest variance share",
+  "unit": "text",
+  "value": "HiTec"
+ },
+ "top_risk_contrib": {
+  "label": "Largest share of portfolio variance",
+  "unit": "pct",
+  "value": 0.2689014886046539
+ },
+ "var95_1d": {
+  "label": "1-day 95% VaR",
+  "unit": "pct",
+  "value": 0.019866148737999998
+ },
+ "var99_1d": {
+  "label": "1-day 99% VaR",
+  "unit": "pct",
+  "value": 0.042472901225
+ },
+ "var99_change": {
+  "label": "Change in VaR since the prior day",
+  "unit": "pct",
+  "value": 0.00945235906099999
+ },
+ "var99_change_positions": {
+  "label": "VaR change from position moves",
+  "unit": "pct",
+  "value": -0.00014642298000001192
+ },
+ "var99_change_window": {
+  "label": "VaR change from the market data window",
+  "unit": "pct",
+  "value": 0.009598782041000002
+ },
+ "var99_param": {
+  "label": "1-day 99% parametric VaR (EWMA, normal)",
+  "unit": "pct",
+  "value": 0.11556103144768982
+ },
+ "vol_ann_ewma": {
+  "label": "Annualised EWMA volatility",
+  "unit": "pct",
+  "value": 0.7885641366310163
+ },
+ "w_Durbl": {
+  "label": "Weight of Durbl",
+  "unit": "pct",
+  "value": 0.03617941
+ },
+ "w_Enrgy": {
+  "label": "Weight of Enrgy",
+  "unit": "pct",
+  "value": 0.04610124
+ },
+ "w_HiTec": {
+  "label": "Weight of HiTec",
+  "unit": "pct",
+  "value": 0.24240956
+ },
+ "w_Hlth": {
+  "label": "Weight of Hlth",
+  "unit": "pct",
+  "value": 0.14029203
+ },
+ "w_Manuf": {
+  "label": "Weight of Manuf",
+  "unit": "pct",
+  "value": 0.10671813
+ },
+ "w_NoDur": {
+  "label": "Weight of NoDur",
+  "unit": "pct",
+  "value": 0.09484988
+ },
+ "w_Other": {
+  "label": "Weight of Other",
+  "unit": "pct",
+  "value": 0.11418365
+ },
+ "w_Shops": {
+  "label": "Weight of Shops",
+  "unit": "pct",
+  "value": 0.12568907
+ },
+ "w_Telcm": {
+  "label": "Weight of Telcm",
+  "unit": "pct",
+  "value": 0.05361043
+ },
+ "w_Utils": {
+  "label": "Weight of Utils",
+  "unit": "pct",
+  "value": 0.03996659
+ },
+ "weight_max": {
+  "label": "Largest sleeve weight",
+  "unit": "pct",
+  "value": 0.24240956
+ },
+ "weight_max_asset": {
+  "label": "Largest sleeve",
+  "unit": "text",
+  "value": "HiTec"
+ }
+}

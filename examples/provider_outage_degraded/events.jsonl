@@ -1,0 +1,26 @@
+{"detail": {"cutoff": "2020-04-21T20:00", "trigger": "schedule:eod", "version": "9ade7848e5dc"}, "sim_ts": "2020-04-21T20:00", "stage": null, "type": "run_created"}
+{"detail": {"round": 0}, "sim_ts": "2020-04-21T20:00", "stage": "ingest", "type": "stage_done"}
+{"detail": {"round": 0}, "sim_ts": "2020-04-21T20:00", "stage": "dq_checks", "type": "stage_done"}
+{"detail": {"round": 0}, "sim_ts": "2020-04-21T20:00", "stage": "dq_triage", "type": "stage_skipped"}
+{"detail": {"round": 0}, "sim_ts": "2020-04-21T20:00", "stage": "dq_apply", "type": "stage_done"}
+{"detail": {"round": 0}, "sim_ts": "2020-04-21T20:00", "stage": "risk_engine", "type": "stage_done"}
+{"detail": {"round": 0}, "sim_ts": "2020-04-21T20:00", "stage": "limit_check", "type": "stage_done"}
+{"detail": {"round": 0}, "sim_ts": "2020-04-21T20:00", "stage": "register", "type": "stage_done"}
+{"detail": {"attempt": 1, "error": "simulated provider outage"}, "sim_ts": "2020-04-21T20:00", "stage": "analyst", "type": "llm_transient_error"}
+{"detail": {"attempt": 2, "error": "simulated provider outage"}, "sim_ts": "2020-04-21T20:00", "stage": "analyst", "type": "llm_transient_error"}
+{"detail": {"attempt": 3, "error": "simulated provider outage"}, "sim_ts": "2020-04-21T20:00", "stage": "analyst", "type": "llm_transient_error"}
+{"detail": {"attempt": 4, "error": "simulated provider outage"}, "sim_ts": "2020-04-21T20:00", "stage": "analyst", "type": "llm_transient_error"}
+{"detail": {"error": "gave up after 4 attempts: simulated provider outage", "round": 0}, "sim_ts": "2020-04-21T20:00", "stage": "analyst", "type": "stage_failed"}
+{"detail": {"reason": "degraded at analyst: gave up after 4 attempts: simulated provider outage", "severity": "high"}, "sim_ts": "2020-04-21T20:00", "stage": null, "type": "escalated"}
+{"detail": {"round": 0}, "sim_ts": "2020-04-21T20:00", "stage": "writer", "type": "stage_skipped"}
+{"detail": {"round": 0}, "sim_ts": "2020-04-21T20:00", "stage": "verify", "type": "stage_skipped"}
+{"detail": {"round": 0}, "sim_ts": "2020-04-21T20:00", "stage": "reviewer", "type": "stage_skipped"}
+{"detail": {"round": 0}, "sim_ts": "2020-04-21T20:00", "stage": "finalise_memo", "type": "stage_done"}
+{"detail": {"round": 0}, "sim_ts": "2020-04-21T20:00", "stage": "gate_policy", "type": "stage_done"}
+{"detail": {"reasons": ["hard_breach", "degraded_memo"]}, "sim_ts": "2020-04-21T20:00", "stage": "approval", "type": "approval_requested"}
+{"detail": {"round": 0}, "sim_ts": "2020-04-21T20:00", "stage": "approval", "type": "stage_waiting"}
+{"detail": {"by": "replay-policy", "decision": "approve", "note": ""}, "sim_ts": "2020-04-21T20:00", "stage": "approval", "type": "human_decision"}
+{"detail": {"round": 0}, "sim_ts": "2020-04-21T20:00", "stage": "approval", "type": "stage_done"}
+{"detail": {"destination": "memos/2020-04-21.md", "key": "memo:eod-2020-04-21"}, "sim_ts": "2020-04-21T20:00", "stage": "publish", "type": "delivered"}
+{"detail": {"round": 0}, "sim_ts": "2020-04-21T20:00", "stage": "publish", "type": "stage_done"}
+{"detail": {}, "sim_ts": "2020-04-21T20:00", "stage": null, "type": "run_completed"}

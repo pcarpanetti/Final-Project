@@ -1,0 +1,6 @@
+{
+ "assessment": "watch",
+ "proposed_change": "Test age-weighted historical VaR so recent losses count for more.",
+ "rationale": "Backtest is in the yellow zone with 1 of two statistical tests failing.",
+ "recommendation": "propose_change"
+}

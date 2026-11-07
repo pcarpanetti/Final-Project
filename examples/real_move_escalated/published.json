@@ -1,0 +1,18 @@
+{
+ "outbox": [
+  {
+   "destination": "memos/2020-03-09.md",
+   "key": "memo:eod-2020-03-09",
+   "kind": "memo",
+   "sha256": "86dee82a27625494c11a12aac232396921ecc46d37a953ce4de6ae08d3bf6520",
+   "status": "delivered"
+  },
+  {
+   "destination": "notices/2020-03-09.json",
+   "key": "notice:eod-2020-03-09",
+   "kind": "notice",
+   "sha256": "1cddf59671f6c5fff6b40b5db1f58604ffae2d1d8773d423eae8807dc4e0cb6e",
+   "status": "delivered"
+  }
+ ]
+}

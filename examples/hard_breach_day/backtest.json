@@ -1,0 +1,15 @@
+{
+ "exception_today": true,
+ "exceptions": 8,
+ "expected": 1.78,
+ "independence": {
+  "lr": 4.890234140050467,
+  "p_value": 0.027009023076859547
+ },
+ "kupiec": {
+  "lr": 11.82742652598401,
+  "p_value": 0.0005836460427462842
+ },
+ "observations": 178,
+ "zone": "yellow"
+}
