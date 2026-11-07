@@ -1,0 +1,17 @@
+# Risk model parameters. Any change here is a new version and must pass `riskwatch eval`.
+var:
+  method: historical        # historical | age_weighted
+  lookback_days: 500
+  age_decay: 0.99           # used only by age_weighted
+ewma_lambda: 0.94
+ewma_window: 250
+beta_window: 250
+factors: [MktRF, SMB, HML]
+stress:                     # hypothetical instantaneous sleeve shocks
+  broad_selloff:   {NoDur: -0.12, Durbl: -0.25, Manuf: -0.22, Enrgy: -0.28, HiTec: -0.26, Telcm: -0.16, Shops: -0.18, Hlth: -0.14, Utils: -0.10, Other: -0.24}
+  energy_collapse: {NoDur: -0.02, Durbl: -0.05, Manuf: -0.08, Enrgy: -0.45, HiTec: -0.03, Telcm: -0.02, Shops: -0.02, Hlth: -0.01, Utils: -0.03, Other: -0.06}
+  tech_derating:   {NoDur: 0.01, Durbl: -0.08, Manuf: -0.06, Enrgy: 0.00, HiTec: -0.35, Telcm: -0.12, Shops: -0.10, Hlth: -0.04, Utils: 0.02, Other: -0.05}
+  rates_shock:     {NoDur: -0.05, Durbl: -0.12, Manuf: -0.08, Enrgy: -0.04, HiTec: -0.14, Telcm: -0.08, Shops: -0.08, Hlth: -0.06, Utils: -0.15, Other: 0.02}
+liquidity:
+  participation: 0.10
+  adv_usd: {NoDur: 40000000, Durbl: 15000000, Manuf: 50000000, Enrgy: 30000000, HiTec: 120000000, Telcm: 20000000, Shops: 45000000, Hlth: 55000000, Utils: 15000000, Other: 70000000}

@@ -1,0 +1,11 @@
+# Limit schedule for the fictional book. A value at or above `hard` is a breach.
+limits:
+  - {id: var99,       metric: var99_1d,     label: 1-day 99% VaR,                warn: 0.035, hard: 0.045}
+  - {id: es975,       metric: es975_1d,     label: 1-day 97.5% expected shortfall, warn: 0.035, hard: 0.050}
+  - {id: vol,         metric: vol_ann_ewma, label: Annualised EWMA volatility,   warn: 0.25,  hard: 0.40}
+  - {id: single_name, metric: weight_max,   label: Largest sleeve weight,        warn: 0.245, hard: 0.25}
+  - {id: top3,        metric: top3_weight,  label: Top three sleeve weights,     warn: 0.52,  hard: 0.55}
+  - {id: beta,        metric: beta_MktRF,   label: Market beta,                  warn: 1.05,  hard: 1.15}
+  - {id: drawdown,    metric: drawdown,     label: Drawdown from NAV peak,       warn: 0.10,  hard: 0.15}
+  - {id: stress,      metric: stress_worst, label: Worst stress scenario loss,   warn: 0.22,  hard: 0.25}
+  - {id: liquidity,   metric: liq_days_max, label: Days to liquidate,            warn: 3.0,   hard: 5.0}

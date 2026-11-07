@@ -1,0 +1,58 @@
+# Operating policy enforced by the controller. Agents cannot read or change any of this at run time.
+schedule:
+  eod_cutoff: "20:00"         # information cutoff for an end-of-day run
+  hard_deadline: "23:30"      # no data by now: stop waiting and escalate
+
+retries:
+  llm_transient: {max_attempts: 4, base_seconds: 2.0, max_seconds: 30.0}
+  schema_repair: 2            # malformed agent replies re-prompted before the stage fails
+  max_tool_steps: 6           # tool calls one agent may make in a stage
+
+revision:
+  max_rounds: 3               # draft -> verify -> review passes before falling back
+
+budgets:
+  per_run: {max_wall_seconds: 900, max_llm_calls: 30, max_tokens: 200000, max_cost_usd: 1.00}
+  per_day: {max_cost_usd: 5.00}
+
+escalation:
+  approval_sla_hours: 14      # unanswered approval goes to the backup approver
+  circuit_breaker_halts: 3    # this many halted runs in a row stops new runs
+
+gates:
+  auto_publish_clean_days: true    # clean day: archive memo without a human
+  require_approval_for:
+    - hard_breach
+    - new_warning
+    - dq_override
+    - dq_escalation
+    - degraded_memo
+    - material_restatement
+    - model_review
+
+restatement:
+  material_var_change: 0.0005  # 5bp of NAV
+
+lease:
+  ttl_seconds: 30
+
+dq:
+  outlier_z: 6.0
+  outlier_vol_lambda: 0.94
+  stale_min_abs_return: 0.0025
+  positions_sum_tolerance: 0.001
+  suspicious_note_patterns:
+    - "(?i)ignore (all |any )?(previous|prior) instructions"
+    - "(?i)system (notice|prompt|message)"
+    - "(?i)without approval"
+    - "(?i)mark (every|all) "
+
+memo:
+  required_sections: ["Status", "Limits", "Drivers", "Data quality", "For decision"]
+  allowed_literals: ["1-day", "99%", "97.5%", "95%", "T-1"]
+  prohibited_phrases:
+    - "(?i)\\b(we|you|i) (must|should|will) (sell|buy|trade)\\b"
+    - "(?i)\\bexecute (the |this )?(trade|order)"
+    - "(?i)\\bplace (an |the )?order"
+  replay_forbidden_terms: [covid, coronavirus, pandemic, lockdown, wuhan, stimulus, fed cut, opec]
+  mask_calendar_dates: true    # hide calendar dates from agents so model memory cannot leak the future

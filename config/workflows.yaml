@@ -1,0 +1,42 @@
+# Each workflow is a DAG run by the controller. Stages are listed in a valid topological order.
+#   kind: code  = deterministic Python; agent = LLM role; gate = waits for a human
+#   when: a named predicate; a false predicate skips the stage
+#   on_failure: degrade = carry on with the deterministic fallback instead of halting
+eod:
+  revision_loop: {stages: [writer, verify, reviewer]}
+  stages:
+    - {name: ingest,        kind: code}
+    - {name: dq_checks,     kind: code,  depends_on: [ingest]}
+    - {name: dq_triage,     kind: agent, depends_on: [dq_checks], agent: data_steward, when: has_dq_exceptions, on_failure: degrade}
+    - {name: dq_apply,      kind: code,  depends_on: [dq_triage]}
+    - {name: risk_engine,   kind: code,  depends_on: [dq_apply]}
+    - {name: limit_check,   kind: code,  depends_on: [risk_engine]}
+    - {name: register,      kind: code,  depends_on: [limit_check]}
+    - {name: analyst,       kind: agent, depends_on: [register], agent: risk_analyst, when: not_degraded, on_failure: degrade}
+    - {name: writer,        kind: agent, depends_on: [analyst], agent: memo_writer, when: not_degraded, on_failure: degrade}
+    - {name: verify,        kind: code,  depends_on: [writer], when: not_degraded}
+    - {name: reviewer,      kind: agent, depends_on: [verify], agent: reviewer, when: verify_passed, on_failure: degrade}
+    - {name: finalise_memo, kind: code,  depends_on: [reviewer]}
+    - {name: gate_policy,   kind: code,  depends_on: [finalise_memo]}
+    - {name: approval,      kind: gate,  depends_on: [gate_policy], when: approval_required}
+    - {name: publish,       kind: code,  depends_on: [approval]}
+
+restate:
+  stages:
+    - {name: ingest,       kind: code}
+    - {name: dq_checks,    kind: code, depends_on: [ingest]}
+    - {name: dq_apply,     kind: code, depends_on: [dq_checks]}
+    - {name: risk_engine,  kind: code, depends_on: [dq_apply]}
+    - {name: limit_check,  kind: code, depends_on: [risk_engine]}
+    - {name: restate_diff, kind: code, depends_on: [limit_check]}
+    - {name: gate_policy,  kind: code, depends_on: [restate_diff]}
+    - {name: approval,     kind: gate, depends_on: [gate_policy], when: approval_required}
+    - {name: publish,      kind: code, depends_on: [approval]}
+
+monthly:
+  stages:
+    - {name: backtest_review, kind: code}
+    - {name: model_reviewer,  kind: agent, depends_on: [backtest_review], agent: model_reviewer, on_failure: degrade}
+    - {name: gate_policy,     kind: code,  depends_on: [model_reviewer]}
+    - {name: approval,        kind: gate,  depends_on: [gate_policy], when: approval_required}
+    - {name: publish,         kind: code,  depends_on: [approval]}
