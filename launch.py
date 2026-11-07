@@ -28,7 +28,9 @@ def install() -> str:
     print("First run: installing numpy, pandas and PyYAML. This takes a minute or two.", flush=True)
     if not env_python().exists():
         venv.create(ENV_DIR, with_pip=True)
-    subprocess.run([str(env_python()), "-m", "pip", "install", "--quiet", "--disable-pip-version-check", *NEEDED], check=True)
+    # Pure-Python PyYAML is plenty here, and it avoids needing a C compiler on very new Python versions.
+    env = {**os.environ, "PYYAML_FORCE_LIBYAML": "0"}
+    subprocess.run([str(env_python()), "-m", "pip", "install", "--quiet", "--disable-pip-version-check", *NEEDED], check=True, env=env)
     return str(env_python())
 
 
