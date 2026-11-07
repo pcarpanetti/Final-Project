@@ -22,8 +22,10 @@ def test_quantile_is_the_ceil_n_alpha_order_statistic():
 
 def test_var_and_es_on_a_known_loss_ladder():
     pnl = -np.arange(1.0, 101.0) / 100.0
-    assert value_at_risk(pnl, 0.99) == pytest.approx(0.99)
-    assert expected_shortfall(pnl, 0.98) == pytest.approx((1.00 + 0.99 + 0.98) / 3)
+    # n * alpha = 1, so the 99% quantile is the single worst observation.
+    assert value_at_risk(pnl, 0.99) == pytest.approx(1.00)
+    assert value_at_risk(pnl, 0.98) == pytest.approx(0.99)
+    assert expected_shortfall(pnl, 0.98) == pytest.approx((1.00 + 0.99) / 2)
 
 
 def test_age_weighting_reacts_to_recent_losses_more_than_equal_weighting():

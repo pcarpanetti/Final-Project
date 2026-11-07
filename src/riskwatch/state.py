@@ -54,11 +54,11 @@ class LeaseHeld(RuntimeError):
 class State:
     """Thin wrapper over one SQLite file. Each public write commits, unless inside `transaction()`."""
 
-    def __init__(self, path: Path):
+    def __init__(self, path: Path, durable: bool = True):
         path.parent.mkdir(parents=True, exist_ok=True)
         self.db = sqlite3.connect(path, timeout=30, isolation_level=None)
         self.db.row_factory = sqlite3.Row
-        self.db.execute("PRAGMA synchronous=FULL")
+        self.db.execute(f"PRAGMA synchronous={'FULL' if durable else 'OFF'}")
         self.db.executescript(SCHEMA)
         self.owner = f"{os.getpid()}-{uuid.uuid4().hex[:8]}"
         self.sim_now = ""

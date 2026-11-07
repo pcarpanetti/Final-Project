@@ -2,8 +2,9 @@
 #   kind: code  = deterministic Python; agent = LLM role; gate = waits for a human
 #   when: a named predicate; a false predicate skips the stage
 #   on_failure: degrade = carry on with the deterministic fallback instead of halting
+#   side_effect: true = changes shared state, so it can never be blindly redone
 eod:
-  revision_loop: {stages: [writer, verify, reviewer]}
+  revision_loop: {stages: [analyst, writer, verify, reviewer]}
   stages:
     - {name: ingest,        kind: code}
     - {name: dq_checks,     kind: code,  depends_on: [ingest]}
@@ -11,7 +12,7 @@ eod:
     - {name: dq_apply,      kind: code,  depends_on: [dq_triage]}
     - {name: risk_engine,   kind: code,  depends_on: [dq_apply]}
     - {name: limit_check,   kind: code,  depends_on: [risk_engine]}
-    - {name: register,      kind: code,  depends_on: [limit_check]}
+    - {name: register,      kind: code,  depends_on: [limit_check], side_effect: true}
     - {name: analyst,       kind: agent, depends_on: [register], agent: risk_analyst, when: not_degraded, on_failure: degrade}
     - {name: writer,        kind: agent, depends_on: [analyst], agent: memo_writer, when: not_degraded, on_failure: degrade}
     - {name: verify,        kind: code,  depends_on: [writer], when: not_degraded}

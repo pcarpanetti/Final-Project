@@ -34,7 +34,7 @@ restatement:
   material_var_change: 0.0005  # 5bp of NAV
 
 lease:
-  ttl_seconds: 30
+  ttl_seconds: 300          # longer than the slowest single LLM call
 
 dq:
   outlier_z: 6.0
