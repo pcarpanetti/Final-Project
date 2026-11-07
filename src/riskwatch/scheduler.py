@@ -29,7 +29,8 @@ def scan_new_inputs(env: Env, ctl: Controller, now: str) -> None:
         if original and original["cutoff"] < row["published_at"] and original["status"] not in ("pending", "blocked_input"):
             days[row["as_of"]] = max(days.get(row["as_of"], ""), row["published_at"])
     for day, published in sorted(days.items()):
-        run_id = f"restate-{day}-{published.replace('-', '').replace(':', '').replace('T', '')}"
+        # Kept short: run ids become folder names, and Windows limits paths to 260 characters.
+        run_id = f"rs-{day}-{published[5:].translate(str.maketrans('', '', '-:T'))}"
         ctl.create_run(run_id, "restate", day, now, "new_input:vendor_correction", parent=f"eod-{day}")
     st.set_kv("corrections_scanned_to", now)
 
