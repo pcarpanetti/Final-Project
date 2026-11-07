@@ -17,10 +17,25 @@ work, and accepts changes to itself only through a fixed baseline test.
 The replay uses **real market data** from the 2020 crash (Ken French daily industry returns) on a **fictional book**,
 with vendor faults injected to give labelled ground truth.
 
+## Run it in your browser
+
+**Windows:** double-click `start.bat`. **Mac or Linux:** run `sh start.sh`. Your browser opens at
+`http://127.0.0.1:8765/`, and the app walks you through everything:
+
+1. **Connect a model:** your name, then Claude login, an API key and address for any provider, or the offline demo.
+2. **Run the workflow:** choose a period and who approves, and watch it progress.
+3. **Approve:** read each flagged memo, then approve, reject or request changes.
+4. **Results:** dashboard, reports, a run inspector, and a one-click ZIP of the full output.
+
+[GETTING_STARTED.md](GETTING_STARTED.md) is the plain-language guide. The only requirement is Python 3.10 or newer.
+
+![Dashboard](docs/screens/4-dashboard.png)
+
 ## Start here
 
 | To see | Open |
 |---|---|
+| How to use the app, step by step | [GETTING_STARTED.md](GETTING_STARTED.md) |
 | The task, stages, triggers, cutoffs, acceptance criteria | [docs/task_specification.md](docs/task_specification.md) |
 | The architecture and design decisions | [docs/design_note.md](docs/design_note.md) |
 | The annotated diagram | [docs/workflow_diagram.png](docs/workflow_diagram.png) |
@@ -35,7 +50,8 @@ with vendor faults injected to give labelled ground truth.
 | `prompts/` | System prompt for each of the five agent roles |
 | `skills/` | Reusable instructions each role loads (`SKILL.md` format) |
 | `config/` | `workflows.yaml` (DAGs), `agents.yaml` (permissions, schemas), `policy.yaml` (limits, retries, gates), `limits.yaml`, `risk_model.yaml` |
-| `src/riskwatch/` | `controller.py`, `scheduler.py`, `state.py`, `pit.py`, plus `risk/`, `stages/`, `agents/`, `llm/`, `verify/`, `improve/` |
+| `start.bat`, `start.sh`, `launch.py` | One-step start: installs what is missing and opens the browser app |
+| `src/riskwatch/` | `controller.py`, `scheduler.py`, `state.py`, `pit.py`, plus `risk/`, `stages/`, `agents/`, `llm/`, `verify/`, `improve/`, `web/` |
 | `data/` | Public return data, the generated bitemporal feed and the fault labels; see [data/README.md](data/README.md) |
 | `scenarios/replay.yaml` | The fixed replay: simulated approvals and injected agent and provider faults |
 | `eval/` | Pre-registered rules (`policy.yaml`), candidates, frozen baselines and results |
@@ -45,7 +61,9 @@ with vendor faults injected to give labelled ground truth.
 | `examples/` | Curated artifacts from the replay, such as memos, failed drafts and restatements |
 | `scripts/` | Feed builder, figures, recovery and version demos, evidence export, ZIP packaging |
 
-## Setup
+## Terminal setup
+
+Everything the browser app does is also available from the terminal. You don't need this section to use the app.
 
 Requires Python 3.10 or newer. No API key is needed for anything below except the optional live run.
 On Windows, unpack to a short path such as `C:\rw`, because very long paths hit the 260-character limit.
@@ -57,10 +75,10 @@ pip install -e ".[dev]"
 python -m pytest -q                # about 2 minutes
 ```
 
-Dependencies are numpy, pandas and PyYAML, plus pytest and matplotlib for development. Model access needs no vendor
-SDK. The code was developed and tested on Windows 11 with Python 3.15, numpy 2.5 and pandas 3.0.
+Dependencies are numpy, pandas and PyYAML, plus pytest and matplotlib for development. Model access and the web app need
+no extra packages. Tested on Windows 11 with Python 3.14 and 3.15.
 
-## Walkthrough
+## Terminal walkthrough
 
 Commands use the `riskwatch` entry point, and `python -m riskwatch` is equivalent. State goes in `runtime/`, or wherever
 `RISKWATCH_HOME` points.
@@ -113,11 +131,12 @@ leave it untouched.
 
 ## Using your own model and provider
 
-The default backend, `scripted`, is rule-based code rather than a model. It keeps everything runnable offline. To use a
-real model, copy `.env.example` to `.env`, or set these variables:
+The browser app's Connect step does all of this for you. In the terminal, the default backend, `scripted`, is rule-based
+code rather than a model, and it keeps everything runnable offline. To use a real model, copy `.env.example` to `.env`,
+or set these variables:
 
 ```bash
-LLM_PROVIDER=openrouter     # or openai, anthropic, kimi, deepseek, qwen, mistral, groq, ollama, custom
+LLM_PROVIDER=openrouter     # or claude-code, openai, anthropic, kimi, deepseek, qwen, mistral, groq, ollama, custom
 LLM_MODEL=<any model id your provider offers>
 LLM_API_KEY=<your key>
 ```
@@ -129,6 +148,8 @@ riskwatch provider-check
 RISKWATCH_HOME=runtime/live riskwatch replay --start 2020-03-09 --end 2020-03-11
 ```
 
+- `LLM_PROVIDER=claude-code` needs no key. It uses the Claude Code account signed in on this computer, with every tool
+  disabled, so agents stay pure text functions.
 - Any OpenAI-compatible endpoint works through `LLM_PROVIDER=custom` with `LLM_BASE_URL`.
 - `LLM_PROVIDER_REVIEWER`, `LLM_MODEL_REVIEWER` and `LLM_API_KEY_REVIEWER` put one role on a different vendor. That
   also applies to the other roles, for example `LLM_MODEL_MEMO_WRITER`.
