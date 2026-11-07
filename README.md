@@ -59,7 +59,7 @@ with vendor faults injected to give labelled ground truth.
 | `tests/` | The test suite, including a crash test at each of 58 named points |
 | `evidence/` | Test results, recovery, leakage, evaluation, versioning and replay records |
 | `examples/` | Curated artifacts from the replay, such as memos, failed drafts and restatements |
-| `scripts/` | Feed builder, figures, recovery and version demos, evidence export, ZIP packaging |
+| `scripts/` | Feed builder, figures, recovery, leakage, live-model and version demos, browser check, evidence export, ZIP packaging |
 
 ## Terminal setup
 
@@ -161,14 +161,15 @@ Keys are read from the environment or `.env`, which is Git-ignored, and are neve
 
 ## Honest limits of this submission
 
-See the end of [evidence/README.md](evidence/README.md) for what was and was not tested. In short: all recorded evidence
-comes from the scripted backend, so it demonstrates the harness and not the quality of any LLM.
+See the end of [evidence/README.md](evidence/README.md) for what was and was not tested. In short: the recorded year and the
+evaluations use a rule-based stand-in, so they demonstrate the harness. Real-model evidence is a spot check of four hard
+days on Claude Sonnet, through the Claude login route. The API-key adapters have been tested only against a fake server.
 
 ## My contribution
 
 I chose portfolio risk monitoring as the task, set the scope (a working harness with real recovery and evaluation
-evidence, not a design alone), and required that the system work with any model or provider so that a reader can run it
-with their own key.
+evidence, not a design alone), required that the system work with any model or provider so that a reader can run it with
+their own key, and required a browser app with guided setup, including Claude login, in place of terminal-only use.
 
 I built the project with Claude Code (Anthropic's coding agent), which wrote the code, tests and first drafts of the
 documents under my direction. Its commit history shows that work as it happened, including the defects the replay

@@ -48,9 +48,15 @@ the harness fills them in, and any digit outside a token fails verification.
 Even inside agent decisions the harness keeps the last word. A quarantined note is forced to `escalate` whatever the
 agent says, and a missing row can only be filled by rule.
 
-**Any provider.** All model access goes through two wire protocols (`src/riskwatch/llm/providers.py`), which cover
-OpenAI-compatible vendors and Anthropic, chosen by environment variables with no vendor SDK. Tool calling uses plain
-JSON in the text channel rather than a vendor function-calling API, so any chat model can drive the loop.
+**Any provider.** All model access goes through `src/riskwatch/llm/providers.py`, with no vendor SDK. Two HTTP protocols
+cover OpenAI-compatible vendors and Anthropic. A third route calls the local Claude Code CLI, so a signed-in Claude account
+works without a key, with every tool, MCP server, skill and user setting disabled so the agent stays a pure text function.
+Tool calling uses plain JSON in the text channel rather than a vendor function-calling API, so any chat model can drive the loop.
+
+**The browser app is a front door, not a second system.** `start.bat` opens a local page that collects the user's name
+and model settings, starts runs, takes approvals and offers the full output. Runs are ordinary `riskwatch` processes, and
+decisions go through the same controller, queued behind the same lease. It holds keys, so it listens on 127.0.0.1 only,
+checks the Host header, needs a session token on every POST, and renders agent text as text, never as HTML.
 
 ## 2. Long-running operation
 
@@ -90,7 +96,8 @@ repeated on resume. A lease stops two controllers working at once, and `--takeov
 | Malformed or invalid agent reply | 2 repair prompts stating the error | Stage failure rules below |
 | Bad key, unknown model | No retry | Stage failure rules below |
 | Agent stage fails, or budget runs out | **Degrade:** template memo with all numbers and no narrative, forced human approval, escalation | |
-| Memo fails after 3 rounds | Same degrade path | |
+| Reviewer still unconvinced after 3 rounds | The memo that passed every check goes to the approver with the open concerns attached | |
+| Checks still failing after 3 rounds | Template memo, forced human approval, escalation | |
 | Data late or positions do not reconcile | Block; retry each tick, logging any cutoff extension | Halt at 23:30, critical escalation |
 | Code exception | No retry, because code errors do not heal | Halt, escalate; a human runs `resume` after fixing it |
 | Corrupt artifact upstream of a side effect | Halt rather than redo the side effect | Human |
@@ -154,8 +161,8 @@ the test is known to be able to catch a leak.
 
 ## 4. What repeated evaluation found
 
-The first full replay passed its tests and still exposed design errors that no single-day run had shown. Each became a
-regression test, and the commits record the fixes.
+The first full replay passed its tests and still exposed design errors that no single-day run had shown, and the first
+real model exposed more that no rule-based stand-in could. Each became a regression test, and the commits record the fixes.
 
 | Found by | Defect | Fix | Commit |
 |---|---|---|---|
@@ -164,10 +171,17 @@ regression test, and the commits record the fixes.
 | Full replay | The LLM journal replayed a round's verdict into the next round, so the loop could not finish | Round is part of the journal key | `873da3a` |
 | Leakage test | The reviewer saw the calendar date in the memo title | Dates are masked in every agent request | `bb309a3`, test in `873da3a` |
 | Reading the report | The hard-kill report claimed four kills when two came after the process had exited | Only kills that land on a running process count | `5edfc4d` |
+| First real model | A memo passing all 13 checks was thrown away for a template because the reviewer stayed unconvinced | Verified memos go to the approver with open concerns attached | See `git log` |
+| First real model | The reviewer rejected true statements as unsupported, because it could not see the metrics they cited | It now receives the metrics, what is new, and prior values | See `git log` |
+| First real model | "3.0 days against a warning of 3.0 days" hid a value of 3.04 | Two decimals | See `git log` |
+| Clean-install test | First launch failed on Python 3.15 without a C compiler, because PyYAML had no prebuilt package | The launcher installs the pure-Python build | See `git log` |
 
 Against the baseline, three of four candidates were rejected under the rules fixed beforehand, including a real coverage
 improvement that breached the VaR guardrail. The accepted candidate is **not** live, for reasons set out in
-[evidence/README.md](../evidence/README.md), which also lists what was not tested. The main limit is that no real LLM has
-run this workflow. All evidence comes from a rule-based stand-in.
+[evidence/README.md](../evidence/README.md), which also lists what was not tested.
+
+On a real model (Claude Sonnet), the data steward made all six judgements correctly across two runs of the hardest days,
+including escalating the energy collapse that the first rule-based steward had overwritten. After the fixes above, all four
+days finished normally. This is a spot check, not a measurement: the recorded year and the evaluations use the stand-in.
 
 ![VaR backtest](var_backtest.png)

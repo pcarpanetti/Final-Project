@@ -87,7 +87,7 @@ starts a restatement instead. A VaR forecast made at T is scored only in the T+1
 | Risk metrics and limit status | An independent pure-Python recomputation agrees within 1e-9; limits re-evaluate identically |
 | Data quality decisions | Every exception decided; quarantined notes always escalated; reasons recorded |
 | Breach register and VaR ledger | Updated exactly once per day, in the same transaction as the stage checkpoint |
-| Daily risk memo | All 13 automated checks pass and the independent reviewer passes it, or a marked template memo is issued instead |
+| Daily risk memo | All 13 automated checks pass and the independent reviewer passes it. Otherwise a person sees it first: with the reviewer's open concerns attached, or as a marked template memo if a check still fails |
 | Approval record | Every breach, data override or degraded memo has a named decision before release |
 | Breach notice | Issued once, for each new hard breach, only after approval |
 | Restatement notice | Issued when VaR moves by 5bp or more of NAV, or any limit status changes |
