@@ -95,12 +95,13 @@ def open_runs(env: Env) -> list[str]:
     return [r["run_id"] for r in rows]
 
 
-def tick(env: Env, now: str, takeover: bool = False) -> dict:
+def tick(env: Env, now: str, takeover: bool = False, sla: bool = True, lease_wait: float = 0.0) -> dict:
     st = env.state
     st.sim_now = now
     ctl = Controller(env)
-    st.acquire_lease(env.bundle["policy"]["lease"]["ttl_seconds"], takeover)
+    st.wait_for_lease(env.bundle["policy"]["lease"]["ttl_seconds"], takeover, lease_wait)
     try:
+        st.set_kv("last_tick", now)
         if circuit_open(env):
             return {"now": now, "circuit": "open", "runs": {}}
         scan_new_inputs(env, ctl, now)
@@ -110,7 +111,8 @@ def tick(env: Env, now: str, takeover: bool = False) -> dict:
         for run_id in open_runs(env):
             if st.run(run_id)["status"] != "awaiting_approval":
                 results[run_id] = ctl.drive(run_id)
-        check_sla(env, now)
+        if sla:
+            check_sla(env, now)
         return {"now": now, "circuit": "closed", "runs": results}
     finally:
         st.release_lease()

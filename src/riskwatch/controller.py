@@ -203,6 +203,7 @@ class Controller:
         run_id, name = run["run_id"], stage["name"]
         rnd = self._round_of(run, wf, name)
         ctx = StageContext(self.env, run, bundle, name, rnd, started)
+        st.renew_lease()
 
         predicate = stage.get("when")
         if predicate and not pipeline.PREDICATES[predicate](ctx):

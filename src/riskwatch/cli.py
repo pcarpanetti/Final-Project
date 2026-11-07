@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -14,7 +15,8 @@ from .controller import Controller, Env
 from .improve import versions
 from .llm.providers import PermanentError, build_provider, load_dotenv
 from .replay import load_scenario, replay
-from .scheduler import circuit_open, status_summary, tick
+from .scheduler import status_summary, tick
+from .state import LeaseHeld
 
 
 def make_env(mode: str = "live", scenario: dict | None = None) -> Env:
@@ -38,8 +40,12 @@ def cmd_tick(args) -> None:
 
 def cmd_replay(args) -> None:
     scenario = load_scenario(ROOT)
+    if args.no_drills:
+        scenario["scripted_faults"] = {}
+        scenario["approvals"]["overrides"] = {}
     env = make_env("replay", scenario)
-    replay(env, scenario, args.start, args.end, lambda d: print(d, status_summary(env), flush=True), args.takeover)
+    replay(env, scenario, args.start, args.end, lambda d: print(d, status_summary(env), flush=True), args.takeover,
+           args.manual_approvals)
     print(status_summary(env))
 
 
@@ -65,9 +71,12 @@ def cmd_pending(args) -> None:
 
 def cmd_decide(args) -> None:
     env = make_env()
-    if args.now:
-        env.state.sim_now = args.now
-    print(Controller(env).decide(args.run_id, args.decision, args.by, args.note))
+    env.state.sim_now = args.now or env.state.get_kv("last_tick")
+    env.state.wait_for_lease(env.bundle["policy"]["lease"]["ttl_seconds"], timeout=60.0)
+    try:
+        print(Controller(env).decide(args.run_id, args.decision, args.by, args.note))
+    finally:
+        env.state.release_lease()
 
 
 def cmd_resume(args) -> None:
@@ -128,8 +137,12 @@ def cmd_eval(args) -> None:
     paths = default_paths()
     rules = yaml.safe_load((ROOT / "eval" / "policy.yaml").read_text(encoding="utf-8"))
     current = versions.active(paths)
-    baseline_file = ROOT / "eval" / "baselines" / f"{current}.json"
+    out_dir = Path(os.environ.get("RISKWATCH_EVAL_OUT", ROOT / "eval"))
+    baseline_file = out_dir / "baselines" / f"{current}.json"
+    if not baseline_file.exists() and (ROOT / "eval" / "baselines" / f"{current}.json").exists():
+        baseline_file = ROOT / "eval" / "baselines" / f"{current}.json"
     if args.baseline:
+        baseline_file = out_dir / "baselines" / f"{current}.json"
         result = evaluate.run_scorecard(versions.load_snapshot(paths, current), ROOT)
         baseline_file.parent.mkdir(parents=True, exist_ok=True)
         baseline_file.write_text(json.dumps(result, indent=1, sort_keys=True) + "\n", encoding="utf-8", newline="\n")
@@ -144,16 +157,22 @@ def cmd_eval(args) -> None:
     result = evaluate.run_scorecard(bundle, ROOT)
     verdict = evaluate.decide(result, baseline, rules)
     name = Path(args.candidate).stem
-    results_dir = ROOT / "eval" / "results"
+    results_dir = out_dir / "results"
     results_dir.mkdir(parents=True, exist_ok=True)
     (results_dir / f"{name}.json").write_text(json.dumps({**result, "verdict": verdict}, indent=1, sort_keys=True) + "\n",
                                               encoding="utf-8", newline="\n")
     report = results_dir / f"{name}.md"
     evaluate.write_comparison(report, result, baseline, verdict, spec["hypothesis"])
-    versions.record_evaluation(paths, version, current, verdict["decision"], verdict["reasons"], report.relative_to(ROOT).as_posix())
+    recorded = report.relative_to(ROOT).as_posix() if report.is_relative_to(ROOT) else report.name
+    versions.record_evaluation(paths, version, current, verdict["decision"], verdict["reasons"], recorded)
     print(f"{name}: {verdict['decision'].upper()} ({version})")
     for reason in verdict["reasons"]:
         print(f"  {reason}")
+
+
+def cmd_web(args) -> None:
+    from .web.server import serve
+    serve(args.port, not args.no_browser)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -174,6 +193,8 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--start")
     s.add_argument("--end")
     s.add_argument("--takeover", action="store_true", help="take the lease from a crashed controller")
+    s.add_argument("--manual-approvals", action="store_true", help="leave approvals for a person to answer")
+    s.add_argument("--no-drills", action="store_true", help="leave out the simulated agent and approver drills")
     s.set_defaults(fn=cmd_replay)
 
     s = sub.add_parser("status", help="show runs, or the stages of one run")
@@ -214,6 +235,11 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--activate", action="store_true")
     s.set_defaults(fn=cmd_versions)
 
+    s = sub.add_parser("web", help="start the browser app")
+    s.add_argument("--port", type=int, default=8765)
+    s.add_argument("--no-browser", action="store_true", help="do not open a browser window")
+    s.set_defaults(fn=cmd_web)
+
     s = sub.add_parser("eval", help="freeze the baseline or test a candidate against it")
     s.add_argument("--baseline", action="store_true")
     s.add_argument("--candidate")
@@ -228,6 +254,8 @@ def main(argv: list[str] | None = None) -> int:
         args.fn(args)
     except (versions.VersionError, PermanentError) as e:
         sys.exit(f"error: {e}")
+    except LeaseHeld as e:
+        sys.exit(f"error: {e}. If that controller crashed, repeat the command with --takeover.")
     return 0
 
 

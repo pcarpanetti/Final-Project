@@ -67,6 +67,7 @@ class LLMClient:
             return cached
 
         self.check_budget(run_id, day, started_at)
+        self.state.renew_lease()
         result = self._with_retries(provider, messages, max_tokens, meta, run_id, stage)
         price_in, price_out = prices()
         cost = (result.tokens_in * price_in + result.tokens_out * price_out) / 1e6

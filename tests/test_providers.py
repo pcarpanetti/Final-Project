@@ -97,7 +97,7 @@ def test_unreachable_host_is_transient():
         OpenAICompatible("custom", "http://127.0.0.1:9", "k", "m", timeout=2).complete(MESSAGES, 10, META)
 
 
-@pytest.mark.parametrize("name", sorted(set(PRESETS) - {"custom"}))
+@pytest.mark.parametrize("name", sorted(set(PRESETS) - {"custom", "claude-code"}))
 def test_every_preset_builds_from_environment_variables(monkeypatch, name):
     monkeypatch.setenv("LLM_PROVIDER", name)
     monkeypatch.setenv("LLM_MODEL", "any-model")

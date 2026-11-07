@@ -28,7 +28,11 @@ def answer_pending(env: Env, ctl: Controller, scenario: dict, now: str) -> None:
 
 
 def replay(env: Env, scenario: dict, start: str | None = None, end: str | None = None,
-           on_day=None, takeover: bool = False) -> None:
+           on_day=None, takeover: bool = False, manual: bool = False) -> None:
+    """With `manual`, nothing answers approvals: they wait for a person, and the days carry on.
+
+    Simulated time runs far faster than a person, so the approval SLA is not applied in that mode.
+    """
     start = start or scenario["window"]["start"]
     end = end or scenario["window"]["end"]
     if not env.state.get_kv("book_start"):
@@ -37,8 +41,9 @@ def replay(env: Env, scenario: dict, start: str | None = None, end: str | None =
     for day in env.store.trading_days(start, end):
         for time_of_day in scenario["tick_times"]:
             now = f"{day}T{time_of_day}"
-            tick(env, now, takeover)
+            tick(env, now, takeover, sla=not manual, lease_wait=600.0)
             takeover = False
-            answer_pending(env, ctl, scenario, now)
+            if not manual:
+                answer_pending(env, ctl, scenario, now)
         if on_day:
             on_day(day)

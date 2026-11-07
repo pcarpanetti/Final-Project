@@ -62,6 +62,7 @@ class State:
         self.db.executescript(SCHEMA)
         self.owner = f"{os.getpid()}-{uuid.uuid4().hex[:8]}"
         self.sim_now = ""
+        self.lease_ttl = 0.0
         self._in_tx = False
 
     def close(self) -> None:
@@ -106,7 +107,26 @@ class State:
                    "ON CONFLICT(id) DO UPDATE SET owner = excluded.owner, expires = excluded.expires",
                    self.owner, now + ttl)
 
+        self.lease_ttl = ttl
+
+    def wait_for_lease(self, ttl: float, takeover: bool = False, timeout: float = 60.0) -> None:
+        """Queue behind the current holder, for callers that may overlap, such as a browser approval."""
+        deadline = time.time() + timeout
+        while True:
+            try:
+                return self.acquire_lease(ttl, takeover)
+            except LeaseHeld:
+                if time.time() >= deadline:
+                    raise
+                time.sleep(0.2)
+
+    def renew_lease(self) -> None:
+        """Called during long work, so a slow model cannot let the lease lapse while the run is alive."""
+        if self.lease_ttl:
+            self.x("UPDATE lease SET expires = ? WHERE owner = ?", time.time() + self.lease_ttl, self.owner)
+
     def release_lease(self) -> None:
+        self.lease_ttl = 0.0
         self.x("DELETE FROM lease WHERE owner = ?", self.owner)
 
     def event(self, run_id: str | None, stage: str | None, etype: str, detail: dict | None = None) -> None:

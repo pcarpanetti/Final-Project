@@ -3,11 +3,15 @@
 `openai` speaks POST {base}/chat/completions, which OpenAI, Kimi, OpenRouter, DeepSeek, Qwen,
 Mistral, Groq, Together, Ollama, vLLM and others all accept. `anthropic` speaks POST {base}/v1/messages.
 Anything else with an OpenAI-compatible endpoint works through LLM_PROVIDER=custom and LLM_BASE_URL.
+`claude-code` needs no key: it calls the local Claude Code CLI, using whoever is signed in on this computer.
 """
 from __future__ import annotations
 
 import json
 import os
+import shutil
+import subprocess
+import tempfile
 import urllib.error
 import urllib.request
 from dataclasses import dataclass
@@ -24,6 +28,7 @@ PRESETS: dict[str, dict] = {
     "groq":       {"protocol": "openai", "base_url": "https://api.groq.com/openai/v1", "key_env": "GROQ_API_KEY"},
     "ollama":     {"protocol": "openai", "base_url": "http://localhost:11434/v1", "key_env": ""},
     "custom":     {"protocol": "openai", "base_url": "", "key_env": ""},
+    "claude-code": {"protocol": "claude-code", "base_url": "", "key_env": ""},
 }
 
 
@@ -120,6 +125,99 @@ class AnthropicMessages:
         return Completion(text, usage.get("input_tokens", 0), usage.get("output_tokens", 0))
 
 
+class ClaudeCodeCLI:
+    """Calls `claude -p`, so a Claude login works in place of an API key.
+
+    The agent must stay a pure text function, so the call runs with every tool disabled, no MCP servers,
+    no skills, none of the user's settings, no saved session, and an empty working folder. The prompt goes
+    through stdin because the Windows launcher is a .cmd file, which mangles long multi-line arguments.
+    """
+
+    SYSTEM = "You are one step in an automated pipeline. Follow the instructions in the message exactly."
+
+    def __init__(self, model: str = "", timeout: float = 240.0):
+        self.name, self.model, self.timeout = "claude-code", model or "default", timeout
+        self.base_url = "local Claude Code login"
+        self.requested_model = model
+
+    def command(self, exe: str) -> list[str]:
+        cmd = [exe, "-p", "--output-format", "json", "--tools", "", "--system-prompt", self.SYSTEM,
+               "--setting-sources", "", "--strict-mcp-config", "--disable-slash-commands",
+               "--no-session-persistence"]
+        return cmd + ["--model", self.requested_model] if self.requested_model else cmd
+
+    @staticmethod
+    def flatten(messages: list[dict]) -> str:
+        system = "\n\n".join(m["content"] for m in messages if m["role"] == "system")
+        turns = "\n\n".join(f"{m['role'].upper()}:\n{m['content']}" for m in messages if m["role"] != "system")
+        return (f"<instructions>\n{system}\n</instructions>\n\n<conversation>\n{turns}\n</conversation>\n\n"
+                "Reply now as the assistant, following the instructions.")
+
+    def complete(self, messages: list[dict], max_tokens: int, meta: dict) -> Completion:
+        exe = shutil.which("claude")
+        if not exe:
+            raise PermanentError("Claude Code is not installed: the `claude` command was not found")
+        with tempfile.TemporaryDirectory() as empty:
+            try:
+                proc = subprocess.run(self.command(exe), input=self.flatten(messages), capture_output=True, text=True,
+                                      encoding="utf-8", errors="replace", timeout=self.timeout, cwd=empty)
+            except subprocess.TimeoutExpired as e:
+                raise TransientError(f"claude timed out after {self.timeout:.0f}s") from e
+        try:
+            data = json.loads(proc.stdout)
+        except json.JSONDecodeError as e:
+            detail = (proc.stderr or proc.stdout)[:300]
+            if "log" in detail.lower() and "in" in detail.lower():
+                raise PermanentError(f"Claude Code is not signed in: {detail}") from e
+            raise TransientError(f"unreadable reply from claude: {detail}") from e
+        if data.get("is_error") or data.get("subtype") != "success":
+            detail = str(data.get("result") or data.get("subtype"))[:300]
+            lowered = detail.lower()
+            if any(word in lowered for word in ("login", "log in", "auth", "credit", "usage limit")):
+                raise PermanentError(f"claude: {detail}")
+            raise TransientError(f"claude: {detail}")
+        usage = data.get("usage") or {}
+        tokens_in = sum(usage.get(k, 0) for k in ("input_tokens", "cache_creation_input_tokens", "cache_read_input_tokens"))
+        return Completion(data.get("result") or "", tokens_in, usage.get("output_tokens", 0))
+
+
+def claude_login_status() -> dict:
+    """Is Claude Code installed and signed in? Asks the CLI itself; never reads its credentials."""
+    exe = shutil.which("claude")
+    if not exe:
+        return {"installed": False, "logged_in": False}
+    try:
+        proc = subprocess.run([exe, "auth", "status"], capture_output=True, text=True, encoding="utf-8",
+                              errors="replace", timeout=30)
+        data = json.loads(proc.stdout)
+    except (subprocess.TimeoutExpired, json.JSONDecodeError, OSError):
+        return {"installed": True, "logged_in": False}
+    return {"installed": True, "logged_in": bool(data.get("loggedIn")), "email": data.get("email", ""),
+            "plan": data.get("subscriptionType", ""), "method": data.get("authMethod", "")}
+
+
+def list_models(provider: str, base_url: str, api_key: str, protocol: str = "") -> list[str]:
+    """Ask a provider which models it offers. Not every endpoint supports this, so callers must cope."""
+    preset = PRESETS.get(provider, PRESETS["custom"])
+    protocol = protocol or preset["protocol"]
+    if protocol == "claude-code":
+        return ["sonnet", "opus", "haiku"]
+    base = (base_url or preset["base_url"]).rstrip("/")
+    if protocol == "anthropic":
+        url, headers = f"{base}/v1/models?limit=100", {"x-api-key": api_key, "anthropic-version": "2023-06-01"}
+    else:
+        url, headers = f"{base}/models", ({"Authorization": f"Bearer {api_key}"} if api_key else {})
+    req = urllib.request.Request(url, headers=headers)
+    try:
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+    except urllib.error.HTTPError as e:
+        raise PermanentError(f"HTTP {e.code}: {e.read().decode('utf-8', 'replace')[:200]}") from e
+    except (urllib.error.URLError, TimeoutError, ConnectionError, json.JSONDecodeError) as e:
+        raise TransientError(f"could not list models: {e}") from e
+    return sorted(m["id"] for m in data.get("data", []) if isinstance(m, dict) and "id" in m)
+
+
 def _role_env(name: str, role: str | None) -> str | None:
     """LLM_MODEL_REVIEWER beats LLM_MODEL, so one role can run on a different model."""
     if role:
@@ -139,6 +237,8 @@ def build_provider(role: str | None = None):
     preset = PRESETS[name]
     base_url = _role_env("LLM_BASE_URL", role) or preset["base_url"]
     model = _role_env("LLM_MODEL", role)
+    if preset["protocol"] == "claude-code":
+        return ClaudeCodeCLI(model or "", float(os.environ.get("LLM_TIMEOUT_SECONDS", "240")))
     api_key = _role_env("LLM_API_KEY", role) or os.environ.get(preset["key_env"] or "", "")
     if not model:
         raise PermanentError("LLM_MODEL is required when LLM_PROVIDER is not 'scripted'")
@@ -158,5 +258,5 @@ def build_provider(role: str | None = None):
 
 def prices() -> tuple[float, float]:
     """USD per million input and output tokens, for the cost limit. Unset means cost reads as zero."""
-    return (float(os.environ.get("LLM_PRICE_IN_PER_MTOK", "0")),
-            float(os.environ.get("LLM_PRICE_OUT_PER_MTOK", "0")))
+    return (float(os.environ.get("LLM_PRICE_IN_PER_MTOK") or 0),
+            float(os.environ.get("LLM_PRICE_OUT_PER_MTOK") or 0))
