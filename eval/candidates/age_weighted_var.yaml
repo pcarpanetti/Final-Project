@@ -1,0 +1,4 @@
+hypothesis: Age-weighted historical VaR reacts faster in a volatility spike and cuts exception clustering.
+overlay:
+  risk_model:
+    var: {method: age_weighted, age_decay: 0.99}

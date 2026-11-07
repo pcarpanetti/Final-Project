@@ -1,0 +1,17 @@
+# Acceptance rules, committed before any candidate was run. Git history is the proof of that order.
+# A candidate is accepted only if every hard gate and guardrail holds and the primary test improves.
+
+hard_gates:
+  min_faults_handled_rate: 1.0      # every labelled vendor fault must be handled correctly
+  max_extra_false_dq_overrides: 0   # no new false alarms that overwrite real data
+  max_halted_runs: 0                # no run may stop on an error
+
+primary:
+  required: true                    # Kupiec p must rise AND exception count must move closer to expected
+
+guardrails:
+  max_rel_increase_avg_var: 0.25          # accuracy may not be bought by just reporting a bigger VaR
+  max_rel_increase_hard_breach_days: 0.30 # alert fatigue is a real cost
+  max_rel_increase_tokens: 0.20           # cost
+
+leakage_probe_days: ["2020-02-24", "2020-03-16", "2020-04-09"]

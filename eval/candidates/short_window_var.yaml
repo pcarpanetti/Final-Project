@@ -1,0 +1,4 @@
+hypothesis: A 125-day VaR lookback reacts faster than 500 days and improves coverage.
+overlay:
+  risk_model:
+    var: {lookback_days: 125}

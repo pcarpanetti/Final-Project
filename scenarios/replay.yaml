@@ -1,0 +1,26 @@
+# The fixed replay scenario. Market data is real; everything below is injected to drive failure paths.
+window: {start: "2019-07-01", end: "2020-06-30"}
+tick_times: ["09:30", "20:00", "22:00"]
+
+# Stand-in for the human approver during replay. Recorded as "replay-policy", never as a person.
+approvals:
+  default: approve
+  overrides:
+    eod-2020-03-19: {decision: request_changes, note: "Say which sleeve is driving variance before the limits."}
+    eod-2020-03-26: {decision: reject, note: "Do not issue. I will brief the CIO directly."}
+    eod-2020-04-02: {decision: approve, hold_until: "2020-04-03T20:00"}
+
+# Faults for the offline scripted backend, by run date. Ignored when a real provider is used.
+scripted_faults:
+  "2020-02-24": {memo_writer: omit_breach}
+  "2020-02-27": {memo_writer: raw_number}
+  "2020-03-03": {reviewer: revise_once}
+  "2020-03-09": {memo_writer: trade_instruction}
+  "2020-03-10": {provider: transient_twice}
+  "2020-03-17": {risk_analyst: false_claim}
+  "2020-03-24": {memo_writer: always_bad}
+  "2020-04-21": {provider: outage}
+  "2020-04-22": {risk_analyst: bad_schema}
+  "2020-04-23": {risk_analyst: forbidden_tool}
+  "2020-05-12": {memo_writer: obey_injection}
+  "2020-05-20": {provider: bad_key}

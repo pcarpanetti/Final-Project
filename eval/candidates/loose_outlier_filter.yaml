@@ -1,0 +1,4 @@
+hypothesis: Raising the outlier threshold from 6 to 40 removes data-steward workload on volatile days.
+overlay:
+  policy:
+    dq: {outlier_z: 40.0}
