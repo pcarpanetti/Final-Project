@@ -48,6 +48,7 @@ with vendor faults injected to give labelled ground truth.
 ## Setup
 
 Requires Python 3.10 or newer. No API key is needed for anything below except the optional live run.
+On Windows, unpack to a short path such as `C:\rw`, because very long paths hit the 260-character limit.
 
 ```bash
 python -m venv .venv
