@@ -144,6 +144,9 @@ class ScriptedProvider:
                 f"## Data quality\n{block(dq_lines)}\n\n## For decision\n{block(decisions, 'Nothing today.')}\n")
 
     def reviewer(self, payload, tool_results, meta, fault) -> str:
+        if fault.get("reviewer") == "always_revise":
+            return _final({"verdict": "revise", "issues": [{"problem": "The cause of the drawdown is not established.",
+                                                            "fix": "Say what is known."}]})
         if fault.get("reviewer") == "revise_once" and meta["round"] == 0:
             return _final({"verdict": "revise", "issues": [{"problem": "The opening does not make the severity clear.",
                                                             "fix": "State the worst item in the first sentence."}]})

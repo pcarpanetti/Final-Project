@@ -72,6 +72,28 @@ def test_revision_loop_is_bounded_then_falls_back_to_a_template(make_env, paths,
     assert "degraded_memo" in json.loads((paths.artifacts / run_id / "gate.json").read_text(encoding="utf-8"))["reasons"]
 
 
+def test_verified_memo_survives_an_unconvinced_reviewer(make_env, paths):
+    """Regression from the first real-model run: a memo passing every check was thrown away."""
+    env = make_env({DAY: {"reviewer": "always_revise"}})
+    _, run_id, status = eod(env, DAY)
+    memo = (paths.artifacts / run_id / "memo_final.md").read_text(encoding="utf-8")
+    assert status == "awaiting_approval" and env.state.run(run_id)["degraded"] == 1
+    assert "[F:F1]" in memo and "## Open reviewer concerns" in memo
+    assert "cause of the drawdown" in memo and "Degraded memo" not in memo
+    assert "degraded_memo" in json.loads((paths.artifacts / run_id / "gate.json").read_text(encoding="utf-8"))["reasons"]
+
+
+def test_reviewer_is_told_what_is_new_and_the_prior_values(make_env):
+    """Regression: without these facts the reviewer raised objections nothing could resolve."""
+    env = make_env()
+    eod(env, "2020-03-13")
+    requests = spy_on_requests(env)
+    eod(env, "2020-03-16")
+    facts = next(json.loads(t)["payload"] for t in requests if '"memo"' in t and t.startswith("{"))
+    assert facts["first_day_of_history"] is False and "new" in facts["delta"]
+    assert all(row["prior_value"] is not None for row in facts["limits"])
+
+
 @pytest.mark.parametrize("fault,calls_expected", [("outage", 0), ("bad_key", 0)])
 def test_provider_failure_still_delivers_the_numbers_to_a_human(make_env, paths, fault, calls_expected):
     env = make_env({DAY: {"provider": fault}})

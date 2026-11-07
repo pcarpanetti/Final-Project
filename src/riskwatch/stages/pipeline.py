@@ -343,21 +343,43 @@ def _resolved_memo(ctx, rnd: int, day: str | None = None) -> str:
 def reviewer(ctx) -> None:
     """Sees the finished memo and source facts only: no drafts, findings or analyst reasoning."""
     limit_status = ctx.read_json("limit_status.json")
+    prior = previous_metrics(ctx)
+    limits = [{**r, "prior_value": prior[r["metric"]]["value"] if prior else None} for r in limit_status["rows"]]
     payload = {"memo": _resolved_memo(ctx, ctx.round, _day_label(ctx)), "status": limit_status["status"],
-               "limits": limit_status["rows"], "dq": ctx.read_json("dq_summary.json")["items"],
-               "backtest": ctx.read_json("backtest.json")}
+               "limits": limits, "delta": ctx.read_json("breach_delta.json"),
+               "dq": ctx.read_json("dq_summary.json")["items"], "backtest": ctx.read_json("backtest.json"),
+               "first_day_of_history": prior is None}
     out = ctx.agent("reviewer", payload)
     ctx.write_json(f"review.r{ctx.round}.json", out)
     if out["verdict"] != "pass":
         ctx.write_json(f"feedback.r{ctx.round + 1}.json", [{"source": "reviewer", **i} for i in out["issues"]])
 
 
+def _verified_draft_with_concerns(ctx, rnd: int) -> str | None:
+    """A draft that passed every check is too good to discard because the reviewer stayed unconvinced.
+
+    It goes to the approver with the open concerns attached. A draft that failed a check never does.
+    """
+    name = f"verification.r{rnd}.json"
+    if not ctx.exists(name) or not ctx.read_json(name)["passed"]:
+        return None
+    lines = ["", "## Open reviewer concerns"]
+    review = f"review.r{rnd}.json"
+    if ctx.exists(review):
+        lines.append("All automated checks passed, but the independent reviewer was still not satisfied after the last round.")
+        lines += [f"- {issue['problem']}" for issue in ctx.read_json(review)["issues"]]
+    else:
+        lines.append("All automated checks passed, but the independent review did not complete.")
+    return _resolved_memo(ctx, rnd).rstrip() + "\n" + "\n".join(lines) + "\n"
+
+
 def finalise_memo(ctx) -> None:
     run = ctx.state.run(ctx.run["run_id"])
     limit_status = ctx.read_json("limit_status.json")
     if run["degraded"]:
-        memo = template_memo(run["as_of"], limit_status["status"], ctx.read_json("metrics.json"), limit_status["rows"],
-                             ctx.read_json("dq_summary.json")["items"], run["degraded_reason"])
+        memo = _verified_draft_with_concerns(ctx, run["round"]) or template_memo(
+            run["as_of"], limit_status["status"], ctx.read_json("metrics.json"), limit_status["rows"],
+            ctx.read_json("dq_summary.json")["items"], run["degraded_reason"])
     else:
         memo = _resolved_memo(ctx, run["round"])
     ctx.write_text("memo_final.md", memo)
