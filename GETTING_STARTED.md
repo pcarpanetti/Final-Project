@@ -100,7 +100,8 @@ test ran. Each evaluation takes about 4 minutes and uses no model calls. Changes
 |---|---|
 | "Python was not found" | Install Python and tick **Add python.exe to PATH**, then try again |
 | The browser did not open | Go to `http://127.0.0.1:8765/` yourself |
-| Port already in use | Close the other RiskWatch window. Or, in a terminal, run `python launch.py --port 8800` |
+| RiskWatch is already open | Double-clicking `start.bat` again just opens it in your browser. If the open copy is an older version and idle, it is replaced; if it is busy with a run, let the run finish first |
+| Port already in use by another program | Close that program. Or, in a terminal, run `python launch.py --port 8800` |
 | **Test connection** fails | The message gives the reason. Usually the key, the model name or the address is wrong |
 | Claude login says not installed | Use an API key, or the offline demo |
 | A memo says "Degraded" or has "Open reviewer concerns" | This is by design: the agents could not finish normally, so a person must look closely |
