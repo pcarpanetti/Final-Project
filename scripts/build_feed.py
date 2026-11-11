@@ -5,6 +5,7 @@ Deterministic: running it twice produces byte-identical files.
 from __future__ import annotations
 
 import csv
+import json
 from pathlib import Path
 
 import numpy as np
@@ -15,8 +16,12 @@ RAW, FEED = ROOT / "data" / "raw", ROOT / "data" / "feed"
 
 ASSETS = ["NoDur", "Durbl", "Manuf", "Enrgy", "HiTec", "Telcm", "Shops", "Hlth", "Utils", "Other"]
 TARGET = dict(zip(ASSETS, [0.09, 0.04, 0.11, 0.06, 0.24, 0.05, 0.12, 0.13, 0.04, 0.12]))
+# The book is anchored at $100m on this date, the eve of the fixed evaluation window, so every row from here
+# on is unchanged by adding earlier history. Earlier rows run the same book backwards to the first month end.
 BOOK_START = "2019-06-28"
 START_NAV = 100_000_000.0
+FIRST_RUN_YEAR = "1986"
+MIN_HISTORY_DAYS = 501
 FEED_TIME, POSITIONS_TIME = "18:00", "18:30"
 
 
@@ -59,21 +64,32 @@ def market_records(dates, rets, faults):
     return out
 
 
-def simulate_book(dates, rets):
+def is_month_end(dates, i: int) -> bool:
+    return i + 1 == len(dates) or dates[i + 1][:7] != dates[i][:7]
+
+
+def simulate_book(dates, rets, first: str = BOOK_START, nav: float = START_NAV, stop: str | None = None):
     """Drift weights daily and rebalance to target on the last trading day of each month."""
-    start = dates.index(BOOK_START)
+    start = dates.index(first)
     target = np.array([TARGET[a] for a in ASSETS])
-    weights, nav = target.copy(), START_NAV
-    rows = [(BOOK_START, weights.copy(), nav)]
-    for i in range(start + 1, len(dates)):
+    weights = target.copy()
+    rows = [(first, weights.copy(), nav)]
+    for i in range(start + 1, len(dates) if stop is None else dates.index(stop) + 1):
         gross = weights * (1.0 + rets[i])
         nav *= float(gross.sum())
         weights = gross / gross.sum()
-        month_end = i + 1 == len(dates) or dates[i + 1][:7] != dates[i][:7]
-        if month_end:
+        if is_month_end(dates, i):
             weights = target.copy()
         rows.append((dates[i], weights.copy(), nav))
     return rows
+
+
+def full_book(dates, rets):
+    """The same book over all of history, scaled so it joins the anchored book at BOOK_START exactly."""
+    first = next(d for i, d in enumerate(dates) if is_month_end(dates, i))
+    early = simulate_book(dates, rets, first, 1.0, stop=BOOK_START)
+    scale = START_NAV / early[-1][2]
+    return [(d, w, nav * scale) for d, w, nav in early if d < BOOK_START] + simulate_book(dates, rets)
 
 
 def write_csv(path: Path, header: list[str], rows) -> None:
@@ -102,7 +118,7 @@ def main() -> None:
 
     breaks = {f["as_of"]: f for f in faults if f["type"] == "positions_break"}
     prows = []
-    for d, w, nav in simulate_book(dates, rets):
+    for d, w, nav in full_book(dates, rets):
         published = f"{d}T{POSITIONS_TIME}"
         fault = breaks.get(d)
         for a, weight in zip(ASSETS, w):
@@ -122,6 +138,11 @@ def main() -> None:
     write_csv(FEED / "vendor_notes.csv", ["as_of", "published_at", "asset", "note"], sorted(notes))
 
     write_csv(FEED / "calendar.csv", ["date"], [(d,) for d in dates])
+    first_run = next(d for d in dates if d.startswith(FIRST_RUN_YEAR))
+    assert dates.index(first_run) >= MIN_HISTORY_DAYS, "not enough history before the first run day"
+    meta = {"first_run_day": first_run, "last_day": dates[-1], "history_from": dates[0],
+            "source": "Kenneth R. French Data Library, CRSP vintage 202609"}
+    (FEED / "meta.json").write_text(json.dumps(meta, indent=1, sort_keys=True) + "\n", encoding="utf-8", newline="\n")
     print(f"market rows {len(records)}, position rows {len(prows)}, notes {len(notes)}, days {len(dates)}")
 
 

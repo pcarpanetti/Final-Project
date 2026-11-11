@@ -57,13 +57,20 @@ def schedule_due(env: Env, ctl: Controller, now: str) -> None:
     start = st.get_kv("book_start")
     if not start:
         return
-    for day in env.store.trading_days(start, now[:10]):
+    # Resume from the last day already scheduled, so a decades-long workspace does not rescan every day on
+    # every tick. That day is checked again, because its month-end review is created only the next morning.
+    cursor = max(start, st.get_kv("scheduled_to", ""))
+    latest = cursor
+    for day in env.store.trading_days(cursor, now[:10]):
         cutoff = eod_cutoff(env, day)
         if cutoff <= now:
             ctl.create_run(f"eod-{day}", "eod", day, cutoff, "schedule:eod")
+            latest = day
         nxt = env.store.next_day(day)
         if nxt and nxt[:7] != day[:7] and f"{nxt}T09:00" <= now:
             ctl.create_run(f"monthly-{day[:7]}", "monthly", day, f"{nxt}T09:00", "schedule:month_end")
+    if latest != cursor:
+        st.set_kv("scheduled_to", latest)
 
 
 def check_sla(env: Env, now: str) -> None:

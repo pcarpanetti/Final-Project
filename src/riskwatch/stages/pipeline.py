@@ -70,10 +70,32 @@ def loop_passed(ctx) -> bool:
 
 # ---- Data ----
 
+LAUNCH_NAV = 100_000_000.0  # the fund's size at launch; equals START_NAV in scripts/build_feed.py
+DQ_HISTORY_DAYS = 61        # dq_checks compares today with the 60 days before it
+
+
+def history_days(risk_cfg: dict) -> int:
+    """Trading days of returns a run needs, today included. Older rows cannot change any figure."""
+    return max(risk_cfg["var"]["lookback_days"] + 1, risk_cfg["ewma_window"], risk_cfg["beta_window"], DQ_HISTORY_DAYS)
+
+
+def book_launch(ctx) -> str:
+    """The fund launches with LAUNCH_NAV at the close of the trading day before the workspace's first day."""
+    first = ctx.state.get_kv("book_start")
+    if not first:
+        row = ctx.state.one("SELECT MIN(as_of) d FROM runs WHERE workflow = 'eod'")
+        first = row["d"] if row and row["d"] else ctx.run["as_of"]
+    launch = ctx.store.previous_day(first)
+    if launch is None:
+        raise ValueError(f"no trading day before {first} to launch the book")
+    return launch
+
+
 def ingest(ctx) -> None:
     run, policy = ctx.run, _policy(ctx)
     as_of, cutoff = run["as_of"], run["cutoff"]
-    snap = ctx.store.snapshot(as_of, cutoff)
+    keep = history_days(ctx.bundle["risk_model"])
+    snap = ctx.store.snapshot(as_of, cutoff, history=keep)
     if as_of not in snap.returns.index or as_of not in snap.factors.index:
         raise InputNotReady(f"market feed for {as_of} not published by {cutoff}")
     if as_of not in snap.weights.index:
@@ -83,18 +105,29 @@ def ingest(ctx) -> None:
         raise InputNotReady(f"positions for {as_of} fail reconciliation: weights sum to {weight_sum:.4f}")
 
     # An override stands only while the record it judged is still the latest one from the vendor.
-    returns = snap.returns.copy()
+    returns = snap.returns.tail(keep).copy()
     applied = []
     for o in ctx.state.q("SELECT * FROM dq_overrides WHERE as_of < ? ORDER BY as_of, asset", as_of):
+        if o["as_of"] not in returns.index:
+            continue  # older than any figure uses
         current = snap.published.at[o["as_of"], o["asset"]] if o["as_of"] in snap.published.index else None
         if not isinstance(current, str) or current == o["judged_published_at"]:
             returns.at[o["as_of"], o["asset"]] = 0.0
             applied.append({"as_of": o["as_of"], "asset": o["asset"], "action": o["action"]})
 
+    # Today's weights and the day before, which is all the risk figures use.
+    launch = book_launch(ctx)
+    weights = snap.weights.loc[launch:as_of].tail(2)
+    # NAV rescaled so the fund starts at LAUNCH_NAV. Drawdown needs only the peak since launch, so the
+    # launch, peak and today rows are kept, which keeps each run's inputs small over decades.
+    nav = snap.nav.loc[launch:as_of]
+    nav = nav * (LAUNCH_NAV / nav.loc[launch])
+    nav = nav.loc[sorted({launch, nav.idxmax(), as_of})]
+
     ctx.write_text("inputs/returns.csv", _csv(returns))
-    ctx.write_text("inputs/factors.csv", _csv(snap.factors))
-    ctx.write_text("inputs/weights.csv", _csv(snap.weights))
-    ctx.write_text("inputs/nav.csv", _csv(snap.nav))
+    ctx.write_text("inputs/factors.csv", _csv(snap.factors.tail(keep)))
+    ctx.write_text("inputs/weights.csv", _csv(weights))
+    ctx.write_text("inputs/nav.csv", _csv(nav))
     ctx.write_json("inputs/manifest.json", {
         "as_of": as_of, "cutoff": cutoff, "max_published_at": snap.max_published_at,
         "published_today": {a: (v if isinstance(v, str) else None) for a, v in snap.published.loc[as_of].items()},

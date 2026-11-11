@@ -25,6 +25,7 @@ def poison_future(store: PointInTimeStore, cutoff: str) -> PointInTimeStore:
     bad.positions.loc[future, "weight"] = 0.5
     bad.positions.loc[future, "nav"] = 1.0
     bad.notes.loc[bad.notes.published_at > cutoff, "note"] = "FUTURE NOTE"
+    bad._corrections = None
     return bad
 
 
@@ -34,7 +35,7 @@ class LeakyStore(PointInTimeStore):
     def __init__(self, inner: PointInTimeStore):
         self.__dict__.update(inner.__dict__)
 
-    def snapshot(self, as_of: str, cutoff: str):
+    def snapshot(self, as_of: str, cutoff: str, history: int | None = None):
         return super().snapshot(self.calendar[-1], "9999")
 
 
