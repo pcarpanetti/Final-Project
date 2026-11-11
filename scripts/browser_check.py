@@ -68,7 +68,14 @@ def main() -> int:
 
             # 2. Run
             expect(page.get_by_role("heading", name="Run the workflow")).to_be_visible()
+            expect(page.get_by_text("Any period from 2 January 1986 to 30 September 2026.")).to_be_visible()
+            page.get_by_text("Black Monday 1987", exact=True).click()
+            expect(page.locator("#no-drills")).to_be_visible()
+            expect(page.locator("#drills")).to_have_count(0)
+            page.get_by_text("Choose dates", exact=True).click()
+            expect(page.locator("input[type=date]").first).to_have_attribute("min", "1986-01-02")
             page.get_by_text("Crash month", exact=True).click()
+            expect(page.locator("#drills")).to_be_visible()
             page.get_by_text("I will review them", exact=True).click()
             shot("2-run-setup")
             page.locator("#start").click()
@@ -93,6 +100,14 @@ def main() -> int:
             page.once("dialog", lambda d: d.accept())
             page.get_by_role("button", name="Approve all").click()
             expect(page.get_by_text("Nothing is waiting for you.")).to_be_visible(timeout=60000)
+
+            # A period that would leave a gap offers a fresh workspace instead of quietly filling the gap.
+            page.locator("nav a[href=\"#/run\"]").click()
+            page.get_by_text("2022 rate shock", exact=True).click()
+            expect(page.locator("#fresh-notice")).to_be_visible()
+            expect(page.locator("#start")).to_have_text("Start over and run")
+            page.get_by_text("Crash month", exact=True).click()
+            expect(page.locator("#fresh-notice")).to_have_count(0)
 
             # Results
             page.locator("nav a[href=\"#/dashboard\"]").click()

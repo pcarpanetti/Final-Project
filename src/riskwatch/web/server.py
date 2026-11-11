@@ -36,6 +36,7 @@ from ..llm.providers import (PRESETS, PermanentError, TransientError, build_prov
                              load_dotenv)
 from ..pit import PointInTimeStore
 from ..replay import load_scenario
+from ..stages.pipeline import history_days
 from .summary import period_summary
 
 STATIC = Path(__file__).parent / "static"
@@ -275,10 +276,19 @@ def api_summary(app: App, q: dict) -> dict:
     open_esc = app.rows("SELECT COUNT(*) n FROM escalations WHERE status = 'open'")
     last = app.rows("SELECT as_of FROM runs WHERE workflow = 'eod' ORDER BY as_of DESC LIMIT 1")
     version = versions.active(app.paths)
-    return {"settings": app.public_settings(), "backend": app.backend_label(), "job": app.job_view(), "counts": counts,
+    book_start = kv(app, "book_start")
+    return {"continue_from": continue_from(app, last[0]["as_of"] if last else None, book_start), "settings": app.public_settings(), "backend": app.backend_label(), "job": app.job_view(), "counts": counts,
             "pending": pending[0]["n"] if pending else 0, "escalations": open_esc[0]["n"] if open_esc else 0,
             "last_day": last[0]["as_of"] if last else None, "queued_decisions": app.queued,
-            "decision_error": app.decision_error, "version": version, "book_start": kv(app, "book_start")}
+            "decision_error": app.decision_error, "version": version, "book_start": book_start}
+
+
+def continue_from(app: App, last_day: str | None, book_start: str) -> str | None:
+    """The latest start a new run may have in this workspace. Anything later would leave a gap of days
+    that the scheduler would quietly fill in, because a missed day is a day to catch up."""
+    if not book_start:
+        return None
+    return (app.store.next_day(last_day) or last_day) if last_day else book_start
 
 
 def kv(app: App, key: str) -> str:
@@ -288,10 +298,13 @@ def kv(app: App, key: str) -> str:
 
 def api_catalog(app: App, q: dict) -> dict:
     calendar = app.store.calendar
+    bundle = versions.load_snapshot(app.paths, versions.active(app.paths))
+    # The first day with enough history for the active risk model, and never before the feed's own floor.
+    first = max(app.store.meta.get("first_run_day", calendar[0]), calendar[history_days(bundle["risk_model"]) - 1])
     return {"providers": {k: {"base_url": v["base_url"], "protocol": v["protocol"], "needs_key": bool(v["key_env"])}
                           for k, v in PRESETS.items()},
-            "first_day": "2019-07-01", "last_day": calendar[-1], "calendar_size": len(calendar),
-            "budgets": versions.load_snapshot(app.paths, versions.active(app.paths))["policy"]["budgets"]}
+            "first_day": first, "last_day": calendar[-1], "calendar_size": len(calendar),
+            "drill_window": load_scenario(ROOT)["window"], "budgets": bundle["policy"]["budgets"]}
 
 
 def api_claude(app: App, q: dict) -> dict:
@@ -344,12 +357,16 @@ def api_start_run(app: App, body: dict) -> dict:
     days = app.store.trading_days(start, end)
     if not days:
         raise ApiError("There are no trading days in that period.")
-    first = api_catalog(app, {})["first_day"]
-    if start < first:
-        raise ApiError(f"The book starts on {first}.")
+    catalog = api_catalog(app, {})
+    if start < catalog["first_day"] or end > catalog["last_day"]:
+        raise ApiError(f"Choose dates between {catalog['first_day']} and {catalog['last_day']}.")
     book_start = kv(app, "book_start")
     if book_start and start < book_start:
         raise ApiError(f"This workspace starts on {book_start}. Use Start over to run an earlier period.")
+    last = app.rows("SELECT MAX(as_of) d FROM runs WHERE workflow = 'eod'")
+    latest = continue_from(app, last[0]["d"] if last else None, book_start)
+    if latest and start > latest:
+        raise ApiError(f"This workspace continues from {latest}. Start there, or use Start over for a separate period.")
     if not app.settings["provider"]:
         raise ApiError("Connect a model first.")
     manual = body.get("approvals") == "manual"

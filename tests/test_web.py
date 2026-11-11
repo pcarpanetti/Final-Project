@@ -132,7 +132,33 @@ def test_run_needs_a_connected_model_and_a_valid_period(web):
     assert web.post("/api/start", {"start": "2020-03-16", "end": "2020-03-17"})[0] == 400
     connect_offline(web)
     assert web.post("/api/start", {"start": "2030-01-01", "end": "2030-01-02"})[0] == 400
-    assert web.post("/api/start", {"start": "2019-01-02", "end": "2019-01-03"})[0] == 400
+    assert web.post("/api/start", {"start": "1985-12-02", "end": "1985-12-06"})[0] == 400
+    assert web.post("/api/start", {"start": "2026-09-28", "end": "2026-10-30"})[0] == 400
+
+
+def test_catalog_offers_1986_to_2026_and_says_where_the_drills_are(web):
+    catalog = web.get("/api/catalog")
+    assert (catalog["first_day"], catalog["last_day"]) == ("1986-01-02", "2026-09-30")
+    assert catalog["drill_window"] == {"start": "2019-07-01", "end": "2020-06-30"}
+
+
+def test_a_historical_period_runs_in_the_app(web):
+    connect_offline(web)
+    assert run_to_end(web, "1987-10-16", "1987-10-20", approvals="auto")["state"] == "finished"
+    assert set(web.get("/api/summary")["counts"]) == {"completed"}
+
+
+def test_a_period_that_would_leave_a_gap_needs_a_fresh_workspace(web):
+    """Otherwise the scheduler would quietly catch up every day in between."""
+    connect_offline(web)
+    run_to_end(web, approvals="auto")
+    summary = web.get("/api/summary")
+    assert summary["continue_from"] == "2020-03-18"
+    code, body = web.post("/api/start", {"start": "2022-01-03", "end": "2022-01-05", "approvals": "auto"})
+    assert code == 400 and "2020-03-18" in body["error"]
+    assert web.post("/api/start-over")[0] == 200
+    assert run_to_end(web, "2022-01-03", "2022-01-05", approvals="auto")["state"] == "finished"
+    assert sorted(r["as_of"] for r in web.get("/api/runs")["runs"] if r["workflow"] == "eod") == ["2022-01-03", "2022-01-04", "2022-01-05"]
 
 
 def test_full_path_from_connect_to_download(web):

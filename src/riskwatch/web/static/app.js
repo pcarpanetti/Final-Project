@@ -338,12 +338,25 @@ function pageConnect() {
 
 // ---- 2. Run ----
 const PERIODS = [
-  ["quick", "Quick look", "Five days at the height of the crash.", "2020-03-09", "2020-03-13"],
-  ["crash", "Crash month", "From the market peak through the sell-off.", "2020-02-18", "2020-03-13"],
+  ["quick", "Quick look", "Five days at the height of the 2020 crash.", "2020-03-09", "2020-03-13"],
+  ["crash", "Crash month", "From the February 2020 peak through the sell-off.", "2020-02-18", "2020-03-13"],
   ["half", "First half of 2020", "Crash and recovery, with monthly reviews.", "2020-01-02", "2020-06-30"],
-  ["full", "Full year", "July 2019 to June 2020, every scenario.", "2019-07-01", "2020-06-30"],
-  ["custom", "Choose dates", "Any period in the data.", "", ""],
+  ["full", "Test year", "July 2019 to June 2020, with every injected fault and drill.", "2019-07-01", "2020-06-30"],
+  ["y1987", "Black Monday 1987", "October 1987, when the market fell 20% in a day.", "1987-10-01", "1987-10-30"],
+  ["y2008", "2008 financial crisis", "Lehman's collapse and the sell-off that followed.", "2008-09-02", "2008-11-28"],
+  ["y2022", "2022 rate shock", "Inflation and rising rates, January to June 2022.", "2022-01-03", "2022-06-30"],
+  ["custom", "Choose dates", "", "", ""],
 ];
+
+function longDate(iso) {
+  return new Date(iso + "T00:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
+}
+
+// Drills and injected vendor faults live only in the fixed test window.
+function hasDrills(start, end) {
+  const w = catalog.drill_window;
+  return Boolean(start && end && start <= w.end && end >= w.start);
+}
 const CALLS_PER_DAY = 5;
 const SECONDS_PER_DAY_OFFLINE = 2;
 const SECONDS_PER_DAY_LIVE = 75;
@@ -371,9 +384,13 @@ function pageRun() {
     const seconds = days * (offline ? SECONDS_PER_DAY_OFFLINE : SECONDS_PER_DAY_LIVE);
     const calls = Math.round(days * CALLS_PER_DAY);
     const heavy = !offline && days > 30;
+    const drills = hasDrills(form.start, form.end);
+    const ws = summary.book_start ? { from: summary.book_start, to: summary.last_day, next: summary.continue_from } : null;
+    const fresh = ws && (form.start < ws.from || form.start > ws.next);
     setup.replaceChildren(
       h("div", { class: "card" }, h("h2", {}, "Period"),
-        h("div", { class: "choices" }, PERIODS.map(([id, name, text, s, e]) => choice("period", id, form.period, name, text, () => {
+        h("div", { class: "choices" }, PERIODS.map(([id, name, text, s, e]) => choice("period", id, form.period, name,
+          text || `Any period from ${longDate(catalog.first_day)} to ${longDate(catalog.last_day)}.`, () => {
           form.period = id;
           if (s) { form.start = s; form.end = e; }
           renderSetup();
@@ -385,23 +402,32 @@ function pageRun() {
         h("div", { class: "choices" },
           choice("approvals", "manual", form.approvals, "I will review them", "Breach days wait in the Approve step, while later days keep running.", () => { form.approvals = "manual"; renderSetup(); }),
           choice("approvals", "auto", form.approvals, "Approve automatically", "A simulated approver signs everything, for a fast full output.", () => { form.approvals = "auto"; renderSetup(); })),
-        offline ? h("label", { class: "row small", style: "margin-top:12px" },
-          h("input", { type: "checkbox", checked: form.drills, onchange: (e) => { form.drills = e.target.checked; } }),
-          "Include failure drills: bad drafts, provider outages and a prompt injection, to watch the workflow handle them") : null),
+        offline && drills ? h("label", { class: "row small", style: "margin-top:12px" },
+          h("input", { type: "checkbox", id: "drills", checked: form.drills, onchange: (e) => { form.drills = e.target.checked; } }),
+          "Include failure drills: bad drafts, provider outages and a prompt injection, to watch the workflow handle them") : null,
+        drills ? null : h("p", { class: "muted small", id: "no-drills", style: "margin-top:12px" },
+          `The failure drills and injected vendor faults sit between ${longDate(catalog.drill_window.start)} and `,
+          `${longDate(catalog.drill_window.end)}. This period has none, so it runs on clean market data.`)),
       h("div", { class: "card" },
         h("div", { class: "row" },
           h("div", { class: "grow" }, h("strong", {}, `About ${days} trading days`),
             h("div", { class: "muted small" }, offline ? `Takes about ${duration(seconds)}. No model calls.`
               : `About ${calls} model calls on ${summary.backend}. Allow roughly ${duration(seconds)}.`)),
-          h("button", { class: "primary", id: "start", disabled: !days, onclick: guard(() => start(false)) }, "Start run")),
+          h("button", { class: "primary", id: "start", disabled: !days, onclick: guard(() => (fresh ? startOverAndRun() : start(false))) },
+            fresh ? "Start over and run" : "Start run")),
         heavy ? h("div", { class: "notice warn", style: "margin:12px 0 0" }, "That is a long run on a real model and will use a lot of your plan or budget. Consider a shorter period first.") : null,
-        summary.book_start ? h("p", { class: "muted small", style: "margin-top:12px" },
-          `This workspace already has results from ${summary.book_start}. A new run continues it. `,
+        fresh ? h("div", { class: "notice warn", id: "fresh-notice", style: "margin:12px 0 0" },
+          `This workspace holds results from ${longDate(ws.from)}${ws.to ? ` to ${longDate(ws.to)}` : ""}, and a new run `,
+          `can only continue it from ${longDate(ws.next)}. Running this period starts a fresh workspace: the current `,
+          "results move to an archive folder first.") : null,
+        ws && !fresh ? h("p", { class: "muted small", style: "margin-top:12px" },
+          `This workspace already has results from ${longDate(ws.from)}. A new run continues it. `,
           h("button", { onclick: guard(startOver) }, "Start over")) : null));
   };
 
   const start = async (resume) => {
-    await api("/api/start", { ...(resume && summary.job ? { start: summary.job.start, end: summary.job.end, approvals: summary.job.manual ? "manual" : "auto", drills: summary.job.drills } : form), resume });
+    await api("/api/start", { ...(resume && summary.job ? { start: summary.job.start, end: summary.job.end, approvals: summary.job.manual ? "manual" : "auto", drills: summary.job.drills }
+      : { ...form, drills: form.drills && hasDrills(form.start, form.end) }), resume });
     await poll();
     renderLive();
   };
@@ -411,6 +437,13 @@ function pageRun() {
     await api("/api/start-over", {});
     await poll();
     route();
+  };
+
+  const startOverAndRun = async () => {
+    if (!confirm("Start a fresh workspace for this period? Current results move to an archive folder.")) return;
+    await api("/api/start-over", {});
+    await poll();
+    await start(false);
   };
 
   const activity = h("div", { class: "muted small" });
