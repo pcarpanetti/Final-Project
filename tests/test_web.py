@@ -111,9 +111,17 @@ def test_unknown_host_header_is_refused_to_stop_dns_rebinding(web):
 
 def test_a_second_server_cannot_take_a_port_that_is_in_use(web, tmp_path):
     """Regression: on Windows a second server bound the same port, said it was running, and got no requests."""
-    from riskwatch.web.server import make_server
-    with pytest.raises(OSError):
+    from riskwatch.web.server import PortInUse, make_server
+    with pytest.raises(PortInUse):
         make_server(tmp_path / "second", web.app.port)
+
+
+def test_a_startup_error_is_not_misreported_as_a_busy_port(tmp_path, monkeypatch):
+    """Regression: every OSError, such as a missing data file, used to be reported as "port in use"."""
+    from riskwatch.web import server as web_server
+    monkeypatch.setattr(web_server, "PointInTimeStore", lambda *a: (_ for _ in ()).throw(FileNotFoundError("feed")))
+    with pytest.raises(FileNotFoundError):
+        web_server.make_server(tmp_path / "ws", 0)
 
 
 def test_server_listens_only_on_loopback(web):

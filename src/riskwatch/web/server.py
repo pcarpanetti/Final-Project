@@ -38,6 +38,7 @@ from ..llm.providers import (PRESETS, PermanentError, TransientError, build_prov
 from ..pit import PointInTimeStore
 from ..replay import load_scenario
 from ..stages.pipeline import history_days
+from .fingerprint import code_fingerprint
 from .summary import period_summary
 
 STATIC = Path(__file__).parent / "static"
@@ -64,6 +65,8 @@ class App:
         self.workspace = workspace
         self.port = port
         self.token = secrets.token_urlsafe(32)
+        self.fingerprint = code_fingerprint()
+        self.server: ThreadingHTTPServer | None = None
         self.lock = threading.Lock()
         self.job: dict | None = None
         self.proc: subprocess.Popen | None = None
@@ -587,14 +590,27 @@ def api_start_over(app: App, body: dict) -> dict:
     return {"ok": True}
 
 
-GET_ROUTES = {"/api/summary": api_summary, "/api/catalog": api_catalog, "/api/claude": api_claude, "/api/runs": api_runs,
+def api_health(app: App, q: dict) -> dict:
+    """Lets launch.py tell whether this server is RiskWatch, which code it runs, and whether it is busy."""
+    return {"app": "riskwatch", "fingerprint": app.fingerprint, "busy": bool(app.job and app.job["state"] == "running")}
+
+
+def api_shutdown(app: App, body: dict) -> dict:
+    """Used by launch.py to replace an older copy. Never while a job runs: that would interrupt it."""
+    if app.job and app.job["state"] == "running":
+        raise ApiError("A run is in progress. Stop it first.", 409)
+    threading.Thread(target=app.server.shutdown, daemon=True).start()
+    return {"ok": True}
+
+
+GET_ROUTES = {"/api/health": api_health, "/api/summary": api_summary, "/api/catalog": api_catalog, "/api/claude": api_claude, "/api/runs": api_runs,
               "/api/run": api_run, "/api/file": api_file, "/api/pending": api_pending, "/api/dashboard": api_dashboard,
               "/api/reports": api_reports, "/api/report": api_report, "/api/improve": api_improve}
 POST_ROUTES = {"/api/settings": api_save_settings, "/api/test": api_test_connection, "/api/models": api_models,
                "/api/claude/login": api_claude_login, "/api/start": api_start_run, "/api/stop": api_stop,
                "/api/decide": api_decide, "/api/approve-all": api_approve_all, "/api/evaluate": api_evaluate,
                "/api/baseline": api_baseline, "/api/promote": api_promote, "/api/rollback": api_rollback,
-               "/api/start-over": api_start_over}
+               "/api/start-over": api_start_over, "/api/shutdown": api_shutdown}
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -682,11 +698,18 @@ class LocalServer(ThreadingHTTPServer):
         super().server_bind()
 
 
+class PortInUse(Exception):
+    pass
+
+
 def make_server(workspace: Path, port: int) -> tuple[ThreadingHTTPServer, App]:
     app = App(workspace, port)
     handler = type("BoundHandler", (Handler,), {"app": app})
-    server = LocalServer(("127.0.0.1", port), handler)
-    app.port = server.server_address[1]
+    try:
+        server = LocalServer(("127.0.0.1", port), handler)
+    except OSError as e:  # only the bind: any other startup error must surface as itself
+        raise PortInUse(port) from e
+    app.port, app.server = server.server_address[1], server
     return server, app
 
 
@@ -695,17 +718,22 @@ def serve(port: int, open_browser: bool) -> None:
     workspace.mkdir(parents=True, exist_ok=True)
     try:
         server, app = make_server(workspace, port)
-    except OSError:
+    except PortInUse:
         sys.exit(f"Port {port} is already in use, probably by another RiskWatch window. Close that window, or start "
                  f"this one on another port with: python launch.py --port {port + 1}")
     url = f"http://127.0.0.1:{app.port}/"
+    # Read by launch.py to replace this copy when a newer version starts. Same trust as settings.json.
+    marker = workspace / "server.json"
+    marker.write_text(json.dumps({"port": app.port, "token": app.token, "fingerprint": app.fingerprint}), encoding="utf-8")
     print(f"RiskWatch is running at {url}\nKeep this window open. Press Ctrl+C to stop.", flush=True)
     if open_browser:
         threading.Timer(0.6, webbrowser.open, args=(url,)).start()
     try:
         server.serve_forever()
+        print("Stopped, because a newer copy of RiskWatch is taking over.")
     except KeyboardInterrupt:
         print("\nStopped.")
     finally:
         app.stop_job()
         server.server_close()
+        marker.unlink(missing_ok=True)
