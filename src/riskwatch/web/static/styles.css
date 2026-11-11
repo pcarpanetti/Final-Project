@@ -80,6 +80,10 @@ nav { display: flex; flex-direction: column; gap: 2px; flex: 1; }
 .step-dot.done { background: var(--good); border-color: var(--good); color: #fff; }
 .badge { margin-left: auto; background: var(--critical); color: #fff; border-radius: 10px; font-size: 11px; font-weight: 700; padding: 1px 7px; }
 .side-foot { padding: 10px; font-size: 12px; color: var(--ink-2); border-top: 1px solid var(--line); overflow-wrap: anywhere; }
+.side-download { display: block; width: 100%; text-align: center; margin-bottom: 10px; font-size: 13px; }
+.side-download.off { opacity: .5; cursor: not-allowed; margin-bottom: 4px; }
+.side-download.off:hover { background: none; }
+.side-hint { margin-bottom: 10px; text-align: center; }
 
 main { flex: 1; min-width: 0; padding: 26px 32px 60px; }
 #page { max-width: 1120px; margin: 0 auto; }

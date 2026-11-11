@@ -147,8 +147,14 @@ function renderNav() {
     ...results.map(([href, label]) => item(href, label, h("span", { class: "step-dot" }, "›"))),
     h("div", { class: "nav-label" }, "More"),
     ...more.map(([href, label]) => item(href, label, h("span", { class: "step-dot" }, "›"))));
+  // Always on screen, so the full output is one click away from any page once a run exists.
+  const download = ran
+    ? h("a", { class: "btn side-download", href: "/api/download", id: "side-download" }, "Download full output (ZIP)")
+    : h("span", { class: "btn side-download off", id: "side-download", "aria-disabled": "true", title: "Available after a run" },
+      "Download full output (ZIP)");
   const foot = document.getElementById("side-foot");
-  foot.replaceChildren(h("div", {}, s ? s.backend : ""), s && s.last_day ? h("div", {}, `Reached ${s.last_day}`) : "");
+  foot.replaceChildren(download, ran ? "" : h("div", { class: "side-hint" }, "Available after a run"),
+    h("div", {}, s ? s.backend : ""), s && s.last_day ? h("div", {}, `Reached ${s.last_day}`) : "");
 }
 
 function renderBanner() {

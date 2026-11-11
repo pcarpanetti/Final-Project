@@ -73,7 +73,8 @@ going, because later days don't wait for you.
 
 - **Dashboard:** the latest position, how VaR held up, limits, the breach register and escalations.
 - **Reports:** every memo, breach notice, restatement and monthly review.
-- **Download full output (ZIP):** everything released, a summary, and the full audit tables.
+- **Download full output (ZIP):** everything released, a summary, and the full audit tables. The button is at the
+  bottom of the left-hand menu on every page.
 - **Run inspector:** for any day, its stages, the 13 automated checks, data decisions and what each agent said.
 
 ## Optional: test a change

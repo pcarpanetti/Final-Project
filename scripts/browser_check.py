@@ -47,6 +47,7 @@ def main() -> int:
 
             # 1. Connect
             page.goto(URL)
+            expect(page.locator("#side-download")).to_have_attribute("aria-disabled", "true")
             expect(page.get_by_role("heading", name="Connect a model")).to_be_visible()
             page.wait_for_timeout(1500)
             shot("1-connect")
@@ -93,6 +94,10 @@ def main() -> int:
             # Results
             page.locator("nav a[href=\"#/dashboard\"]").click()
             expect(page.get_by_text("Did VaR hold?")).to_be_visible()
+            # The download stays in the sidebar on every page, not only on Reports.
+            with page.expect_download() as from_sidebar:
+                page.locator("#side-download").click()
+            assert from_sidebar.value.suggested_filename == "riskwatch-output.zip"
             box = page.locator(".chart-wrap svg").bounding_box()
             page.mouse.move(box["x"] + box["width"] * 0.7, box["y"] + box["height"] * 0.5)
             expect(page.locator(".tip")).to_be_visible()
