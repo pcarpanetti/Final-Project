@@ -153,13 +153,18 @@ function renderNav() {
     h("div", { class: "nav-label" }, "More"),
     ...more.map(([href, label]) => item(href, label, h("span", { class: "step-dot" }, "›"))));
   // Always on screen, so the full output is one click away from any page once a run exists.
+  // Phones show the short label, because the button shares the top bar with the menu.
+  const label = [h("span", { class: "long" }, "Download full output (ZIP)"), h("span", { class: "short" }, "Download")];
   const download = ran
-    ? h("a", { class: "btn side-download", href: "/api/download", id: "side-download" }, "Download full output (ZIP)")
-    : h("span", { class: "btn side-download off", id: "side-download", "aria-disabled": "true", title: "Available after a run" },
-      "Download full output (ZIP)");
-  const foot = document.getElementById("side-foot");
-  foot.replaceChildren(download, ran ? "" : h("div", { class: "side-hint" }, "Available after a run"),
-    h("div", {}, s ? s.backend : ""), s && s.last_day ? h("div", {}, `Reached ${s.last_day}`) : "");
+    ? h("a", { class: "btn side-download", href: "/api/download", id: "side-download", "aria-label": "Download full output (ZIP)" }, label)
+    : h("span", { class: "btn side-download off", id: "side-download", "aria-disabled": "true", title: "Available after a run" }, label);
+  document.getElementById("side-dl").replaceChildren(download, ran ? "" : h("div", { class: "side-hint" }, "Available after a run"));
+  document.getElementById("side-foot").replaceChildren(h("div", {}, s ? s.backend : ""),
+    s && s.last_day ? h("div", {}, `Reached ${s.last_day}`) : "");
+  // The menu hides the Approve badge on phones, so the menu button carries it too.
+  const badge = document.getElementById("menu-badge");
+  badge.hidden = !(s && s.pending);
+  badge.textContent = s && s.pending ? String(s.pending) : "";
 }
 
 function renderBanner() {
@@ -776,6 +781,14 @@ async function route(keep) {
 (async function start() {
   [summary, catalog] = await Promise.all([api("/api/summary"), api("/api/catalog")]);
   if (!location.hash) location.hash = summary.settings.configured ? (Object.keys(summary.counts).length ? "#/dashboard" : "#/run") : "#/connect";
+  // The menu button only shows on narrow screens. Choosing a page, or pressing Escape, closes it.
+  const sidebar = document.getElementById("sidebar"), toggle = document.getElementById("menu-toggle");
+  const setMenu = (open) => { sidebar.classList.toggle("open", open); toggle.setAttribute("aria-expanded", String(open)); };
+  toggle.addEventListener("click", () => setMenu(!sidebar.classList.contains("open")));
+  document.getElementById("nav").addEventListener("click", (e) => { if (e.target.closest("a")) setMenu(false); });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && sidebar.classList.contains("open")) { setMenu(false); toggle.focus(); }
+  });
   window.addEventListener("hashchange", () => route());
   await route();
   setInterval(poll, 2000);

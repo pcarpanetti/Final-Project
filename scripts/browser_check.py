@@ -49,6 +49,9 @@ def main() -> int:
             page.goto(URL)
             expect(page.locator("#side-download")).to_have_attribute("aria-disabled", "true")
             expect(page.get_by_role("heading", name="Connect a model")).to_be_visible()
+            # On desktop the page list is always shown, so there is no menu button.
+            expect(page.locator("#menu-toggle")).to_be_hidden()
+            expect(page.locator("#nav")).to_be_visible()
             page.wait_for_timeout(1500)
             shot("1-connect")
             page.get_by_text("OpenRouter", exact=True).click()
@@ -138,8 +141,21 @@ def main() -> int:
             if page.evaluate(clipped_js):
                 problems.append("a dashboard table is cut off at phone width")
             shot("8-phone")
-            page.goto(URL + "#/runs")
+            # Phones: pages fold into a menu, while the download stays on the top bar.
+            expect(page.locator("#nav")).to_be_hidden()
+            expect(page.locator("#side-download")).to_be_visible()
+            page.locator("#menu-toggle").click()
+            expect(page.locator("#menu-toggle")).to_have_attribute("aria-expanded", "true")
+            expect(page.locator("#nav")).to_be_visible()
+            page.set_viewport_size({"width": 400, "height": 700})
+            page.wait_for_timeout(350)
+            page.screenshot(path=SHOTS / "8b-phone-menu.png")
+            page.locator("nav a[href=\"#/runs\"]").click()
+            expect(page.locator("#nav")).to_be_hidden()
             expect(page.get_by_role("link", name="eod-2020-03-09")).to_be_visible()
+            page.locator("#menu-toggle").click()
+            page.keyboard.press("Escape")
+            expect(page.locator("#nav")).to_be_hidden()
             if page.evaluate(clipped_js):
                 problems.append("the run list is cut off at phone width")
             browser.close()

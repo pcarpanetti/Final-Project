@@ -79,11 +79,15 @@ nav { display: flex; flex-direction: column; gap: 2px; flex: 1; }
 }
 .step-dot.done { background: var(--good); border-color: var(--good); color: #fff; }
 .badge { margin-left: auto; background: var(--critical); color: #fff; border-radius: 10px; font-size: 11px; font-weight: 700; padding: 1px 7px; }
-.side-foot { padding: 10px; font-size: 12px; color: var(--ink-2); border-top: 1px solid var(--line); overflow-wrap: anywhere; }
-.side-download { display: block; width: 100%; text-align: center; margin-bottom: 10px; font-size: 13px; }
-.side-download.off { opacity: .5; cursor: not-allowed; margin-bottom: 4px; }
+/* Scoped to .sidebar so it outranks the general button rule further down. */
+.sidebar .menu-toggle, .badge[hidden] { display: none; }
+.side-dl { padding: 10px 10px 0; border-top: 1px solid var(--line); font-size: 12px; color: var(--ink-2); }
+.side-foot { padding: 0 10px 10px; margin-top: -8px; font-size: 12px; color: var(--ink-2); overflow-wrap: anywhere; }
+.side-download { display: block; width: 100%; text-align: center; font-size: 13px; }
+.side-download .short { display: none; }
+.side-download.off { opacity: .5; cursor: not-allowed; }
 .side-download.off:hover { background: none; }
-.side-hint { margin-bottom: 10px; text-align: center; }
+.side-hint { margin-top: 4px; text-align: center; }
 
 main { flex: 1; min-width: 0; padding: 26px 32px 60px; }
 #page { max-width: 1120px; margin: 0 auto; }
@@ -203,9 +207,23 @@ pre.code { font: 12.5px/1.45 ui-monospace, Consolas, monospace; background: var(
 
 @media (max-width: 860px) {
   body { flex-direction: column; }
-  .sidebar { width: auto; height: auto; position: static; }
-  nav { flex-direction: row; flex-wrap: wrap; }
-  .nav-label { display: none; }
+  /* A compact top bar: name, download and a menu button. The page list folds into the menu. */
+  .sidebar {
+    width: auto; height: auto; position: sticky; top: 0; z-index: 5; overflow: visible;
+    display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 8px;
+    padding: 10px 16px; border-right: 0; border-bottom: 1px solid var(--line);
+  }
+  .brand { padding: 0; }
+  .brand small { display: none; }
+  .sidebar .menu-toggle { display: inline-flex; align-items: center; gap: 6px; grid-column: 3; grid-row: 1; }
+  .sidebar .menu-toggle .badge[hidden] { display: none; }
+  .menu-toggle .badge { margin-left: 2px; }
+  .side-dl { grid-column: 2; grid-row: 1; padding: 0; border: 0; }
+  .side-download .long, .side-hint { display: none; }
+  .side-download .short { display: inline; }
+  nav, .side-foot { display: none; grid-column: 1 / -1; }
+  .sidebar.open nav { display: flex; max-height: calc(100vh - 120px); overflow-y: auto; }
+  .sidebar.open .side-foot { display: block; margin: 0; padding: 8px 10px 0; border-top: 1px solid var(--line); }
   main { padding: 18px 16px 50px; }
   .split, .cols-2 { grid-template-columns: minmax(0, 1fr); }
 }

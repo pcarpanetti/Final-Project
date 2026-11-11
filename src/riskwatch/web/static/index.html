@@ -9,9 +9,13 @@
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-  <aside class="sidebar">
+  <aside class="sidebar" id="sidebar">
     <a class="brand" href="#/connect">RiskWatch<small>Daily risk monitoring</small></a>
+    <button class="btn menu-toggle" id="menu-toggle" type="button" aria-expanded="false" aria-controls="nav">
+      <span aria-hidden="true">☰</span> Menu <span class="badge" id="menu-badge" hidden></span>
+    </button>
     <nav id="nav" aria-label="Main"></nav>
+    <div class="side-dl" id="side-dl"></div>
     <div class="side-foot" id="side-foot"></div>
   </aside>
   <main>
