@@ -109,6 +109,13 @@ def test_unknown_host_header_is_refused_to_stop_dns_rebinding(web):
     assert web.post("/api/stop", headers={"Host": "evil.example.com"})[0] == 403
 
 
+def test_a_second_server_cannot_take_a_port_that_is_in_use(web, tmp_path):
+    """Regression: on Windows a second server bound the same port, said it was running, and got no requests."""
+    from riskwatch.web.server import make_server
+    with pytest.raises(OSError):
+        make_server(tmp_path / "second", web.app.port)
+
+
 def test_server_listens_only_on_loopback(web):
     assert web.app.port and web.base.startswith("http://127.0.0.1")
 

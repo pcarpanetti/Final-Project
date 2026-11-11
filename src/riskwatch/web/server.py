@@ -15,6 +15,7 @@ import queue
 import re
 import secrets
 import shutil
+import socket
 import sqlite3
 import subprocess
 import sys
@@ -666,10 +667,25 @@ class Handler(BaseHTTPRequestHandler):
         self.run_route(route, body)
 
 
+class LocalServer(ThreadingHTTPServer):
+    """Refuses a port that another program already holds.
+
+    The standard server sets SO_REUSEADDR, which on Windows lets a second server bind a port in use. It then
+    reports success while the first one keeps every request, so a restarted app silently serves old code.
+    """
+
+    allow_reuse_address = os.name != "nt"
+
+    def server_bind(self) -> None:
+        if os.name == "nt":
+            self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
+        super().server_bind()
+
+
 def make_server(workspace: Path, port: int) -> tuple[ThreadingHTTPServer, App]:
     app = App(workspace, port)
     handler = type("BoundHandler", (Handler,), {"app": app})
-    server = ThreadingHTTPServer(("127.0.0.1", port), handler)
+    server = LocalServer(("127.0.0.1", port), handler)
     app.port = server.server_address[1]
     return server, app
 
@@ -677,7 +693,11 @@ def make_server(workspace: Path, port: int) -> tuple[ThreadingHTTPServer, App]:
 def serve(port: int, open_browser: bool) -> None:
     workspace = Path(os.environ.get("RISKWATCH_WEB_HOME", ROOT / "runtime" / "web"))
     workspace.mkdir(parents=True, exist_ok=True)
-    server, app = make_server(workspace, port)
+    try:
+        server, app = make_server(workspace, port)
+    except OSError:
+        sys.exit(f"Port {port} is already in use, probably by another RiskWatch window. Close that window, or start "
+                 f"this one on another port with: python launch.py --port {port + 1}")
     url = f"http://127.0.0.1:{app.port}/"
     print(f"RiskWatch is running at {url}\nKeep this window open. Press Ctrl+C to stop.", flush=True)
     if open_browser:
