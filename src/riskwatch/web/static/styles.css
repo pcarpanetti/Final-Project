@@ -209,3 +209,17 @@ pre.code { font: 12.5px/1.45 ui-monospace, Consolas, monospace; background: var(
   main { padding: 18px 16px 50px; }
   .split, .cols-2 { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* Phones: a table this wide would hide its last columns, so each row becomes a small block of "name  value" lines. */
+@media (max-width: 600px) {
+  .stack table, .stack tbody, .stack tr { display: block; width: 100%; }
+  .stack thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .stack tr { padding: 8px 0; border-bottom: 1px solid var(--line-2); }
+  .stack td, .stack td.r {
+    display: grid; grid-template-columns: minmax(84px, 38%) minmax(0, 1fr); gap: 10px;
+    padding: 3px 0; border: 0; text-align: left; white-space: normal; overflow-wrap: anywhere;
+  }
+  .stack td::before { content: attr(data-label); color: var(--ink-2); font-size: 12.5px; font-weight: 600; }
+  .stack td:not([data-label]) { display: block; }
+  .stack td:not([data-label])::before { content: none; }
+}

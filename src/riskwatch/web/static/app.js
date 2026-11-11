@@ -113,7 +113,12 @@ function markdown(text) {
 }
 
 function table(headers, rows, opts = {}) {
-  return h("div", { class: "scroll" + (opts.tall ? " scroll-y" : "") }, h("table", {},
+  // Each cell carries its column name, so on a phone a row can stack into "name: value" lines.
+  const labels = headers.map((c) => c.replace(/^>/, ""));
+  for (const tr of [rows].flat(Infinity)) {
+    if (tr && tr.children) [...tr.children].forEach((cell, i) => { if (labels[i]) cell.setAttribute("data-label", labels[i]); });
+  }
+  return h("div", { class: "scroll stack" + (opts.tall ? " scroll-y" : "") }, h("table", {},
     h("thead", {}, h("tr", {}, headers.map((c) => h("th", { class: c.startsWith(">") ? "r" : "" }, c.replace(/^>/, ""))))),
     h("tbody", {}, rows)));
 }

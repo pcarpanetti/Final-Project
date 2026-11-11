@@ -133,7 +133,15 @@ def main() -> int:
             overflow = page.evaluate("document.documentElement.scrollWidth - document.documentElement.clientWidth")
             if overflow > 1:
                 problems.append(f"page overflows sideways by {overflow}px at phone width")
+            # A table inside its own scroll box does not widen the page, so check those boxes as well.
+            clipped_js = "[...document.querySelectorAll('.scroll')].filter(e => e.scrollWidth - e.clientWidth > 1).length"
+            if page.evaluate(clipped_js):
+                problems.append("a dashboard table is cut off at phone width")
             shot("8-phone")
+            page.goto(URL + "#/runs")
+            expect(page.get_by_role("link", name="eod-2020-03-09")).to_be_visible()
+            if page.evaluate(clipped_js):
+                problems.append("the run list is cut off at phone width")
             browser.close()
     finally:
         server.terminate()
