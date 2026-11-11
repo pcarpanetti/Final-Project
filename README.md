@@ -14,8 +14,9 @@ it. A controller owns scheduling, checkpoints, retries, budgets, approvals and e
 across days, scores its own VaR forecasts, restates when vendors correct data, resumes after a crash without repeating
 work, and accepts changes to itself only through a fixed baseline test.
 
-The replay uses **real market data** from the 2020 crash (Ken French daily industry returns) on a **fictional book**,
-with vendor faults injected to give labelled ground truth.
+It runs on **real market data** (Ken French daily industry returns) for any period from 1986 to September 2026, on a
+**fictional book**. The fixed test year, July 2019 to June 2020, covers the 2020 crash and adds injected vendor faults
+to give labelled ground truth.
 
 ## Run it in your browser
 
@@ -59,7 +60,7 @@ with vendor faults injected to give labelled ground truth.
 | `tests/` | The test suite, including a crash test at each of 58 named points |
 | `evidence/` | Test results, recovery, leakage, evaluation, versioning and replay records |
 | `examples/` | Curated artifacts from the replay, such as memos, failed drafts and restatements |
-| `scripts/` | Feed builder, figures, recovery, leakage, live-model and version demos, browser check, evidence export, ZIP packaging |
+| `scripts/` | Data extraction, feed builder, figures, recovery, leakage, live-model and version demos, browser check, evidence export, ZIP packaging |
 
 ## Terminal setup
 
@@ -92,7 +93,8 @@ riskwatch status eod-2020-03-09      # one run, stage by stage
 ```
 
 Memos land in `runtime/published/memos/`. The full fixed year is `riskwatch replay` with no dates, which takes about
-10 minutes.
+10 minutes. Any period from 1986-01-02 to 2026-09-30 works in a fresh home, for example Black Monday:
+`RISKWATCH_HOME=runtime/1987 riskwatch replay --start 1987-10-01 --end 1987-10-30 --no-drills`.
 
 **2. Act as the approver.** Start fresh and drive one day by hand:
 

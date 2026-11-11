@@ -17,6 +17,7 @@ any model. Real-model results are in [live_model/](live_model/report.md). See [W
 | The year runs end to end | 267 runs: 252 daily runs completed, 1 rejected by the approver, 11 monthly reviews, 3 restatements, no halts | [summary.md](replay/summary.md), [runs.csv](replay/runs.csv) | `riskwatch replay` |
 | Labelled faults are handled | 6 of 6, with no false override of real data | `eval/baselines/` | `riskwatch eval --baseline` |
 | Changes go through a fixed baseline | 4 candidates evaluated: 3 rejected, 1 accepted | `eval/results/`, `versions/registry.jsonl` | `riskwatch eval --candidate <file>` |
+| Any period from 1986 to 2026 runs | Black Monday 1987 runs end to end, in a test and in the app; adding 1984-2026 left every earlier feed row byte-identical | `tests/test_history.py` | `python -m pytest tests/test_history.py` |
 | Results still hold on the final code | Baseline replayed: all 22 behaviour fields identical to the frozen scorecard | [baseline_recheck.md](versioning/baseline_recheck.md) | `python scripts/recheck_baseline.py` |
 | Rollback restores behaviour exactly | `metrics.json` hash identical before promotion and after rollback; promoting a rejected candidate is refused | [promote_rollback.md](versioning/promote_rollback.md) | `python scripts/demo_version_cycle.py` |
 | Adapters speak both HTTP protocols | Requests, auth headers, retries and full runs checked against a local fake vendor, for every preset | `tests/test_providers.py` | `python -m pytest tests/test_providers.py` |
@@ -120,5 +121,9 @@ promotion is a person's decision. Three reasons to pause before making it:
   the rule looks only at VaR and limit status. All three replay corrections were immaterial, so the material path is
   covered by a test only. Adding a P&L threshold is a natural next candidate.
 - **Scale.** One controller, one worker, SQLite. Fine for one book, not for many.
+- **Periods outside 2019-20 have no ground truth.** The six labelled faults and every drill sit in the test window,
+  so other periods test the workflow on clean data only. Their limits, stress shocks and liquidity figures were set
+  for 2019-20 markets. ADV is held at 2019 levels, so on long runs liquidity readings drift as NAV grows. Only
+  1987, 2020 and 2022 dates have been run; most of the 40 years has not.
 - **Platform.** Tested only on Windows 11, with Python 3.14 and 3.15, in Microsoft Edge. `start.sh` has not been run on a
   Mac or Linux machine.

@@ -65,9 +65,9 @@ publish). `config/workflows.yaml` is the definition the controller executes.
 
 | Input | Source in this project | Available at |
 |---|---|---|
-| Daily sleeve returns | Ken French 10 Industry Portfolios, value-weighted | 18:00 on T |
-| Factor returns | Ken French 3 Factors | 18:00 on T |
-| Positions and NAV | Simulated administrator file | 18:30 on T |
+| Daily sleeve returns | Ken French 10 Industry Portfolios, value-weighted, 1984 to September 2026 | 18:00 on T |
+| Factor returns | Ken French 3 Factors, same range | 18:00 on T |
+| Positions and NAV | Simulated administrator file; the fund launches with $100m the day before a workspace's first day | 18:30 on T |
 | Vendor notes | Simulated, **untrusted** free text | As published |
 | Limits, risk model, policy | `config/`, frozen in a version | Fixed per version |
 

@@ -74,6 +74,12 @@ updated *before* the approval gate: it records facts, so an unanswered approval 
 **Triggers.** `riskwatch tick` is the single entry point, called by cron every 30 minutes in production and by a
 simulated clock in replay. It creates what is due, including runs missed during downtime, each with its original cutoff.
 It also detects vendor corrections, reopens blocked runs and checks approval SLAs. Calling it twice is harmless.
+It resumes from the last day it scheduled, so a workspace spanning decades costs the same per tick as a fresh one.
+
+**Any period, fixed test window.** Runs may cover any trading day from 1986 to September 2026. Each run keeps only
+the history its version's risk model reads (501 days for the baseline), so its inputs stay small. The fund launches
+with $100m the day before a workspace's first day. The evaluation window, its faults and the frozen baseline did not
+move: the feed was extended around a book anchored on the eve of that window, and the baseline replays identically.
 
 **Resuming without repeating work.** Recovery is the same command again. Then:
 
