@@ -41,28 +41,33 @@ Your key stays on this computer. It is held in memory, and it is saved to disk o
 
 ## 3. Run the workflow
 
-1. Choose a period. **Crash month** is a good first run. Presets also cover Black Monday 1987, the 2008 financial
-   crisis and the 2022 rate shock, and **Choose dates** takes any period from 2 January 1986 to 30 September 2026.
-2. Choose who approves. **I will review them** shows you the full process. **Approve automatically** is the
+1. Choose a period with the **From** and **To** dates. Any period from 2 January 1986 to 30 September 2026 works.
+   The shortcuts fill in the dates for you: **Crash month** is a good first run, **Full test year** covers every
+   labelled fault and drill, and **Black Monday 1987** shows the long history.
+2. Choose who approves. **I review breach days** shows you the full process. **Approve automatically** is the
    fastest way to a full output.
 3. Click **Start run**.
 
 You can watch progress, and **Stop** then **Resume** carries on without repeating anything.
 
-The fund starts with $100m the trading day before your first day. The failure drills and the injected vendor
-faults exist only between July 2019 and June 2020, so the drills option appears only for periods that overlap
-those dates. Other periods run on clean market data.
+The fund starts with $100m the trading day before your first day. The injected vendor faults and the failure drills
+exist only between July 2019 and June 2020. A line under the dates says whether your period includes them. The
+drills run only in the offline demo, and they switch on by themselves for periods that overlap those dates. Other
+periods run on clean market data.
 
-A new run continues the results already in the app. If you pick a period that doesn't follow on from them, the
-button becomes **Start over and run**: the current results move to an archive folder and the new period starts
-fresh. Otherwise the app would have to fill in every day in between.
+A new run continues the results already in the app, so the dates start from the next day not yet run. If you pick a
+period that doesn't follow on from them, the button becomes **Start over and run**: the current results move to an
+archive folder and the new period starts fresh. Otherwise the app would have to fill in every day in between.
+
+Other periods worth trying: the 2008 financial crisis (2 September to 28 November 2008), the 2022 rate shock
+(3 January to 30 June 2022) and the first half of 2020 (crash and recovery, with monthly reviews).
 
 | Period | Offline demo | Real model, roughly |
 |---|---|---|
-| Quick look (5 days) | 10 seconds | 6 minutes, 25 calls |
+| Five days, 9 to 13 March 2020 | 10 seconds | 6 minutes, 25 calls |
 | Crash month (19 days) | 40 seconds | 25 minutes, 95 calls |
 | First half of 2020 | 4 minutes | 2.5 hours, 600 calls |
-| Test year (July 2019 to June 2020) | 9 minutes | 5 hours, 1,250 calls |
+| Full test year (July 2019 to June 2020) | 9 minutes | 5 hours, 1,250 calls |
 | Black Monday 1987 (22 days) | 50 seconds | 30 minutes, 110 calls |
 | Any period | About 2 seconds a day | About 75 seconds and 5 calls a day |
 

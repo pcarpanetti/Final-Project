@@ -337,19 +337,21 @@ function pageConnect() {
 }
 
 // ---- 2. Run ----
-const PERIODS = [
-  ["quick", "Quick look", "Five days at the height of the 2020 crash.", "2020-03-09", "2020-03-13"],
-  ["crash", "Crash month", "From the February 2020 peak through the sell-off.", "2020-02-18", "2020-03-13"],
-  ["half", "First half of 2020", "Crash and recovery, with monthly reviews.", "2020-01-02", "2020-06-30"],
-  ["full", "Test year", "July 2019 to June 2020, with every injected fault and drill.", "2019-07-01", "2020-06-30"],
-  ["y1987", "Black Monday 1987", "October 1987, when the market fell 20% in a day.", "1987-10-01", "1987-10-30"],
-  ["y2008", "2008 financial crisis", "Lehman's collapse and the sell-off that followed.", "2008-09-02", "2008-11-28"],
-  ["y2022", "2022 rate shock", "Inflation and rising rates, January to June 2022.", "2022-01-03", "2022-06-30"],
-  ["custom", "Choose dates", "", "", ""],
+// Any dates work; these fill them in. The test year is the only period with labelled faults and drills.
+const SHORTCUTS = [
+  ["Crash month", "2020-02-18", "2020-03-13"],
+  ["Full test year", "2019-07-01", "2020-06-30"],
+  ["Black Monday 1987", "1987-10-01", "1987-10-30"],
 ];
 
 function longDate(iso) {
   return new Date(iso + "T00:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
+}
+
+function addDays(iso, n) {
+  const d = new Date(iso + "T00:00:00Z");
+  d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0, 10);
 }
 
 // Drills and injected vendor faults live only in the fixed test window.
@@ -375,7 +377,12 @@ function duration(seconds) {
 function pageRun() {
   if (!summary.settings.configured) { location.hash = "#/connect"; return; }
   const offline = summary.settings.provider === "scripted";
-  const form = { period: "crash", start: "2020-02-18", end: "2020-03-13", approvals: "manual", drills: offline };
+  const workspace = () => (summary.book_start ? { from: summary.book_start, to: summary.last_day, next: summary.continue_from } : null);
+  // A workspace with results suggests continuing it for about a month; otherwise the crash month.
+  const begun = workspace();
+  const form = begun && begun.next ? { start: begun.next, end: [addDays(begun.next, 27), catalog.last_day].sort()[0] }
+    : { start: SHORTCUTS[0][1], end: SHORTCUTS[0][2] };
+  form.approvals = "manual";
   const setup = h("div");
   const live = h("div");
 
@@ -385,29 +392,28 @@ function pageRun() {
     const calls = Math.round(days * CALLS_PER_DAY);
     const heavy = !offline && days > 30;
     const drills = hasDrills(form.start, form.end);
-    const ws = summary.book_start ? { from: summary.book_start, to: summary.last_day, next: summary.continue_from } : null;
+    const ws = workspace();
     const fresh = ws && (form.start < ws.from || form.start > ws.next);
+    const date = (key, label) => h("label", { class: "field" }, label, h("input", { type: "date", id: `${key}-date`, min: catalog.first_day,
+      max: catalog.last_day, value: form[key], onchange: (e) => { form[key] = e.target.value; renderSetup(); } }));
+    const approval = (value, label) => h("label", { class: value === form.approvals ? "on" : "" },
+      h("input", { type: "radio", name: "approvals", value, checked: value === form.approvals, onchange: () => { form.approvals = value; renderSetup(); } }), label);
     setup.replaceChildren(
       h("div", { class: "card" }, h("h2", {}, "Period"),
-        h("div", { class: "choices" }, PERIODS.map(([id, name, text, s, e]) => choice("period", id, form.period, name,
-          text || `Any period from ${longDate(catalog.first_day)} to ${longDate(catalog.last_day)}.`, () => {
-          form.period = id;
-          if (s) { form.start = s; form.end = e; }
-          renderSetup();
-        }))),
-        form.period === "custom" ? h("div", { class: "grid cols-2", style: "margin-top:14px" },
-          h("label", { class: "field" }, "From", h("input", { type: "date", min: catalog.first_day, max: catalog.last_day, value: form.start, onchange: (e) => { form.start = e.target.value; renderSetup(); } })),
-          h("label", { class: "field" }, "To", h("input", { type: "date", min: catalog.first_day, max: catalog.last_day, value: form.end, onchange: (e) => { form.end = e.target.value; renderSetup(); } }))) : null),
+        h("div", { class: "grid cols-2" }, date("start", "From"), date("end", "To")),
+        h("div", { class: "row small" }, h("span", { class: "muted" }, "Shortcuts:"),
+          SHORTCUTS.map(([name, s, e]) => h("button", { class: "chip" + (form.start === s && form.end === e ? " on" : ""),
+            onclick: () => { form.start = s; form.end = e; renderSetup(); } }, name))),
+        drills ? h("p", { class: "small", id: "has-drills", style: "margin:12px 0 0" }, offline
+          ? "Includes the labelled vendor faults and the failure drills: bad drafts, provider outages and a prompt injection."
+          : "Includes the labelled vendor faults. The failure drills run only in the offline demo.")
+          : h("p", { class: "muted small", id: "no-drills", style: "margin:12px 0 0" },
+            `Clean market data only. The labelled faults and drills sit between ${longDate(catalog.drill_window.start)} and ${longDate(catalog.drill_window.end)}.`)),
       h("div", { class: "card" }, h("h2", {}, "Who approves?"),
-        h("div", { class: "choices" },
-          choice("approvals", "manual", form.approvals, "I will review them", "Breach days wait in the Approve step, while later days keep running.", () => { form.approvals = "manual"; renderSetup(); }),
-          choice("approvals", "auto", form.approvals, "Approve automatically", "A simulated approver signs everything, for a fast full output.", () => { form.approvals = "auto"; renderSetup(); })),
-        offline && drills ? h("label", { class: "row small", style: "margin-top:12px" },
-          h("input", { type: "checkbox", id: "drills", checked: form.drills, onchange: (e) => { form.drills = e.target.checked; } }),
-          "Include failure drills: bad drafts, provider outages and a prompt injection, to watch the workflow handle them") : null,
-        drills ? null : h("p", { class: "muted small", id: "no-drills", style: "margin-top:12px" },
-          `The failure drills and injected vendor faults sit between ${longDate(catalog.drill_window.start)} and `,
-          `${longDate(catalog.drill_window.end)}. This period has none, so it runs on clean market data.`)),
+        h("div", { class: "segment" }, approval("manual", "I review breach days"), approval("auto", "Approve automatically")),
+        h("p", { class: "muted small", style: "margin:10px 0 0" }, form.approvals === "manual"
+          ? "Flagged days wait in the Approve step, while later days keep running."
+          : "A simulated approver signs everything, for a fast full output.")),
       h("div", { class: "card" },
         h("div", { class: "row" },
           h("div", { class: "grow" }, h("strong", {}, `About ${days} trading days`),
@@ -417,17 +423,15 @@ function pageRun() {
             fresh ? "Start over and run" : "Start run")),
         heavy ? h("div", { class: "notice warn", style: "margin:12px 0 0" }, "That is a long run on a real model and will use a lot of your plan or budget. Consider a shorter period first.") : null,
         fresh ? h("div", { class: "notice warn", id: "fresh-notice", style: "margin:12px 0 0" },
-          `This workspace holds results from ${longDate(ws.from)}${ws.to ? ` to ${longDate(ws.to)}` : ""}, and a new run `,
-          `can only continue it from ${longDate(ws.next)}. Running this period starts a fresh workspace: the current `,
-          "results move to an archive folder first.") : null,
+          `This workspace can only continue from ${longDate(ws.next)}, so this period starts fresh and archives the current results.`) : null,
         ws && !fresh ? h("p", { class: "muted small", style: "margin-top:12px" },
-          `This workspace already has results from ${longDate(ws.from)}. A new run continues it. `,
+          `Continues this workspace's results from ${longDate(ws.from)}. `,
           h("button", { onclick: guard(startOver) }, "Start over")) : null));
   };
 
   const start = async (resume) => {
     await api("/api/start", { ...(resume && summary.job ? { start: summary.job.start, end: summary.job.end, approvals: summary.job.manual ? "manual" : "auto", drills: summary.job.drills }
-      : { ...form, drills: form.drills && hasDrills(form.start, form.end) }), resume });
+      : { ...form, drills: offline && hasDrills(form.start, form.end) }), resume });
     await poll();
     renderLive();
   };
@@ -778,7 +782,7 @@ function pageHelp() {
   page.replaceChildren(h("h1", {}, "Help"),
     h("div", { class: "card" }, h("h2", {}, "Getting a full output"),
       step("1. Connect a model", "Enter your name, then choose Claude login, an API provider, or the offline demo. Test the connection."),
-      step("2. Run the workflow", "Pick a period and who approves. Quick look or Crash month is a good first run."),
+      step("2. Run the workflow", "Pick a period and who approves. The Crash month shortcut is a good first run."),
       step("3. Approve", "Read each flagged memo and decide. If you chose automatic approval, there is nothing to do here."),
       step("4. Collect the results", "The Dashboard shows the position, Reports holds everything released, and Download full output gives you a ZIP.")),
     h("div", { class: "card" }, h("h2", {}, "Good to know"),

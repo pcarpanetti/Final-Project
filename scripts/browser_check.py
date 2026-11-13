@@ -68,15 +68,18 @@ def main() -> int:
 
             # 2. Run
             expect(page.get_by_role("heading", name="Run the workflow")).to_be_visible()
-            expect(page.get_by_text("Any period from 2 January 1986 to 30 September 2026.")).to_be_visible()
-            page.get_by_text("Black Monday 1987", exact=True).click()
+            # The dates are always shown; shortcuts only fill them in.
+            expect(page.locator("#start-date")).to_have_attribute("min", "1986-01-02")
+            expect(page.locator("#end-date")).to_have_attribute("max", "2026-09-30")
+            expect(page.locator("#has-drills")).to_be_visible()
+            page.get_by_role("button", name="Black Monday 1987").click()
+            expect(page.locator("#start-date")).to_have_value("1987-10-01")
             expect(page.locator("#no-drills")).to_be_visible()
-            expect(page.locator("#drills")).to_have_count(0)
-            page.get_by_text("Choose dates", exact=True).click()
-            expect(page.locator("input[type=date]").first).to_have_attribute("min", "1986-01-02")
-            page.get_by_text("Crash month", exact=True).click()
-            expect(page.locator("#drills")).to_be_visible()
-            page.get_by_text("I will review them", exact=True).click()
+            page.locator("#start-date").fill("2020-02-18")
+            page.locator("#end-date").fill("2020-03-13")
+            expect(page.get_by_role("button", name="Crash month")).to_have_class("chip on")
+            expect(page.locator("#has-drills")).to_contain_text("failure drills")
+            page.get_by_text("I review breach days", exact=True).click()
             shot("2-run-setup")
             page.locator("#start").click()
             expect(page.get_by_text("days processed")).to_be_visible()
@@ -103,10 +106,14 @@ def main() -> int:
 
             # A period that would leave a gap offers a fresh workspace instead of quietly filling the gap.
             page.locator("nav a[href=\"#/run\"]").click()
-            page.get_by_text("2022 rate shock", exact=True).click()
+            # With results in hand, the form suggests continuing from the next unrun day.
+            expect(page.locator("#start-date")).to_have_value("2020-03-16")
+            expect(page.locator("#fresh-notice")).to_have_count(0)
+            page.locator("#start-date").fill("2022-01-03")
+            page.locator("#end-date").fill("2022-06-30")
             expect(page.locator("#fresh-notice")).to_be_visible()
             expect(page.locator("#start")).to_have_text("Start over and run")
-            page.get_by_text("Crash month", exact=True).click()
+            page.get_by_role("button", name="Crash month").click()
             expect(page.locator("#fresh-notice")).to_have_count(0)
 
             # Results
