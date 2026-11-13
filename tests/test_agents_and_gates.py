@@ -93,6 +93,8 @@ def test_reviewer_is_told_what_is_new_and_the_prior_values(make_env):
     assert facts["first_day_of_history"] is False and "new" in facts["delta"]
     assert all(row["prior_value"] is not None for row in facts["limits"])
     assert {"var99_change_window", "ctr_HiTec", "top_risk_asset"} <= set(facts["metrics"])
+    assert all(today is not None and prior is not None for today, prior in
+               (facts["metrics"][m] for m in ("var99_1d", "daily_return", "top_risk_asset")))
 
 
 def test_a_value_just_over_its_limit_does_not_round_down_to_the_limit():

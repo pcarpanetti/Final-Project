@@ -88,10 +88,8 @@ class ScriptedProvider:
 
     def risk_analyst(self, payload, tool_results, meta, fault) -> str:
         active = [r for r in payload["limits"] if r["status"] != "ok"]
-        if active and not tool_results:
-            return _tool("get_breach_history", limit_id=active[0]["limit_id"])
-        window = payload["metrics"].get("var99_change_window", {}).get("value", 0.0)
-        positions = payload["metrics"].get("var99_change_positions", {}).get("value", 0.0)
+        window = payload["metrics"].get("var99_change_window", [0.0])[0]
+        positions = payload["metrics"].get("var99_change_positions", [0.0])[0]
         findings = []
         for i, row in enumerate(active, 1):
             claim = "above_hard" if row["status"] == "breach" else "above_warn"
@@ -103,7 +101,7 @@ class ScriptedProvider:
                 evidence.append({"metric": "var99_change_window", "claim": "positive" if window > 0 else "negative"})
             findings.append({"id": f"F{i}", "limit_id": row["limit_id"], "statement": statement, "evidence": evidence})
         if fault.get("risk_analyst") == "false_claim" and findings and meta["round"] == 0:
-            findings[0]["evidence"].append({"metric": "daily_return", "claim": "positive" if payload["metrics"]["daily_return"]["value"] < 0 else "negative"})
+            findings[0]["evidence"].append({"metric": "daily_return", "claim": "positive" if payload["metrics"]["daily_return"][0] < 0 else "negative"})
         return _final({"findings": findings})
 
     def memo_writer(self, payload, tool_results, meta, fault) -> str:

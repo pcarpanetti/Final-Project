@@ -71,10 +71,17 @@ Each row is injected by `scenarios/replay.yaml` or `data/faults.yaml`, and the o
 Baseline `9ade7848e5dc` is 500-day equal-weighted historical VaR. All candidates used the same fixed window and the rules
 in `eval/policy.yaml`, committed in `2e91b15` before any candidate ran.
 
-All four were re-scored on the final code, against a baseline frozen again on that code. Harness changes after the
-first scoring (the reviewer receiving more facts) raised token use by 17% for the baseline and candidates alike, and
-the token guardrail compares the two. Every decision and every behaviour field matched the first scoring. The
-original baseline file is in Git history, and `versions/registry.jsonl` records both rounds of evaluation.
+All four were re-scored on the final code, against a baseline frozen again on that code, because the token guardrail
+compares the two. The harness changed twice after the first scoring:
+
+- The reviewer received more facts, which raised token use by 17%.
+- Requests were then made leaner. Metrics go to agents as `id: [today, prior day]` at six significant digits, with
+  labels and units sent once in a legend in the system prompt. The breach history of active limits is in the
+  analyst's first request instead of costing a tool round trip that resent everything. The JSON is compact. Over the
+  fixed year, tokens fell 29% (2,152,336 to 1,519,237) and model calls fell 14% (928 to 802, the removed round trips).
+
+Every decision, and every behaviour field apart from that call count, matched the first scoring. The earlier baseline
+files are in Git history, and `versions/registry.jsonl` records every round of evaluation.
 
 | Candidate | Exceptions (2.5 expected) | Kupiec p | Independence p | Basel zone | Average VaR | Decision |
 |---|---|---|---|---|---|---|
@@ -95,6 +102,9 @@ promotion is a person's decision. Three reasons to pause before making it:
 
 ## What was not tested
 
+- **The leaner request format has not met a real model.** The four real-model days ran before metrics were compacted.
+  The stand-in confirms the workflow behaves identically, but whether a real model reads `[today, prior day]` as well
+  as the labelled form is untested.
 - **Real-model evidence is a spot check, not a measurement.** One model (Claude Sonnet), four chosen days, two runs. No
   full year has run on a real model, and the fixed evaluation still uses the scripted backend. A live evaluation would
   need repeat runs, because outputs vary.

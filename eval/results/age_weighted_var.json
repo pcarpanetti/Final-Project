@@ -1,6 +1,6 @@
 {
  "backend": "scripted:rules-v1",
- "elapsed_seconds": 84.9,
+ "elapsed_seconds": 90.4,
  "leakage": {
   "days": [
    {
@@ -43,9 +43,9 @@
   "hard_breach_days": 84,
   "independence_p": 0.17434519693925057,
   "kupiec_p": 0.019049230890526528,
-  "llm_calls": 928,
+  "llm_calls": 802,
   "llm_cost_usd": 0.0,
-  "llm_tokens": 2162948,
+  "llm_tokens": 1529194,
   "memos_published": 252,
   "runs_needing_revision": 6,
   "status_counts": {

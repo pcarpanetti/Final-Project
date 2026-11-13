@@ -105,8 +105,8 @@ class StageContext:
             meta={"role": role, "as_of": self.run["as_of"], "round": self.round, "stage": self.stage},
             day=self.run["as_of"], started_at=self.started_at)
 
-    def agent(self, role: str, payload: dict) -> dict:
-        return _run_agent(self, role, payload, Tools(self))
+    def agent(self, role: str, payload: dict, legend: str = "") -> dict:
+        return _run_agent(self, role, payload, Tools(self), legend)
 
 
 class Controller:

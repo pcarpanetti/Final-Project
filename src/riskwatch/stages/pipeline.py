@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 
 from .. import crash
+from ..agents.tools import Tools
 from ..controller import InputNotReady, WaitForDependency
 from ..memo import resolve, template_memo
 from ..risk import backtest
@@ -310,6 +311,42 @@ def previous_metrics(ctx) -> dict | None:
     return json.loads(path.read_text(encoding="utf-8")) if path.exists() else None
 
 
+# Agent requests carry metrics as id: [today, prior day]. Labels and units go once into the system prompt as a
+# legend, which is the same every day, instead of into every request.
+UNIT_NAMES = {"pct": "fraction", "usd": "USD", "ratio": "number", "count": "count", "days": "days", "text": "text"}
+
+
+def _sig(value):
+    """Six significant digits: far finer than any memo prints, in a fraction of the characters."""
+    return float(f"{value:.6g}") if isinstance(value, float) else value
+
+
+def compact_metrics(metrics: dict, prior: dict | None) -> dict:
+    prior = prior or {}
+    return {mid: [_sig(m["value"]), _sig(prior[mid]["value"]) if mid in prior else None] for mid, m in metrics.items()}
+
+
+def compact_rows(rows: list[dict]) -> list[dict]:
+    return [{k: _sig(v) for k, v in row.items()} for row in rows]
+
+
+def metric_legend(metrics: dict) -> str:
+    """One line per metric, except that a family such as w_<sleeve> ("Weight of <sleeve>") gets one line in all."""
+    unit = lambda m: UNIT_NAMES.get(m["unit"], m["unit"])
+    families: dict[tuple, list[str]] = {}
+    for mid, m in metrics.items():
+        prefix, _, rest = mid.partition("_")
+        if rest and m["label"].endswith(" " + rest):
+            families.setdefault((prefix, m["label"][:-len(rest) - 1], unit(m)), []).append(rest)
+    families = {k: sorted(v) for k, v in families.items() if len(v) >= 3}
+    grouped = {f"{prefix}_{x}" for (prefix, _, _), xs in families.items() for x in xs}
+    lines = ["Metrics in the payload are given as id: [today, prior day]. Prior is null when there is no earlier day.",
+             "A fraction of 0.0123 means 1.23%. Metric ids, with what each measures and its unit:"]
+    lines += [f"- {prefix}_<x>: {head} <x> ({u}), for x in {', '.join(xs)}" for (prefix, head, u), xs in sorted(families.items())]
+    lines += [f"- {mid}: {m['label']} ({unit(m)})" for mid, m in sorted(metrics.items()) if mid not in grouped]
+    return "\n".join(lines)
+
+
 def metrics_with_backtest(ctx) -> dict:
     metrics = ctx.read_json("metrics.json")
     bt = ctx.read_json("backtest.json")
@@ -337,19 +374,20 @@ def analyst(ctx) -> None:
         ctx.write_json(f"analysis.r{ctx.round}.json", ctx.read_json(f"analysis.r{ctx.round - 1}.json"))
         return
     metrics = metrics_with_backtest(ctx)
-    prior = previous_metrics(ctx) or {}
-    for mid, m in metrics.items():
-        if mid in prior:
-            m["prior_value"] = prior[mid]["value"]
-    payload = {"as_of": _day_label(ctx), "metrics": metrics, "limits": ctx.read_json("limit_status.json")["rows"],
-               "delta": ctx.read_json("breach_delta.json"), "backtest": ctx.read_json("backtest.json"),
-               "dq": ctx.read_json("dq_summary.json")["items"], "feedback": feedback}
-    ctx.write_json(f"analysis.r{ctx.round}.json", ctx.agent("risk_analyst", payload))
+    limits = ctx.read_json("limit_status.json")["rows"]
+    # The history of every active limit is sent up front: asking for it by tool would resend the whole request.
+    tools = Tools(ctx)
+    history = {r["limit_id"]: tools.get_breach_history(r["limit_id"]) for r in limits if r["status"] != "ok"}
+    payload = {"as_of": _day_label(ctx), "metrics": compact_metrics(metrics, previous_metrics(ctx)),
+               "limits": compact_rows(limits), "breach_history": history, "delta": ctx.read_json("breach_delta.json"),
+               "backtest": ctx.read_json("backtest.json"), "dq": ctx.read_json("dq_summary.json")["items"],
+               "feedback": feedback}
+    ctx.write_json(f"analysis.r{ctx.round}.json", ctx.agent("risk_analyst", payload, metric_legend(metrics)))
 
 
 def writer(ctx) -> None:
     payload = {"as_of": _day_label(ctx), "status": ctx.read_json("limit_status.json")["status"],
-               "limits": ctx.read_json("limit_status.json")["rows"], "delta": ctx.read_json("breach_delta.json"),
+               "limits": compact_rows(ctx.read_json("limit_status.json")["rows"]), "delta": ctx.read_json("breach_delta.json"),
                "findings": ctx.read_json(f"analysis.r{ctx.round}.json")["findings"], "dq": ctx.read_json("dq_summary.json")["items"],
                "backtest": ctx.read_json("backtest.json"), "metric_ids": sorted(metrics_with_backtest(ctx)),
                "feedback": _feedback(ctx)}
@@ -378,11 +416,12 @@ def reviewer(ctx) -> None:
     limit_status = ctx.read_json("limit_status.json")
     prior = previous_metrics(ctx)
     limits = [{**r, "prior_value": prior[r["metric"]]["value"] if prior else None} for r in limit_status["rows"]]
+    metrics = metrics_with_backtest(ctx)
     payload = {"memo": _resolved_memo(ctx, ctx.round, _day_label(ctx)), "status": limit_status["status"],
-               "metrics": metrics_with_backtest(ctx), "limits": limits, "delta": ctx.read_json("breach_delta.json"),
-               "dq": ctx.read_json("dq_summary.json")["items"], "backtest": ctx.read_json("backtest.json"),
-               "first_day_of_history": prior is None}
-    out = ctx.agent("reviewer", payload)
+               "metrics": compact_metrics(metrics, prior), "limits": compact_rows(limits),
+               "delta": ctx.read_json("breach_delta.json"), "dq": ctx.read_json("dq_summary.json")["items"],
+               "backtest": ctx.read_json("backtest.json"), "first_day_of_history": prior is None}
+    out = ctx.agent("reviewer", payload, metric_legend(metrics))
     ctx.write_json(f"review.r{ctx.round}.json", out)
     if out["verdict"] != "pass":
         ctx.write_json(f"feedback.r{ctx.round + 1}.json", [{"source": "reviewer", **i} for i in out["issues"]])

@@ -9,6 +9,9 @@ import json
 import re
 
 
+COMPACT = (",", ":")  # no padding spaces in the JSON sent to models: the same data in fewer tokens
+
+
 class AgentFailed(RuntimeError):
     """The agent could not produce a valid result within its limits."""
 
@@ -48,23 +51,25 @@ def parse_reply(text: str) -> dict:
     return reply
 
 
-def system_prompt(bundle: dict, role: str) -> str:
+def system_prompt(bundle: dict, role: str, legend: str = "") -> str:
+    """Everything here is the same from day to day, so providers that cache a repeated prefix can reuse it."""
     spec = bundle["agents"]["roles"][role]
     parts = [bundle["prompts"][spec["prompt"]]]
     parts += [bundle["skills"][f"{s}/SKILL.md"] for s in spec.get("skills", [])]
     parts.append(f"Tools you may call: {', '.join(spec['tools']) or 'none'}.")
     parts.append(f"Your final output must satisfy this schema:\n{json.dumps(spec['output_schema'], indent=1)}")
     parts.append(bundle["agents"]["protocol"])
+    parts += [legend] if legend else []
     return "\n\n".join(parts)
 
 
-def run_agent(ctx, role: str, payload: dict, tools) -> dict:
+def run_agent(ctx, role: str, payload: dict, tools, legend: str = "") -> dict:
     """Run one role to completion. `ctx.complete` is journaled, so resuming replays finished calls."""
     spec = ctx.bundle["agents"]["roles"][role]
     retries = ctx.bundle["policy"]["retries"]
     messages = [
-        {"role": "system", "content": system_prompt(ctx.bundle, role)},
-        {"role": "user", "content": json.dumps({"payload": payload}, sort_keys=True, ensure_ascii=False)},
+        {"role": "system", "content": system_prompt(ctx.bundle, role, legend)},
+        {"role": "user", "content": json.dumps({"payload": payload}, sort_keys=True, ensure_ascii=False, separators=COMPACT)},
     ]
     repairs = tool_steps = 0
     while True:
@@ -78,7 +83,7 @@ def run_agent(ctx, role: str, payload: dict, tools) -> dict:
                 if tool_steps > retries["max_tool_steps"]:
                     raise AgentFailed(f"{role} exceeded {retries['max_tool_steps']} tool steps")
                 result = _call_tool(ctx, role, spec, reply, tools)
-                messages.append({"role": "user", "content": json.dumps({"tool_result": result}, sort_keys=True)})
+                messages.append({"role": "user", "content": json.dumps({"tool_result": result}, sort_keys=True, separators=COMPACT)})
                 continue
             if action != "final":
                 raise ValueError(f"unknown action {action!r}")
