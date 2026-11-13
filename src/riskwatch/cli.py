@@ -10,6 +10,7 @@ from pathlib import Path
 
 import yaml
 
+from . import book
 from .config import ROOT, default_paths, deep_merge, load_source_bundle
 from .controller import Controller, Env
 from .improve import versions
@@ -26,8 +27,19 @@ def make_env(mode: str = "live", scenario: dict | None = None) -> Env:
                scripted_faults=(scenario or {}).get("scripted_faults"))
 
 
+def adopt_book(env: Env, path: str | None, start: str) -> None:
+    """With --book, a fresh workspace runs that portfolio instead of the default one."""
+    if path:
+        try:
+            spec = json.loads(Path(path).read_text(encoding="utf-8"))
+        except (OSError, ValueError) as e:
+            raise book.BookError(f"cannot read the portfolio file {path}: {e}") from e
+        book.adopt(env, spec, start)
+
+
 def cmd_init(args) -> None:
     env = make_env()  # a replay sets this itself; init is for `tick`-driven operation
+    adopt_book(env, args.book, args.start)
     env.state.set_kv("book_start", args.start)
     print(f"Book start {args.start}, version {env.version}, state in {env.paths.db}")
 
@@ -44,6 +56,7 @@ def cmd_replay(args) -> None:
         scenario["scripted_faults"] = {}
         scenario["approvals"]["overrides"] = {}
     env = make_env("replay", scenario)
+    adopt_book(env, args.book, args.start or scenario["window"]["start"])
     replay(env, scenario, args.start, args.end, lambda d: print(d, status_summary(env), flush=True), args.takeover,
            args.manual_approvals)
     print(status_summary(env))
@@ -175,12 +188,17 @@ def cmd_web(args) -> None:
     serve(args.port, not args.no_browser)
 
 
+BOOK_HELP = ("JSON file with a portfolio for a fresh workspace: targets (sleeve to weight), nav, rebalance "
+             "(monthly, quarterly or none) and changes (list of {from, targets})")
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="riskwatch", description=__doc__)
     sub = p.add_subparsers(dest="command", required=True)
 
     s = sub.add_parser("init", help="set the first date the book is monitored")
     s.add_argument("--start", required=True)
+    s.add_argument("--book", help=BOOK_HELP)
     s.set_defaults(fn=cmd_init)
 
     s = sub.add_parser("tick", help="scheduler entry point: start whatever is due")
@@ -195,6 +213,7 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--takeover", action="store_true", help="take the lease from a crashed controller")
     s.add_argument("--manual-approvals", action="store_true", help="leave approvals for a person to answer")
     s.add_argument("--no-drills", action="store_true", help="leave out the simulated agent and approver drills")
+    s.add_argument("--book", help=BOOK_HELP)
     s.set_defaults(fn=cmd_replay)
 
     s = sub.add_parser("status", help="show runs, or the stages of one run")
@@ -252,7 +271,7 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
         args.fn(args)
-    except (versions.VersionError, PermanentError) as e:
+    except (versions.VersionError, PermanentError, book.BookError) as e:
         sys.exit(f"error: {e}")
     except LeaseHeld as e:
         sys.exit(f"error: {e}. If that controller crashed, repeat the command with --takeover.")

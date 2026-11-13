@@ -80,7 +80,26 @@ def main() -> int:
             expect(page.get_by_role("button", name="Crash month")).to_have_class("chip on")
             expect(page.locator("#has-drills")).to_contain_text("failure drills")
             page.get_by_text("I review breach days", exact=True).click()
+            expect(page.locator("#book-line")).to_contain_text("Default book: $100m")
+            # The Connect step's name warning would otherwise sit in the screenshot.
+            expect(page.locator(".toast.err")).to_have_count(0, timeout=10000)
             shot("2-run-setup")
+
+            # Your own portfolio: weights must add up before the run can start.
+            page.locator("#customise").click()
+            page.locator("#weights input[data-sleeve=HiTec]").fill("30")
+            expect(page.locator("#book-problem")).to_contain_text("106%")
+            expect(page.locator("#start")).to_be_disabled()
+            page.locator("#weights input[data-sleeve=Other]").fill("6")
+            expect(page.locator("#book-problem")).to_be_hidden()
+            expect(page.locator("#start")).to_be_enabled()
+            page.get_by_text("Quarterly", exact=True).click()
+            page.locator("#add-change").click()
+            expect(page.locator(".change-date")).to_have_value("2020-03-03")
+            shot("2a-portfolio")
+            page.get_by_role("button", name="Reset to default", exact=True).click()
+            page.get_by_role("button", name="Done", exact=True).click()
+            expect(page.locator("#book-line")).to_contain_text("Default book")
             page.locator("#start").click()
             expect(page.get_by_text("days processed")).to_be_visible()
             page.wait_for_timeout(5000)
@@ -109,10 +128,13 @@ def main() -> int:
             # With results in hand, the form suggests continuing from the next unrun day.
             expect(page.locator("#start-date")).to_have_value("2020-03-16")
             expect(page.locator("#fresh-notice")).to_have_count(0)
+            # A workspace keeps its portfolio; only a fresh one can take another.
+            expect(page.locator("#book")).to_contain_text("To change it, start over.")
             page.locator("#start-date").fill("2022-01-03")
             page.locator("#end-date").fill("2022-06-30")
             expect(page.locator("#fresh-notice")).to_be_visible()
             expect(page.locator("#start")).to_have_text("Start over and run")
+            expect(page.locator("#customise")).to_be_visible()
             page.get_by_role("button", name="Crash month").click()
             expect(page.locator("#fresh-notice")).to_have_count(0)
 
@@ -180,6 +202,27 @@ def main() -> int:
             expect(page.locator("#nav")).to_be_hidden()
             if page.evaluate(clipped_js):
                 problems.append("the run list is cut off at phone width")
+
+            # Last, since it replaces the results: a fresh workspace on your own portfolio, at phone width.
+            page.goto(URL + "#/run")
+            page.locator("#start-date").fill("2022-01-03")
+            page.locator("#end-date").fill("2022-01-05")
+            page.locator("#customise").click()
+            page.locator("#weights input[data-sleeve=HiTec]").fill("48")
+            page.locator("#weights input[data-sleeve=Other]").fill("0")
+            page.locator("#weights input[data-sleeve=Hlth]").fill("1")
+            page.locator("#book-nav").fill("20")
+            if page.evaluate("document.documentElement.scrollWidth - document.documentElement.clientWidth") > 1:
+                problems.append("the portfolio form overflows sideways at phone width")
+            page.get_by_text("Approve automatically", exact=True).click()
+            page.once("dialog", lambda d: d.accept())
+            page.locator("#start").click()
+            expect(page.get_by_text("3 of 3 days processed")).to_be_visible(timeout=120000)
+            expect(page.get_by_role("link", name="Open dashboard")).to_be_visible(timeout=30000)
+            # Once the run ends, the form suggests the next period and shows the book the workspace keeps.
+            expect(page.locator("#start-date")).to_have_value("2022-01-06")
+            expect(page.locator("#book")).to_contain_text("Your book: $20m")
+            expect(page.locator("#book")).to_contain_text("largest Business equipment at 48%")
             browser.close()
     finally:
         server.terminate()

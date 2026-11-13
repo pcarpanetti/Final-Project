@@ -39,7 +39,7 @@ class Env:
         self.paths, self.bundle, self.version, self.mode = paths, bundle, version, mode
         self.durable = durable
         self.state = State(paths.db, durable)
-        self.store = store or PointInTimeStore(paths.data)
+        self.store = store or PointInTimeStore(paths.data, paths.book)
         self.llm = LLMClient(self.state, bundle["policy"], scripted_faults, sleep)
 
     def bundle_for(self, version: str) -> dict:

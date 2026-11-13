@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import csv
 import json
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -13,16 +14,17 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 RAW, FEED = ROOT / "data" / "raw", ROOT / "data" / "feed"
+sys.path.insert(0, str(ROOT / "src"))
 
-ASSETS = ["NoDur", "Durbl", "Manuf", "Enrgy", "HiTec", "Telcm", "Shops", "Hlth", "Utils", "Other"]
-TARGET = dict(zip(ASSETS, [0.09, 0.04, 0.11, 0.06, 0.24, 0.05, 0.12, 0.13, 0.04, 0.12]))
+from riskwatch.book import ASSETS, DEFAULT_NAV, DEFAULT_TARGET, POSITIONS_TIME, is_month_end, simulate, vector  # noqa: E402
+
 # The book is anchored at $100m on this date, the eve of the fixed evaluation window, so every row from here
 # on is unchanged by adding earlier history. Earlier rows run the same book backwards to the first month end.
 BOOK_START = "2019-06-28"
-START_NAV = 100_000_000.0
+START_NAV = DEFAULT_NAV
 FIRST_RUN_YEAR = "1986"
 MIN_HISTORY_DAYS = 501
-FEED_TIME, POSITIONS_TIME = "18:00", "18:30"
+FEED_TIME = "18:00"
 
 
 def iso(yyyymmdd: str) -> str:
@@ -64,24 +66,9 @@ def market_records(dates, rets, faults):
     return out
 
 
-def is_month_end(dates, i: int) -> bool:
-    return i + 1 == len(dates) or dates[i + 1][:7] != dates[i][:7]
-
-
 def simulate_book(dates, rets, first: str = BOOK_START, nav: float = START_NAV, stop: str | None = None):
-    """Drift weights daily and rebalance to target on the last trading day of each month."""
-    start = dates.index(first)
-    target = np.array([TARGET[a] for a in ASSETS])
-    weights = target.copy()
-    rows = [(first, weights.copy(), nav)]
-    for i in range(start + 1, len(dates) if stop is None else dates.index(stop) + 1):
-        gross = weights * (1.0 + rets[i])
-        nav *= float(gross.sum())
-        weights = gross / gross.sum()
-        if is_month_end(dates, i):
-            weights = target.copy()
-        rows.append((dates[i], weights.copy(), nav))
-    return rows
+    """The default book: drift weights daily and rebalance to target on the last trading day of each month."""
+    return simulate(dates, rets, first, nav, vector(DEFAULT_TARGET), "monthly", stop=stop)
 
 
 def full_book(dates, rets):

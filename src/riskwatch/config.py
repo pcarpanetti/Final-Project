@@ -33,6 +33,11 @@ class Paths:
     def published(self) -> Path:
         return self.home / "published"
 
+    @property
+    def book(self) -> Path:
+        """The workspace's own portfolio, when it does not run the default book."""
+        return self.home / "book"
+
 
 def default_paths() -> Paths:
     return Paths(

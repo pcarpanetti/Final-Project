@@ -70,7 +70,7 @@ def loop_passed(ctx) -> bool:
 
 # ---- Data ----
 
-LAUNCH_NAV = 100_000_000.0  # the fund's size at launch; equals START_NAV in scripts/build_feed.py
+LAUNCH_NAV = 100_000_000.0  # the default fund's size at launch; a workspace's own book sets `launch_nav`
 DQ_HISTORY_DAYS = 61        # dq_checks compares today with the 60 days before it
 
 
@@ -80,7 +80,7 @@ def history_days(risk_cfg: dict) -> int:
 
 
 def book_launch(ctx) -> str:
-    """The fund launches with LAUNCH_NAV at the close of the trading day before the workspace's first day."""
+    """The fund launches at the close of the trading day before the workspace's first day."""
     first = ctx.state.get_kv("book_start")
     if not first:
         row = ctx.state.one("SELECT MIN(as_of) d FROM runs WHERE workflow = 'eod'")
@@ -118,10 +118,10 @@ def ingest(ctx) -> None:
     # Today's weights and the day before, which is all the risk figures use.
     launch = book_launch(ctx)
     weights = snap.weights.loc[launch:as_of].tail(2)
-    # NAV rescaled so the fund starts at LAUNCH_NAV. Drawdown needs only the peak since launch, so the
+    # NAV rescaled so the fund starts at its launch NAV. Drawdown needs only the peak since launch, so the
     # launch, peak and today rows are kept, which keeps each run's inputs small over decades.
     nav = snap.nav.loc[launch:as_of]
-    nav = nav * (LAUNCH_NAV / nav.loc[launch])
+    nav = nav * (float(ctx.state.get_kv("launch_nav") or LAUNCH_NAV) / nav.loc[launch])
     nav = nav.loc[sorted({launch, nav.idxmax(), as_of})]
 
     ctx.write_text("inputs/returns.csv", _csv(returns))

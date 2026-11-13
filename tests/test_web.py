@@ -62,8 +62,8 @@ def connect_offline(web):
     assert web.post("/api/settings", {"name": "Test Approver", "provider": "scripted"})[0] == 200
 
 
-def run_to_end(web, start="2020-03-16", end="2020-03-17", approvals="manual", drills=False):
-    code, job = web.post("/api/start", {"start": start, "end": end, "approvals": approvals, "drills": drills})
+def run_to_end(web, start="2020-03-16", end="2020-03-17", approvals="manual", drills=False, book=None):
+    code, job = web.post("/api/start", {"start": start, "end": end, "approvals": approvals, "drills": drills, "book": book})
     assert code == 200, job
     deadline = time.time() + 120
     while time.time() < deadline:
@@ -174,6 +174,35 @@ def test_a_period_that_would_leave_a_gap_needs_a_fresh_workspace(web):
     assert web.post("/api/start-over")[0] == 200
     assert run_to_end(web, "2022-01-03", "2022-01-05", approvals="auto")["state"] == "finished"
     assert sorted(r["as_of"] for r in web.get("/api/runs")["runs"] if r["workflow"] == "eod") == ["2022-01-03", "2022-01-04", "2022-01-05"]
+
+
+HALF_AND_HALF = {"NoDur": 0.5, "Durbl": 0, "Manuf": 0, "Enrgy": 0, "HiTec": 0, "Telcm": 0, "Shops": 0, "Hlth": 0.5, "Utils": 0, "Other": 0}
+
+
+def test_the_app_runs_your_own_portfolio_and_keeps_it(web):
+    connect_offline(web)
+    catalog = web.get("/api/catalog")["book"]
+    assert [a for a, _ in catalog["sleeves"]][:2] == ["NoDur", "Durbl"] and catalog["default"]["nav"] == 100_000_000
+    own = {"targets": HALF_AND_HALF, "nav": 25_000_000, "rebalance": "quarterly", "changes": []}
+    assert run_to_end(web, approvals="auto", book=own)["state"] == "finished"
+    assert web.get("/api/summary")["book"] == {**own, "nav": 25_000_000.0, "targets": {k: float(v) for k, v in HALF_AND_HALF.items()}}
+    nav = web.app.paths.artifacts / "eod-2020-03-16" / "inputs" / "nav.csv"
+    assert nav.read_text(encoding="utf-8").splitlines()[1] == "2020-03-13,25000000"
+    # Continuing needs no book, but a different one needs a fresh workspace.
+    code, body = web.post("/api/start", {"start": "2020-03-18", "end": "2020-03-18", "approvals": "auto", "book": {**own, "nav": 30_000_000}})
+    assert code == 400 and "Start over" in body["error"]
+    with zipfile.ZipFile(io.BytesIO(web.raw("/api/download")[1])) as z:
+        assert "Own portfolio: $25.0m at launch, rebalanced to target each quarter end." in z.read("SUMMARY.md").decode()
+    assert web.post("/api/start-over")[0] == 200
+    assert web.get("/api/summary")["book"] is None
+
+
+def test_the_app_refuses_a_portfolio_that_cannot_run(web):
+    connect_offline(web)
+    for targets, message in (({**HALF_AND_HALF, "Durbl": -0.1, "Manuf": 0.1}, "negative"), ({**HALF_AND_HALF, "Hlth": 0.4}, "90.00%")):
+        code, body = web.post("/api/start", {"start": "2020-03-16", "end": "2020-03-17", "book": {"targets": targets}})
+        assert code == 400 and message in body["error"]
+    assert web.get("/api/summary")["job"] is None
 
 
 def test_full_path_from_connect_to_download(web):

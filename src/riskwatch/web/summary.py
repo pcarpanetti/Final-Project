@@ -1,9 +1,12 @@
 """The period summary that goes at the top of the downloadable output."""
 from __future__ import annotations
 
+from ..book import describe
 
-def period_summary(rows, backend: str, version: str) -> str:
-    """`rows` runs a read-only query, so this works from any state database."""
+
+def period_summary(rows, backend: str, version: str, book: dict | None = None) -> str:
+    """`rows` runs a read-only query, so this works from any state database. `book` is the workspace's own
+    portfolio, or None for the default one."""
     runs = rows("SELECT workflow, status, COUNT(*) n, MIN(as_of) first, MAX(as_of) last FROM runs GROUP BY workflow, status")
     eod = rows("SELECT MIN(as_of) first, MAX(as_of) last, COUNT(*) n FROM runs WHERE workflow = 'eod'")
     ledger = rows("SELECT COUNT(*) n, COALESCE(SUM(hit), 0) hits FROM var_ledger WHERE hit IS NOT NULL")
@@ -17,7 +20,7 @@ def period_summary(rows, backend: str, version: str) -> str:
     lines = ["# RiskWatch output summary", "", f"Period: {period['first']} to {period['last']} ({period['n']} daily runs)",
              f"Model backend: {backend}", f"Workflow version: `{version}`", "",
              "Market returns are real (Ken French data library). The book, limits and vendor faults are fictional.",
-             "", "## Runs", "", "| Workflow | Status | Count |", "|---|---|---|"]
+             "", "## Portfolio", "", *describe(book), "", "## Runs", "", "| Workflow | Status | Count |", "|---|---|---|"]
     lines += [f"| {r['workflow']} | {r['status']} | {r['n']} |" for r in runs]
 
     if ledger and ledger[0]["n"]:

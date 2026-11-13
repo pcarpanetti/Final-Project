@@ -103,7 +103,9 @@ def scorecard(env: Env, faults: list[dict]) -> dict:
 
 
 def run_scorecard(bundle: dict, root: Path, store: PointInTimeStore | None = None) -> dict:
-    """Replay the fixed window in a throwaway home. Nothing here touches production state."""
+    """Replay the fixed window in a throwaway home. Nothing here touches production state.
+
+    The home starts empty, so the scorecard always runs the feed's default book, never a workspace's own portfolio."""
     scenario = load_scenario(root)
     faults = yaml.safe_load((root / "data" / "faults.yaml").read_text(encoding="utf-8"))
     store = store or PointInTimeStore(root / "data" / "feed")

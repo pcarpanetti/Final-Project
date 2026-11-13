@@ -15,7 +15,7 @@ across days, scores its own VaR forecasts, restates when vendors correct data, r
 work, and accepts changes to itself only through a fixed baseline test.
 
 It runs on **real market data** (Ken French daily industry returns) for any period from 1986 to September 2026, on a
-**fictional book**. The fixed test year, July 2019 to June 2020, covers the 2020 crash and adds injected vendor faults
+**fictional book**: the default one, or one you set up with your own weights, size, rebalancing and changes of targets. The fixed test year, July 2019 to June 2020, covers the 2020 crash and adds injected vendor faults
 to give labelled ground truth.
 
 ## Run it in your browser
@@ -24,7 +24,7 @@ to give labelled ground truth.
 `http://127.0.0.1:8765/`, and the app walks you through everything:
 
 1. **Connect a model:** your name, then Claude login, an API key and address for any provider, or the offline demo.
-2. **Run the workflow:** choose a period and who approves, and watch it progress.
+2. **Run the workflow:** choose a period, who approves and, if you like, your own portfolio, and watch it progress.
 3. **Approve:** read each flagged memo, then approve, reject or request changes.
 4. **Results:** dashboard, reports, a run inspector, and a one-click ZIP of the full output.
 
@@ -95,6 +95,8 @@ riskwatch status eod-2020-03-09      # one run, stage by stage
 Memos land in `runtime/published/memos/`. The full fixed year is `riskwatch replay` with no dates, which takes about
 10 minutes. Any period from 1986-01-02 to 2026-09-30 works in a fresh home, for example Black Monday:
 `RISKWATCH_HOME=runtime/1987 riskwatch replay --start 1987-10-01 --end 1987-10-30 --no-drills`.
+In a fresh home, `--book my_book.json` runs your own portfolio instead of the default one. `riskwatch replay --help`
+describes the file.
 
 **2. Act as the approver.** Start fresh and drive one day by hand:
 

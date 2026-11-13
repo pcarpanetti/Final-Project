@@ -30,6 +30,7 @@ from urllib.parse import parse_qs, urlparse
 
 import yaml
 
+from .. import book
 from ..config import ROOT, default_paths
 from ..controller import Controller, Env
 from ..improve import versions
@@ -240,8 +241,9 @@ class App:
         paths = self.paths
         version = versions.active(paths)
         faults = load_scenario(ROOT)["scripted_faults"] if self.job and self.job.get("drills") else None
-        return Env(paths, versions.load_snapshot(paths, version), version, store=self.store, mode="replay",
-                   scripted_faults=faults)
+        own = book.load(paths) is not None  # then Env reads that workspace's positions itself
+        return Env(paths, versions.load_snapshot(paths, version), version, store=None if own else self.store,
+                   mode="replay", scripted_faults=faults)
 
     def apply_decision(self, run_id: str, decision: str, note: str) -> None:
         env = self.make_env()
@@ -284,7 +286,8 @@ def api_summary(app: App, q: dict) -> dict:
     return {"continue_from": continue_from(app, last[0]["as_of"] if last else None, book_start), "settings": app.public_settings(), "backend": app.backend_label(), "job": app.job_view(), "counts": counts,
             "pending": pending[0]["n"] if pending else 0, "escalations": open_esc[0]["n"] if open_esc else 0,
             "last_day": last[0]["as_of"] if last else None, "queued_decisions": app.queued,
-            "decision_error": app.decision_error, "version": version, "book_start": book_start}
+            "decision_error": app.decision_error, "version": version, "book_start": book_start,
+            "book": book.load(app.paths) if book_start else None}
 
 
 def continue_from(app: App, last_day: str | None, book_start: str) -> str | None:
@@ -308,7 +311,9 @@ def api_catalog(app: App, q: dict) -> dict:
     return {"providers": {k: {"base_url": v["base_url"], "protocol": v["protocol"], "needs_key": bool(v["key_env"])}
                           for k, v in PRESETS.items()},
             "first_day": first, "last_day": calendar[-1], "calendar_size": len(calendar),
-            "drill_window": load_scenario(ROOT)["window"], "budgets": bundle["policy"]["budgets"]}
+            "drill_window": load_scenario(ROOT)["window"], "budgets": bundle["policy"]["budgets"],
+            "book": {"sleeves": [[a, book.LABELS[a]] for a in book.ASSETS], "default": book.DEFAULT,
+                     "rebalance": list(book.REBALANCE)}}
 
 
 def api_claude(app: App, q: dict) -> dict:
@@ -376,11 +381,26 @@ def api_start_run(app: App, body: dict) -> dict:
     manual = body.get("approvals") == "manual"
     drills = bool(body.get("drills")) and app.settings["provider"] == "scripted"
     args = ["replay", "--start", start, "--end", end]
+    if body.get("book") is not None:
+        args += ["--book", str(stage_book(app, body["book"], book_start or start))]
     args += ["--manual-approvals"] if manual else []
     args += [] if drills else ["--no-drills"]
     args += ["--takeover"] if body.get("resume") or (app.job and app.job["state"] in ("stopped", "failed")) else []
     meta = {"start": start, "end": end, "manual": manual, "drills": drills, "backend": app.backend_label()}
     return app.start_job("run", args, meta)
+
+
+def stage_book(app: App, spec, start: str) -> Path:
+    """Check the portfolio here, so a mistake shows on the form, and hand it to the run as a file."""
+    try:
+        normal = book.validate(spec, app.store.calendar, start)
+    except book.BookError as e:
+        raise ApiError(str(e)) from e
+    if kv(app, "book_start") and normal != book.load(app.paths):
+        raise ApiError("This workspace already runs a different portfolio. Use Start over to change it.")
+    path = app.workspace / "book-request.json"
+    path.write_text(json.dumps(spec), encoding="utf-8")
+    return path
 
 
 def api_stop(app: App, body: dict) -> dict:
@@ -517,7 +537,7 @@ def build_output_zip(app: App) -> bytes:
     """The full output of the workspace: everything published, the period summary and the audit tables."""
     buffer = io.BytesIO()
     with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as z:
-        z.writestr("SUMMARY.md", period_summary(app.rows, app.backend_label(), versions.active(app.paths)))
+        z.writestr("SUMMARY.md", period_summary(app.rows, app.backend_label(), versions.active(app.paths), book.load(app.paths)))
         for path in published_files(app):
             z.write(path, Path("published") / path.relative_to(app.paths.published))
         tables = {"runs": "SELECT run_id, workflow, as_of, cutoff, version, status, trigger, round, degraded, llm FROM runs ORDER BY as_of",

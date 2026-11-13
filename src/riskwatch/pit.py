@@ -5,11 +5,15 @@ Every read takes a cutoff, and a row published after that cutoff does not exist 
 from __future__ import annotations
 
 import bisect
+import csv
 import json
 from dataclasses import dataclass
 from pathlib import Path
 
 import pandas as pd
+
+POSITIONS = "positions.csv"
+POSITION_COLUMNS = ["as_of", "asset", "weight", "nav", "published_at", "vendor_seq"]
 
 
 @dataclass
@@ -25,13 +29,24 @@ class Snapshot:
     max_published_at: str
 
 
+def write_positions(folder: Path, rows: list[tuple]) -> None:
+    """Write an administrator's positions file, one row per (as_of, asset), in the feed's format."""
+    folder.mkdir(parents=True, exist_ok=True)
+    with open(folder / POSITIONS, "w", newline="\n") as f:
+        w = csv.writer(f, lineterminator="\n")
+        w.writerow(POSITION_COLUMNS)
+        w.writerows(rows)
+
+
 class PointInTimeStore:
-    def __init__(self, feed_dir: Path):
-        read = lambda name: pd.read_csv(feed_dir / name, dtype={"as_of": str, "published_at": str})
-        self.market = read("market.csv")
-        self.factors = read("factors.csv")
-        self.positions = read("positions.csv")
-        self.notes = read("vendor_notes.csv").fillna("")
+    def __init__(self, feed_dir: Path, book_dir: Path | None = None):
+        """With `book_dir` holding its own positions file, those positions replace the feed's default book."""
+        read = lambda folder, name: pd.read_csv(folder / name, dtype={"as_of": str, "published_at": str})
+        self.market = read(feed_dir, "market.csv")
+        self.factors = read(feed_dir, "factors.csv")
+        own = book_dir is not None and (book_dir / POSITIONS).exists()
+        self.positions = read(book_dir if own else feed_dir, POSITIONS)
+        self.notes = read(feed_dir, "vendor_notes.csv").fillna("")
         self.calendar: list[str] = pd.read_csv(feed_dir / "calendar.csv", dtype=str)["date"].tolist()
         meta = feed_dir / "meta.json"
         self.meta: dict = json.loads(meta.read_text(encoding="utf-8")) if meta.exists() else {}

@@ -46,7 +46,11 @@ Your key stays on this computer. It is held in memory, and it is saved to disk o
    labelled fault and drill, and **Black Monday 1987** shows the long history.
 2. Choose who approves. **I review breach days** shows you the full process. **Approve automatically** is the
    fastest way to a full output.
-3. Click **Start run**.
+3. Optionally, set the portfolio. The default book is $100m across ten industry sleeves, rebalanced monthly. Click
+   **Customise** to set your own target weight for each sleeve (they must add up to 100%), the starting NAV, and
+   whether it rebalances monthly, quarterly or never. **Add a change of targets** trades the book to new weights
+   from a date you choose, as a portfolio manager would.
+4. Click **Start run**.
 
 You can watch progress, and **Stop** then **Resume** carries on without repeating anything.
 
@@ -55,9 +59,15 @@ exist only between July 2019 and June 2020. A line under the dates says whether 
 drills run only in the offline demo, and they switch on by themselves for periods that overlap those dates. Other
 periods run on clean market data.
 
+A workspace keeps the portfolio it started with. The limits, stress shocks and liquidity figures were set for the
+default book, so a very different book can breach a limit from its first day. That is the workflow doing its job.
+A custom book's positions are clean: the default book's injected positions fault is not part of it. The test on the
+**Improve** page always uses the default book, so its results stay comparable.
+
 A new run continues the results already in the app, so the dates start from the next day not yet run. If you pick a
 period that doesn't follow on from them, the button becomes **Start over and run**: the current results move to an
-archive folder and the new period starts fresh. Otherwise the app would have to fill in every day in between.
+archive folder and the new period starts fresh, with whatever portfolio you set. Otherwise the app would have to fill
+in every day in between.
 
 Other periods worth trying: the 2008 financial crisis (2 September to 28 November 2008), the 2022 rate shock
 (3 January to 30 June 2022) and the first half of 2020 (crash and recovery, with monthly reviews).

@@ -378,13 +378,109 @@ function pageRun() {
   if (!summary.settings.configured) { location.hash = "#/connect"; return; }
   const offline = summary.settings.provider === "scripted";
   const workspace = () => (summary.book_start ? { from: summary.book_start, to: summary.last_day, next: summary.continue_from } : null);
+  const form = { approvals: "manual" };
   // A workspace with results suggests continuing it for about a month; otherwise the crash month.
-  const begun = workspace();
-  const form = begun && begun.next ? { start: begun.next, end: [addDays(begun.next, 27), catalog.last_day].sort()[0] }
-    : { start: SHORTCUTS[0][1], end: SHORTCUTS[0][2] };
-  form.approvals = "manual";
+  const suggest = () => {
+    const ws = workspace();
+    [form.start, form.end] = ws && ws.next ? [ws.next, [addDays(ws.next, 27), catalog.last_day].sort()[0]] : SHORTCUTS[0].slice(1);
+  };
+  suggest();
   const setup = h("div");
   const live = h("div");
+  // A period that does not follow on from the workspace's results starts a fresh one, which may take a new book.
+  const freshFor = (ws) => !ws || form.start < ws.from || form.start > ws.next;
+
+  // The portfolio is edited in percent and sent as fractions. A workspace keeps the book it began with.
+  const SLEEVES = catalog.book.sleeves;
+  const asPct = (targets) => Object.fromEntries(SLEEVES.map(([a]) => [a, Math.round(targets[a] * 1e4) / 100]));
+  const resetBook = () => ({ open: false, targets: asPct(catalog.book.default.targets), nav: catalog.book.default.nav / 1e6,
+    rebalance: catalog.book.default.rebalance, changes: [] });
+  let book = resetBook();
+  const bookSpec = () => {
+    const frac = (t) => Object.fromEntries(SLEEVES.map(([a]) => [a, (Number(t[a]) || 0) / 100]));
+    return { targets: frac(book.targets), nav: book.nav * 1e6, rebalance: book.rebalance,
+      changes: book.changes.map((c) => ({ from: c.from, targets: frac(c.targets) })) };
+  };
+  const isDefaultBook = (spec) => spec.nav === catalog.book.default.nav && spec.rebalance === catalog.book.default.rebalance
+    && !spec.changes.length && SLEEVES.every(([a]) => Math.abs(spec.targets[a] - catalog.book.default.targets[a]) < 1e-9);
+  const sum = (t) => SLEEVES.reduce((n, [a]) => n + (Number(t[a]) || 0), 0);
+  const bookProblem = () => {
+    const off = [book.targets, ...book.changes.map((c) => c.targets)].find((t) => Math.abs(sum(t) - 100) > 0.001);
+    if (off) return `Weights must add up to 100%. One set adds up to ${+sum(off).toFixed(2)}%.`;
+    if (!(book.nav > 0)) return "The starting NAV must be more than zero.";
+    if (book.changes.some((c) => !c.from)) return "Each change of targets needs a date.";
+    return "";
+  };
+  const describeBook = (spec) => {
+    const [top] = SLEEVES.map(([a, label]) => [label, spec.targets[a]]).sort((x, y) => y[1] - x[1]);
+    const every = { monthly: "rebalanced monthly", quarterly: "rebalanced quarterly", none: "never rebalanced" }[spec.rebalance];
+    const n = spec.changes.length;
+    return `${isDefaultBook(spec) ? "Default book" : "Your book"}: $${+(spec.nav / 1e6).toFixed(1)}m across ten industry sleeves, `
+      + `largest ${top[0]} at ${+(top[1] * 100).toFixed(1)}%, ${every}${n ? `, ${n} change${n > 1 ? "s" : ""} of targets` : ""}.`;
+  };
+  // Typing in a weight updates the totals in place, so the field keeps its focus.
+  const totals = [];
+  const refreshBook = () => {
+    for (const [t, el] of totals) {
+      const ok = Math.abs(sum(t) - 100) <= 0.001;
+      el.className = "small total" + (ok ? "" : " off");
+      el.textContent = `Total ${+sum(t).toFixed(2)}%${ok ? "" : ", must be 100%"}`;
+    }
+    const problem = bookProblem();
+    const note = document.getElementById("book-problem");
+    if (note) { note.hidden = !problem; note.textContent = problem; }
+    const button = document.getElementById("start");
+    if (button) button.disabled = !tradingDaysRough(form.start, form.end) || Boolean(problem && freshFor(workspace()));
+  };
+  const weightGrid = (targets, id) => {
+    const total = h("p", { class: "small total" });
+    totals.push([targets, total]);
+    return h("div", {}, h("div", { class: "weights", id }, SLEEVES.map(([a, label]) => h("label", { class: "field" }, label,
+      h("input", { type: "number", min: 0, max: 100, step: 0.5, value: targets[a], "data-sleeve": a,
+        oninput: (e) => { targets[a] = e.target.value === "" ? 0 : Number(e.target.value); refreshBook(); } })))), total);
+  };
+  const renderBook = (editable) => {
+    totals.length = 0;
+    const card = h("div", { class: "card", id: "book" }, h("h2", {}, "Portfolio"));
+    if (!editable) {
+      card.append(h("p", { class: "small", style: "margin:0" }, describeBook(summary.book || catalog.book.default),
+        " To change it, start over."));
+      return card;
+    }
+    if (!book.open) {
+      card.append(h("div", { class: "row" }, h("p", { class: "small grow", id: "book-line", style: "margin:0" }, describeBook(bookSpec())),
+        h("button", { id: "customise", onclick: () => { book.open = true; renderSetup(); } }, "Customise")));
+      return card;
+    }
+    const rebalance = (value, label) => h("label", { class: value === book.rebalance ? "on" : "" },
+      h("input", { type: "radio", name: "rebalance", value, checked: value === book.rebalance, onchange: () => { book.rebalance = value; renderSetup(); } }), label);
+    card.append(
+      h("p", { class: "muted small", style: "margin-top:0" }, "Target weight of each industry sleeve, in percent. No short positions."),
+      weightGrid(book.targets, "weights"),
+      h("div", { class: "grid cols-2", style: "margin-top:12px" },
+        h("label", { class: "field" }, "Starting NAV, $ millions",
+          h("input", { type: "number", id: "book-nav", min: 0.1, step: "any", value: book.nav, oninput: (e) => { book.nav = Number(e.target.value); refreshBook(); } })),
+        h("div", { class: "field" }, h("div", { class: "field-label" }, "Rebalance to target"),
+          h("div", { class: "segment" }, rebalance("monthly", "Monthly"), rebalance("quarterly", "Quarterly"), rebalance("none", "Never")))),
+      ...book.changes.map((c, i) => h("div", { class: "change" },
+        h("div", { class: "row" }, h("label", { class: "field grow", style: "margin:0" }, "New targets from",
+          h("input", { type: "date", class: "change-date", min: form.start, max: catalog.last_day, value: c.from, onchange: (e) => { c.from = e.target.value; refreshBook(); } })),
+          h("button", { onclick: () => { book.changes.splice(i, 1); renderSetup(); } }, "Remove")),
+        weightGrid(c.targets))),
+      h("p", { class: "notice bad", id: "book-problem", hidden: true, style: "margin:12px 0 0" }),
+      h("div", { class: "row", style: "margin-top:12px" },
+        h("button", { id: "add-change", onclick: () => {
+          const last = book.changes.length ? book.changes[book.changes.length - 1].targets : book.targets;
+          book.changes.push({ from: [addDays(form.start, 14), form.end].sort()[0], targets: { ...last } });
+          renderSetup();
+        } }, "Add a change of targets"),
+        h("button", { onclick: () => { book = { ...resetBook(), open: true }; renderSetup(); } }, "Reset to default"),
+        h("button", { onclick: () => { book.open = false; renderSetup(); } }, "Done")),
+      h("p", { class: "muted small", style: "margin:12px 0 0" }, "The limits, stress shocks and liquidity figures are set for the default book, ",
+        "so a very different book may breach from the first day. A custom book has clean positions, without the default ",
+        "book's injected positions fault, and the test on the Improve page always uses the default book."));
+    return card;
+  };
 
   const renderSetup = () => {
     const days = tradingDaysRough(form.start, form.end);
@@ -393,7 +489,7 @@ function pageRun() {
     const heavy = !offline && days > 30;
     const drills = hasDrills(form.start, form.end);
     const ws = workspace();
-    const fresh = ws && (form.start < ws.from || form.start > ws.next);
+    const fresh = ws && freshFor(ws);
     const date = (key, label) => h("label", { class: "field" }, label, h("input", { type: "date", id: `${key}-date`, min: catalog.first_day,
       max: catalog.last_day, value: form[key], onchange: (e) => { form[key] = e.target.value; renderSetup(); } }));
     const approval = (value, label) => h("label", { class: value === form.approvals ? "on" : "" },
@@ -414,6 +510,7 @@ function pageRun() {
         h("p", { class: "muted small", style: "margin:10px 0 0" }, form.approvals === "manual"
           ? "Flagged days wait in the Approve step, while later days keep running."
           : "A simulated approver signs everything, for a fast full output.")),
+      renderBook(!ws || fresh),
       h("div", { class: "card" },
         h("div", { class: "row" },
           h("div", { class: "grow" }, h("strong", {}, `About ${days} trading days`),
@@ -427,11 +524,12 @@ function pageRun() {
         ws && !fresh ? h("p", { class: "muted small", style: "margin-top:12px" },
           `Continues this workspace's results from ${longDate(ws.from)}. `,
           h("button", { onclick: guard(startOver) }, "Start over")) : null));
+    refreshBook();
   };
 
   const start = async (resume) => {
     await api("/api/start", { ...(resume && summary.job ? { start: summary.job.start, end: summary.job.end, approvals: summary.job.manual ? "manual" : "auto", drills: summary.job.drills }
-      : { ...form, drills: offline && hasDrills(form.start, form.end) }), resume });
+      : { ...form, drills: offline && hasDrills(form.start, form.end), book: freshFor(workspace()) ? bookSpec() : undefined }), resume });
     await poll();
     renderLive();
   };
@@ -485,13 +583,22 @@ function pageRun() {
     live, setup);
   renderSetup();
   renderLive();
+  const isRunning = () => Boolean(summary.job && summary.job.state === "running" && summary.job.kind === "run");
+  let wasRunning = isRunning();
   onPoll = async () => {
     renderLive();
-    if (summary.job && summary.job.state === "running" && summary.job.kind === "run") {
+    const running = isRunning();
+    if (running) {
       const data = await api("/api/runs");
       const active = data.runs.find((r) => r.status === "running");
       activity.textContent = active ? `Working on ${active.run_id}` : "";
+    } else if (wasRunning) {
+      // The workspace now has results: suggest the next period, and show the book it keeps.
+      suggest();
+      book = resetBook();
+      renderSetup();
     } else if (setup.hidden === false && !setup.childElementCount) renderSetup();
+    wasRunning = running;
   };
 }
 

@@ -22,10 +22,16 @@ anchored at $100m on 2019-06-28, the eve of the fixed evaluation window, so exte
 earlier row of the feed byte-for-byte unchanged. A workspace then launches the fund with $100m on the trading
 day before its own first day, so NAV and drawdown are measured from the period you choose.
 
+A workspace can instead run its own book: target weights for the ten sleeves, a starting NAV, monthly, quarterly or
+no rebalancing, and dated changes of targets. `src/riskwatch/book.py` writes that book's positions file into the
+workspace before its first run, using the same simulation as `build_feed.py`, and runs read it through the
+point-in-time store like any other input. Its positions are clean: the injected positions fault belongs to the default
+book. Evaluation always uses the default book.
+
 What is real and what is not:
 
 - **Real:** all market returns, except the handful of rows listed in `faults.yaml`.
-- **Fictional:** the portfolio, its NAV, target weights and limits. The ten industry portfolios
+- **Fictional:** the portfolio, its NAV, target weights and limits, whether default or your own. The ten industry portfolios
   stand in for ten investable sleeves. No client or employer data is used.
 - **Injected:** the vendor faults in `faults.yaml`. They exist so the evaluation has labelled
   ground truth. Only `build_feed.py` and the evaluation harness read that file; a test checks

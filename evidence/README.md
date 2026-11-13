@@ -121,6 +121,10 @@ promotion is a person's decision. Three reasons to pause before making it:
   the rule looks only at VaR and limit status. All three replay corrections were immaterial, so the material path is
   covered by a test only. Adding a P&L threshold is a natural next candidate.
 - **Scale.** One controller, one worker, SQLite. Fine for one book, not for many.
+- **A custom portfolio uses limits set for the default one.** Limits, stress shocks and ADV were calibrated to the
+  default book, so a very different book may breach from its first day. Custom books are tested for weights,
+  launch NAV, cutoffs and rebalancing, and to leave the default book and the baseline unchanged. They have no
+  labelled faults of their own.
 - **Periods outside 2019-20 have no ground truth.** The six labelled faults and every drill sit in the test window,
   so other periods test the workflow on clean data only. Their limits, stress shocks and liquidity figures were set
   for 2019-20 markets. ADV is held at 2019 levels, so on long runs liquidity readings drift as NAV grows. Only
