@@ -71,6 +71,11 @@ Each row is injected by `scenarios/replay.yaml` or `data/faults.yaml`, and the o
 Baseline `9ade7848e5dc` is 500-day equal-weighted historical VaR. All candidates used the same fixed window and the rules
 in `eval/policy.yaml`, committed in `2e91b15` before any candidate ran.
 
+All four were re-scored on the final code, against a baseline frozen again on that code. Harness changes after the
+first scoring (the reviewer receiving more facts) raised token use by 17% for the baseline and candidates alike, and
+the token guardrail compares the two. Every decision and every behaviour field matched the first scoring. The
+original baseline file is in Git history, and `versions/registry.jsonl` records both rounds of evaluation.
+
 | Candidate | Exceptions (2.5 expected) | Kupiec p | Independence p | Basel zone | Average VaR | Decision |
 |---|---|---|---|---|---|---|
 | Baseline | 10 | 0.0003 | 0.051 | Red | 3.72% | |
@@ -96,9 +101,9 @@ promotion is a person's decision. Three reasons to pause before making it:
 - **No HTTP provider has been called for real.** The OpenAI-style and Anthropic adapters were tested only against a local
   fake server, because no API key was available. Only the Claude login route has reached a real model. A real vendor may
   differ in ways the fake does not, so `Test connection` in the app is the first step.
-- **Evaluations ran before the last harness fixes.** The candidates were scored before the reviewer received more facts.
-  The baseline replay confirms behaviour is unchanged, but token use rose 17%, and the candidates were not re-scored.
-  Harness code is outside a version's hash, which is why `scripts/recheck_baseline.py` exists.
+- **Harness code is outside a version's hash.** A code change can move results without a new version, so
+  `scripts/recheck_baseline.py` replays the baseline and the candidates were re-scored on the final code. A later
+  code change would need the same again.
 - **The real writer has a repeat habit.** In the first run it typed "99th" twice. The verifier caught it each time at the
   cost of a round. Adding that to the skill is a prompt change, so it would be a new version and has to go through evaluation.
 - **The scripted agents are simple rules.** Their memos read flat because they are templates. They also can't really

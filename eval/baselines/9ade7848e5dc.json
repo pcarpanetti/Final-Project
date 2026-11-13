@@ -1,6 +1,6 @@
 {
  "backend": "scripted:rules-v1",
- "elapsed_seconds": 228.8,
+ "elapsed_seconds": 80.0,
  "leakage": {
   "days": [
    {
@@ -45,7 +45,7 @@
   "kupiec_p": 0.00031898450821338356,
   "llm_calls": 928,
   "llm_cost_usd": 0.0,
-  "llm_tokens": 1835775,
+  "llm_tokens": 2152336,
   "memos_published": 252,
   "runs_needing_revision": 6,
   "status_counts": {
