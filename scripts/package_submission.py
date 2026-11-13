@@ -1,4 +1,4 @@
-"""Build 25210660154-PabloCarpanetti-final-project.zip from the committed local folder, including the full .git/.
+"""Build 25210660154-final-project.zip, the name the brief asks for, from the committed local folder, including the full .git/.
 
 Refuses to run with uncommitted changes, because the brief says to commit before compressing. The ZIP
 is written beside the project folder and checked by unpacking it and running `git fsck` on the copy.
@@ -14,7 +14,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 STUDENT_ID = "25210660154"
-NAME = "PabloCarpanetti"
 SKIP_DIRS = {"runtime", "__pycache__", ".pytest_cache", ".venv", "riskwatch.egg-info", "build", "dist"}
 SKIP_FILES = {".env", "final_project.pdf"}
 
@@ -30,7 +29,7 @@ def main() -> None:
     if git("rev-parse", "--is-shallow-repository") != "false":
         sys.exit("repository is shallow")
 
-    target = ROOT.parent / f"{STUDENT_ID}-{NAME}-final-project.zip"
+    target = ROOT.parent / f"{STUDENT_ID}-final-project.zip"
     count = 0
     with zipfile.ZipFile(target, "w", zipfile.ZIP_DEFLATED) as z:
         for folder, dirs, files in os.walk(ROOT):
