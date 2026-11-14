@@ -102,10 +102,11 @@ def scorecard(env: Env, faults: list[dict]) -> dict:
     }
 
 
-def run_scorecard(bundle: dict, root: Path, store: PointInTimeStore | None = None) -> dict:
+def run_scorecard(bundle: dict, root: Path, store: PointInTimeStore | None = None, progress=None) -> dict:
     """Replay the fixed window in a throwaway home. Nothing here touches production state.
 
-    The home starts empty, so the scorecard always runs the feed's default book, never a workspace's own portfolio."""
+    The home starts empty, so the scorecard always runs the feed's default book, never a workspace's own portfolio.
+    `progress`, if given, receives one line of text per replayed day and one for the leakage test."""
     scenario = load_scenario(root)
     faults = yaml.safe_load((root / "data" / "faults.yaml").read_text(encoding="utf-8"))
     store = store or PointInTimeStore(root / "data" / "feed")
@@ -115,10 +116,15 @@ def run_scorecard(bundle: dict, root: Path, store: PointInTimeStore | None = Non
         home = Path(tmp)
         env = Env(Paths(root, home, home / "versions", root / "data" / "feed"), bundle, version, store=store,
                   mode="replay", scripted_faults=scenario["scripted_faults"], sleep=lambda s: None, durable=False)
-        replay(env, scenario)
+        days = store.trading_days(scenario["window"]["start"], scenario["window"]["end"])
+        done = iter(range(1, len(days) + 1))
+        report = (lambda day: progress(f"Replaying the test year: day {next(done)} of {len(days)} ({day})")) if progress else None
+        replay(env, scenario, on_day=report)
         card = scorecard(env, faults)
         env.close()
     probe_days = yaml.safe_load((root / "eval" / "policy.yaml").read_text(encoding="utf-8"))["leakage_probe_days"]
+    if progress:
+        progress(f"Checking that no later data leaks into a day ({len(probe_days)} probe days)")
     leak = perturbation_test(bundle, version, root, store, probe_days)
     return {"version": version, "backend": _backend(), "scorecard": card, "leakage": leak,
             "elapsed_seconds": round(time.time() - started, 1)}

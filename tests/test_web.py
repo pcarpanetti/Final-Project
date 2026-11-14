@@ -289,6 +289,22 @@ def test_start_over_archives_instead_of_deleting(web):
     assert list((web.app.workspace / "archive").glob("home-*/state.db"))
 
 
+def test_a_running_evaluation_reports_how_far_it_has_got(web):
+    web.app.job = {"id": "e1", "kind": "evaluate", "args": [], "state": "running", "candidate": "short_window_var"}
+    log = web.app.workspace / "job.log"
+    log.write_text("Replaying the test year: day 36 of 253 (2019-08-20)\n"
+                   "Replaying the test year: day 37 of 253 (2019-08-21)\n", encoding="utf-8")
+    job = web.get("/api/summary")["job"]
+    assert (job["days_done"], job["days_total"]) == (37, 253)
+    # The leakage check comes after the last day, and the bar stays full while it runs.
+    with log.open("a", encoding="utf-8") as f:
+        f.write("Replaying the test year: day 253 of 253 (2020-06-30)\n"
+                "Checking that no later data leaks into a day (3 probe days)\n")
+    job = web.get("/api/summary")["job"]
+    assert (job["days_done"], job["days_total"]) == (253, 253)
+    assert job["last_line"].startswith("Checking that no later data leaks")
+
+
 def test_improve_works_on_a_private_copy_of_the_registry(web):
     from riskwatch.config import ROOT
     before = (ROOT / "versions" / "registry.jsonl").read_bytes()

@@ -171,10 +171,13 @@ function renderBanner() {
   const banner = document.getElementById("banner");
   const job = summary && summary.job;
   const parts = [];
-  if (job && job.state === "running" && !location.hash.startsWith("#/run")) {
+  // The banner points to the page that shows the job's progress, so it is not shown on that page itself.
+  const home = job && job.kind === "run" ? "#/run" : "#/improve";
+  if (job && job.state === "running" && (location.hash || "#/connect") !== home) {
+    const counted = job.days_total ? `${job.days_done} of ${job.days_total} days done. ` : "";
     parts.push(h("div", { class: "notice info" }, job.kind === "run"
-      ? `Running: ${job.days_done} of ${job.days_total} days done. `
-      : "Evaluation running. ", h("a", { href: job.kind === "run" ? "#/run" : "#/improve" }, "View")));
+      ? `Running: ${counted}`
+      : `Evaluation running: ${counted || "starting. "}`, h("a", { href: home }, "View progress")));
   }
   if (summary && summary.decision_error) parts.push(h("div", { class: "notice bad" }, summary.decision_error));
   banner.replaceChildren(...parts);
@@ -863,20 +866,46 @@ async function pageImprove() {
     return h("tr", {}, td(h("div", {}, h("strong", {}, c.title), h("div", { class: "small muted" }, c.hypothesis))),
       td(r ? String(r.scorecard.var_exceptions) : "", 1), td(r ? r.scorecard.kupiec_p.toFixed(4) : "", 1), td(r ? pct(r.scorecard.avg_var99) : "", 1),
       td(r ? h("div", {}, status(r.verdict.decision === "accept" ? "ok" : "failed"), h("div", { class: "small muted" }, r.verdict.decision === "accept" ? "Accepted" : r.verdict.reasons.join("; "))) : "Not run here"),
-      td(h("button", { disabled: busy, onclick: guard(async () => { await api("/api/evaluate", { candidate: c.name }); toast("Evaluation started. It takes about 4 minutes."); await poll(); route(true); }) }, "Evaluate")));
+      td(h("button", { disabled: busy, onclick: guard(async () => { await api("/api/evaluate", { candidate: c.name }); await poll(); await route(true);
+        // The progress shows at the top of the page, far from this button, so take the reader there.
+        const shown = document.getElementById("eval-progress");
+        if (shown) shown.scrollIntoView({ block: "center" }); }) }, "Evaluate")));
   });
   const job = summary.job && summary.job.kind === "evaluate" ? summary.job : null;
+  const names = Object.fromEntries(d.candidates.map((c) => [c.name, c.title]));
   page.replaceChildren(
     h("h1", {}, "Improve"),
     h("p", { class: "lede" }, "A change goes live only by beating the fixed baseline under rules written before it was tested. Evaluation always replays the full year on the offline backend, so scorecards compare like with like."),
-    job ? h("div", { class: `notice ${job.state === "failed" ? "bad" : "info"}` }, `Evaluating ${job.candidate}: ${job.state}. ${job.last_line || ""}`, job.error ? h("pre", { class: "code" }, job.error) : null) : "",
+    job ? evalNotice(job, names) : "",
     modelCard(d),
     h("div", { class: "card" }, h("h2", {}, "Candidates"), table(["Change", ">Exceptions", ">Kupiec p", ">Average VaR", "Decision", ""], rows)),
     h("div", { class: "card" }, h("h2", {}, "Version history"), table(["Event", "Version", "Detail"], d.history.slice().reverse().map((e) =>
       h("tr", {}, td(title(e.event)), td(h("code", {}, e.version)), td(e.note || e.decision || e.by || ""))), { tall: true })),
     h("p", { class: "small muted" }, "These changes affect this workspace's copy of the version registry, not the repository's."));
   let state = job ? job.state : "";
-  onPoll = async () => { const now = summary.job && summary.job.kind === "evaluate" ? summary.job.state : ""; if (now !== state) { state = now; await route(true); } };
+  onPoll = async () => {
+    const live = summary.job && summary.job.kind === "evaluate" ? summary.job : null;
+    const now = live ? live.state : "";
+    if (now !== state) { state = now; await route(true); return; }
+    // While it runs, only the progress notice changes, so the page does not jump.
+    const shown = document.getElementById("eval-progress");
+    if (live && shown) shown.replaceWith(evalNotice(live, names));
+  };
+}
+
+function evalNotice(job, names = {}) {
+  const name = names[job.candidate] || title(job.candidate || "");
+  const running = job.state === "running";
+  const share = job.days_total ? Math.round((100 * job.days_done) / job.days_total) : 0;
+  const what = !running ? `Evaluation of ${name}: ${job.state}.`
+    : job.days_total && job.days_done < job.days_total ? `Evaluating ${name}: replaying the test year, day ${job.days_done} of ${job.days_total}.`
+    : job.days_total ? `Evaluating ${name}: ${job.last_line || "finishing"}.`
+    : `Evaluating ${name}: starting.`;
+  return h("div", { class: `notice ${job.state === "failed" ? "bad" : "info"}`, id: "eval-progress" },
+    h("div", {}, what),
+    running ? h("div", { class: "progress" }, h("div", { style: `width:${share}%` })) : "",
+    running ? h("div", { class: "small muted" }, "It takes about 4 minutes and makes no model calls. You can leave this page; the result appears in the table below.") : "",
+    job.error ? h("pre", { class: "code" }, job.error) : "");
 }
 
 // The model in use, in plain words, with any tested improvement and the way back.

@@ -223,6 +223,12 @@ class App:
             view["days_total"], view["days_done"] = len(days), done[0]["n"] if done else 0
         elif lines:
             view["last_line"] = lines[-1][:200]
+            # The evaluation prints "day N of M" as it replays, which is enough for a progress bar.
+            for line in reversed(lines):
+                found = re.search(r"day (\d+) of (\d+)", line)
+                if found:
+                    view["days_done"], view["days_total"] = int(found[1]), int(found[2])
+                    break
         return view
 
     # ---- Decisions: queued, because a decision must take the same lease as a running job ----

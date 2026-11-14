@@ -156,7 +156,7 @@ def cmd_eval(args) -> None:
         baseline_file = ROOT / "eval" / "baselines" / f"{current}.json"
     if args.baseline:
         baseline_file = out_dir / "baselines" / f"{current}.json"
-        result = evaluate.run_scorecard(versions.load_snapshot(paths, current), ROOT)
+        result = evaluate.run_scorecard(versions.load_snapshot(paths, current), ROOT, progress=lambda line: print(line, flush=True))
         baseline_file.parent.mkdir(parents=True, exist_ok=True)
         baseline_file.write_text(json.dumps(result, indent=1, sort_keys=True) + "\n", encoding="utf-8", newline="\n")
         print(f"baseline scorecard frozen: {baseline_file}")
@@ -167,7 +167,7 @@ def cmd_eval(args) -> None:
     spec = yaml.safe_load(Path(args.candidate).read_text(encoding="utf-8"))
     bundle = deep_merge(versions.load_snapshot(paths, current), spec["overlay"])
     version = versions.register(paths, bundle, spec["hypothesis"], args.candidate)
-    result = evaluate.run_scorecard(bundle, ROOT)
+    result = evaluate.run_scorecard(bundle, ROOT, progress=lambda line: print(line, flush=True))
     verdict = evaluate.decide(result, baseline, rules)
     name = Path(args.candidate).stem
     results_dir = out_dir / "results"
