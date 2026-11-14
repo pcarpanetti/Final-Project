@@ -41,7 +41,7 @@ to give labelled ground truth.
 | The architecture and design decisions | [docs/design_note.md](docs/design_note.md) |
 | The annotated diagram | [docs/workflow_diagram.png](docs/workflow_diagram.png) |
 | What was measured | [evidence/README.md](evidence/README.md) |
-| Sample outputs | [examples/README.md](examples/README.md) |
+| Example inputs and outputs | [examples/README.md](examples/README.md) |
 
 ## Guide to the files
 
@@ -59,7 +59,7 @@ to give labelled ground truth.
 | `versions/` | Frozen bundles, the `ACTIVE` pointer and the append-only `registry.jsonl` |
 | `tests/` | The test suite, including a crash test at each of 58 named points |
 | `evidence/` | Test results, recovery, leakage, evaluation, versioning and replay records |
-| `examples/` | Curated artifacts from the replay, such as memos, failed drafts and restatements |
+| `examples/` | Curated outputs from the replay, such as memos, failed drafts and restatements, with a guide to the inputs in `data/feed/` |
 | `scripts/` | Data extraction, feed builder, figures, recovery, leakage, live-model and version demos, browser check, evidence export, ZIP packaging |
 
 ## Terminal setup

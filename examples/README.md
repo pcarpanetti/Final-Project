@@ -1,7 +1,12 @@
-# Example outputs
+# Example inputs and outputs
 
-These are real artifacts from the full replay in `evidence/replay/`, copied here by `scripts/export_evidence.py`. Agent
-text comes from the offline scripted backend, so it is template-like. The figures come from the risk engine. For memos
+**Inputs** are the shareable files in [`data/feed/`](../data/feed/): real daily industry and factor returns from the public
+Ken French data library, a simulated administrator positions file, and simulated vendor notes.
+[data/README.md](../data/README.md) explains where they come from and what is real, and
+[`data/faults.yaml`](../data/faults.yaml) labels the vendor faults injected into them.
+
+**Outputs** are in the folders below. They are real artifacts from the full replay in `evidence/replay/`, copied here by
+`scripts/export_evidence.py`. Agent text comes from the offline scripted backend, so it is template-like. The figures come from the risk engine. For memos
 written by a real model, see [evidence/live_model/](../evidence/live_model/report.md).
 Each folder includes `events.jsonl`, the run's event log.
 
@@ -19,5 +24,4 @@ Each folder includes `events.jsonl`, the run's event log.
 | `restatement/` | 2020-01-16 | The notice comparing a report with its vendor correction | `restatement.md` |
 | `monthly_review/` | 2020-03 | VaR backtest statistics and a proposal, which goes to evaluation and is not applied | `model_review.md` |
 
-Inputs are the files in `data/feed/`. To regenerate these outputs, run `riskwatch replay` and then
-`python scripts/export_evidence.py`.
+To regenerate these outputs from the inputs, run `riskwatch replay` and then `python scripts/export_evidence.py`.
