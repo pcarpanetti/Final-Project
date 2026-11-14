@@ -566,15 +566,32 @@ def api_improve(app: App, q: dict) -> dict:
             results[path.stem] = {"version": data["version"], "verdict": data["verdict"], "scorecard": {
                 k: data["scorecard"][k] for k in ("var_exceptions", "kupiec_p", "independence_p", "basel_zone", "avg_var99")}}
     candidates = []
+    log = versions.history(paths)
+    # Plain-language names, so a person sees "Age-weighted VaR, gentle" rather than a hash.
+    models: dict[str, dict] = {}
+    for e in log:
+        if e["event"] == "registered" and e.get("note"):
+            models[e["version"]] = {"title": e["note"].removeprefix("Baseline: "), "plain": "", "scorecard": None}
     for path in sorted((ROOT / "eval" / "candidates").glob("*.yaml")):
         spec = yaml.safe_load(path.read_text(encoding="utf-8"))
-        candidates.append({"name": path.stem, "hypothesis": spec["hypothesis"], "result": results.get(path.stem)})
-    log = versions.history(paths)
+        result = results.get(path.stem)
+        candidates.append({"name": path.stem, "title": spec.get("title", path.stem), "hypothesis": spec["hypothesis"],
+                           "result": result})
+        if result:
+            models[result["version"]] = {"title": spec.get("title", path.stem), "plain": spec.get("plain", ""),
+                                         "scorecard": result["scorecard"]}
+    frozen = ROOT / "eval" / "baselines" / f"{current}.json"
+    if frozen.exists():
+        card = json.loads(frozen.read_text(encoding="utf-8"))["scorecard"]
+        models.setdefault(current, {"title": "", "plain": "", "scorecard": None})["scorecard"] = {
+            k: card[k] for k in ("var_exceptions", "kupiec_p", "independence_p", "basel_zone", "avg_var99")}
     can_promote = sorted({e["version"] for e in log if e["event"] == "evaluated" and e["baseline"] == current
                           and e["decision"] == "accept"})
     moved = [e for e in log if e["event"] in ("promoted", "rolled_back") and e["version"] == current]
+    rollback_to = moved[-1]["from"] if moved and "from" in moved[-1] else None
     return {"active": current, "candidates": candidates, "history": log[-30:], "can_promote": can_promote,
-            "can_rollback": bool(moved and "from" in moved[-1])}
+            "can_rollback": rollback_to is not None, "rollback_to": rollback_to,
+            "models": {v: m for v, m in models.items() if v in {current, rollback_to, *can_promote}}}
 
 
 def api_evaluate(app: App, body: dict) -> dict:

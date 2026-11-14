@@ -295,9 +295,18 @@ def test_improve_works_on_a_private_copy_of_the_registry(web):
     data = web.get("/api/improve")
     assert len(data["candidates"]) >= 4 and data["active"]
     assert data["can_promote"]
-    code, _ = web.post("/api/promote", {"version": data["can_promote"][0]})
+    # Every version on offer has a plain name and scores to compare, so nobody chooses by hash.
+    offered = data["can_promote"][0]
+    assert data["models"][data["active"]]["title"] == "500-day historical VaR"
+    assert data["models"][offered]["title"] == "Age-weighted VaR, gentle"
+    assert data["models"][data["active"]]["scorecard"] and data["models"][offered]["scorecard"]
+    assert data["rollback_to"] is None
+    code, _ = web.post("/api/promote", {"version": offered})
     assert code == 200
-    assert web.get("/api/improve")["active"] == data["can_promote"][0]
+    promoted = web.get("/api/improve")
+    assert promoted["active"] == offered
+    assert promoted["rollback_to"] == data["active"]
+    assert promoted["models"][data["active"]]["title"] == "500-day historical VaR"
     assert web.post("/api/rollback", {})[0] == 200
     assert web.get("/api/improve")["active"] == data["active"]
     assert web.post("/api/promote", {"version": "nonsense"})[0] == 400

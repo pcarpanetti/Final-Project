@@ -174,7 +174,19 @@ def main() -> int:
 
             page.locator("nav a[href=\"#/improve\"]").click()
             expect(page.get_by_role("heading", name="Candidates")).to_be_visible()
+            # The model is named in words, and the tested improvement says what switching means.
+            expect(page.get_by_role("heading", name="Risk model in use")).to_be_visible()
+            expect(page.get_by_text("An improvement passed the test: Age-weighted VaR, gentle")).to_be_visible()
             shot("7-improve")
+            prompts: list[str] = []
+            page.once("dialog", lambda d: (prompts.append(d.message), d.accept()))
+            page.get_by_role("button", name="Switch to the improved model").click()
+            switch_back = page.get_by_role("button", name="Switch back to 500-day historical VaR")
+            expect(switch_back).to_be_visible()
+            assert "switch back at any time" in prompts[0] and "more limit warnings" in prompts[0], prompts
+            page.once("dialog", lambda d: d.accept())
+            switch_back.click()
+            expect(page.get_by_role("button", name="Switch to the improved model")).to_be_visible()
             page.locator("nav a[href=\"#/help\"]").click()
             expect(page.get_by_text("Getting a full output")).to_be_visible()
 

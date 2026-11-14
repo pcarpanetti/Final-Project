@@ -1,3 +1,5 @@
+title: Age-weighted VaR, strong
+plain: Recent days count much more than old ones, so the risk forecast reacts very fast when markets turn.
 hypothesis: Age-weighted historical VaR reacts faster in a volatility spike and cuts exception clustering.
 overlay:
   risk_model:

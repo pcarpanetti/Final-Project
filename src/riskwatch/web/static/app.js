@@ -860,7 +860,7 @@ async function pageImprove() {
   const busy = summary.job && summary.job.state === "running";
   const rows = d.candidates.map((c) => {
     const r = c.result;
-    return h("tr", {}, td(h("div", {}, h("strong", {}, title(c.name)), h("div", { class: "small muted" }, c.hypothesis))),
+    return h("tr", {}, td(h("div", {}, h("strong", {}, c.title), h("div", { class: "small muted" }, c.hypothesis))),
       td(r ? String(r.scorecard.var_exceptions) : "", 1), td(r ? r.scorecard.kupiec_p.toFixed(4) : "", 1), td(r ? pct(r.scorecard.avg_var99) : "", 1),
       td(r ? h("div", {}, status(r.verdict.decision === "accept" ? "ok" : "failed"), h("div", { class: "small muted" }, r.verdict.decision === "accept" ? "Accepted" : r.verdict.reasons.join("; "))) : "Not run here"),
       td(h("button", { disabled: busy, onclick: guard(async () => { await api("/api/evaluate", { candidate: c.name }); toast("Evaluation started. It takes about 4 minutes."); await poll(); route(true); }) }, "Evaluate")));
@@ -870,17 +870,54 @@ async function pageImprove() {
     h("h1", {}, "Improve"),
     h("p", { class: "lede" }, "A change goes live only by beating the fixed baseline under rules written before it was tested. Evaluation always replays the full year on the offline backend, so scorecards compare like with like."),
     job ? h("div", { class: `notice ${job.state === "failed" ? "bad" : "info"}` }, `Evaluating ${job.candidate}: ${job.state}. ${job.last_line || ""}`, job.error ? h("pre", { class: "code" }, job.error) : null) : "",
-    h("div", { class: "card" }, h("div", { class: "row" }, h("div", { class: "grow" }, h("h2", { style: "margin:0" }, "Active version"), h("code", {}, d.active)),
-      d.can_rollback ? h("button", { class: "danger", onclick: guard(async () => { if (confirm("Roll back to the previous version?")) { await api("/api/rollback", {}); route(true); } }) }, "Roll back") : null,
-      d.can_promote.map((v) => h("button", { class: "primary", onclick: guard(async () => {
-        if (confirm(`Promote ${v}? New runs in this workspace will use it.`)) { await api("/api/promote", { version: v }); route(true); }
-      }) }, `Promote ${v}`)))),
+    modelCard(d),
     h("div", { class: "card" }, h("h2", {}, "Candidates"), table(["Change", ">Exceptions", ">Kupiec p", ">Average VaR", "Decision", ""], rows)),
     h("div", { class: "card" }, h("h2", {}, "Version history"), table(["Event", "Version", "Detail"], d.history.slice().reverse().map((e) =>
       h("tr", {}, td(title(e.event)), td(h("code", {}, e.version)), td(e.note || e.decision || e.by || ""))), { tall: true })),
     h("p", { class: "small muted" }, "These changes affect this workspace's copy of the version registry, not the repository's."));
   let state = job ? job.state : "";
   onPoll = async () => { const now = summary.job && summary.job.kind === "evaluate" ? summary.job.state : ""; if (now !== state) { state = now; await route(true); } };
+}
+
+// The model in use, in plain words, with any tested improvement and the way back.
+function modelCard(d) {
+  const model = (v) => d.models[v] || { title: `Version ${v}`, plain: "", scorecard: null };
+  const now = model(d.active);
+  const zone = (z) => z ? z[0].toUpperCase() + z.slice(1) : "";
+  const offer = (v) => {
+    const next = model(v), a = now.scorecard, b = next.scorecard;
+    const riskier = a && b && b.avg_var99 > a.avg_var99;
+    const lines = [
+      `Switch to "${next.title}"?`, "",
+      "- Days you run from now on use the new model.",
+      "- Days already run keep the current one, so charts will show both.",
+      riskier ? `- It reports more risk (average VaR ${pct(a.avg_var99)} becomes ${pct(b.avg_var99)}), so expect more limit warnings.` : "",
+      "- You can switch back at any time on this page."];
+    return h("div", { class: "notice good", id: `offer-${v}` },
+      h("strong", {}, `An improvement passed the test: ${next.title}`),
+      next.plain ? h("div", {}, next.plain) : "",
+      a && b ? table(["", ">Now", ">Improved"], [
+        h("tr", {}, td("Days the loss beat the forecast (fewer is better)"), td(String(a.var_exceptions), 1), td(String(b.var_exceptions), 1)),
+        h("tr", {}, td("Backtest zone (green is best, red is worst)"), td(zone(a.basel_zone), 1), td(zone(b.basel_zone), 1)),
+        h("tr", {}, td("Average VaR (higher means more limit warnings)"), td(pct(a.avg_var99), 1), td(pct(b.avg_var99), 1))]) : "",
+      h("p", { class: "small" }, "Only days you run from now on use it. You can switch back at any time."),
+      h("button", { class: "primary", onclick: guard(async () => {
+        if (confirm(lines.filter((l, i) => l || i === 1).join("\n"))) { await api("/api/promote", { version: v }); toast(`Now using ${next.title}.`); route(true); }
+      }) }, "Switch to the improved model"));
+  };
+  const back = d.can_rollback ? model(d.rollback_to) : null;
+  return h("div", { class: "card" },
+    h("h2", {}, "Risk model in use"),
+    h("div", { class: "row" }, h("strong", { class: "grow" }, now.title), h("code", { title: "Version code, for the audit trail" }, d.active)),
+    h("p", { class: "small muted" }, "New runs in this workspace use this model. Days already run keep the model they ran with."),
+    d.can_promote.map(offer),
+    back ? h("div", { class: "row" }, h("span", { class: "grow small muted" }, `Before this, runs used ${back.title}.`),
+      h("button", { onclick: guard(async () => {
+        if (confirm(`Switch back to "${back.title}"?\n\nDays you run from now on use it again. Days already run keep their model.`)) {
+          await api("/api/rollback", {}); toast(`Now using ${back.title}.`); route(true);
+        }
+      }) }, `Switch back to ${back.title}`)) : "",
+    !d.can_promote.length && !back ? h("p", { class: "small" }, "No tested improvement is waiting. Evaluate a candidate below: if it beats this model under the fixed rules, you can switch to it here.") : "");
 }
 
 // ---- Help ----

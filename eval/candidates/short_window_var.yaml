@@ -1,3 +1,5 @@
+title: Shorter VaR history
+plain: Forecasts risk from the last 125 days of history instead of 500, so it forgets calm periods sooner.
 hypothesis: A 125-day VaR lookback reacts faster than 500 days and improves coverage.
 overlay:
   risk_model:

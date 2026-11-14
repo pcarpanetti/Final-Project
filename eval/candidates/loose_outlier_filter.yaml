@@ -1,3 +1,5 @@
+title: Looser bad-data filter
+plain: Flags far fewer unusual prices as possible data errors, so people have less to check.
 hypothesis: Raising the outlier threshold from 6 to 50 removes data-steward workload on volatile days.
 overlay:
   policy:
