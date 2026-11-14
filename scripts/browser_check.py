@@ -6,6 +6,7 @@ Saves screenshots to docs/screens/ and fails on any browser console error.
 from __future__ import annotations
 
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -39,6 +40,9 @@ def main() -> int:
 
             def shot(name: str) -> None:
                 page.wait_for_timeout(350)
+                # A null handed straight to the DOM renders as the word "null".
+                if re.search(r"\bnull", page.locator("#page").inner_text()):
+                    problems.append(f"{name}: the word null is on the page")
                 page.screenshot(path=SHOTS / f"{name}.png", full_page=True)
 
             # Keep personal account details out of the committed screenshots.

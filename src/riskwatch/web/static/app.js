@@ -795,7 +795,7 @@ async function pageReports() {
   page.replaceChildren(
     h("div", { class: "row" }, h("h1", { class: "grow" }, "Reports"), h("a", { class: "btn", href: "/api/download", id: "download" }, "Download full output (ZIP)")),
     h("p", { class: "lede" }, "Everything released so far. The ZIP adds a period summary and the full audit tables."),
-    items.length ? tabs : null,
+    items.length ? tabs : "",
     items.length ? h("div", { class: "split" }, list, viewer) : h("div", { class: "card" }, h("p", {}, "Nothing has been published yet.")));
   if (items.length) { render(); await show(items.find((i) => i.kind === kind)); }
 }
@@ -846,8 +846,8 @@ async function pageRunDetail(id) {
     h("p", { class: "small" }, h("a", { href: "#/runs" }, "‹ All runs")),
     h("div", { class: "row" }, h("h1", { class: "grow" }, id), status(d.run.status)),
     h("p", { class: "lede" }, `Cutoff ${d.run.cutoff}. Version ${d.run.version}. Model ${d.run.llm}. Started by ${d.run.trigger}.`),
-    d.run.degraded ? h("div", { class: "notice warn" }, `The agents could not finish normally: ${d.run.degraded_reason}`) : null,
-    d.run.halted_reason ? h("div", { class: "notice bad" }, d.run.halted_reason) : null,
+    d.run.degraded ? h("div", { class: "notice warn" }, `The agents could not finish normally: ${d.run.degraded_reason}`) : "",
+    d.run.halted_reason ? h("div", { class: "notice bad" }, d.run.halted_reason) : "",
     h("div", { class: "card" }, h("h2", {}, "Stages"), h("div", { class: "timeline" }, d.stages.map((s) =>
       h("div", { class: "stage" }, h("b", {}, s.round ? `${s.stage} (round ${s.round + 1})` : s.stage), status(s.status), s.attempts > 1 ? h("div", { class: "small muted" }, `${s.attempts} attempts`) : null)))),
     h("div", { class: "card" }, tabs, content));
@@ -869,7 +869,7 @@ async function pageImprove() {
   page.replaceChildren(
     h("h1", {}, "Improve"),
     h("p", { class: "lede" }, "A change goes live only by beating the fixed baseline under rules written before it was tested. Evaluation always replays the full year on the offline backend, so scorecards compare like with like."),
-    job ? h("div", { class: `notice ${job.state === "failed" ? "bad" : "info"}` }, `Evaluating ${job.candidate}: ${job.state}. ${job.last_line || ""}`, job.error ? h("pre", { class: "code" }, job.error) : null) : null,
+    job ? h("div", { class: `notice ${job.state === "failed" ? "bad" : "info"}` }, `Evaluating ${job.candidate}: ${job.state}. ${job.last_line || ""}`, job.error ? h("pre", { class: "code" }, job.error) : null) : "",
     h("div", { class: "card" }, h("div", { class: "row" }, h("div", { class: "grow" }, h("h2", { style: "margin:0" }, "Active version"), h("code", {}, d.active)),
       d.can_rollback ? h("button", { class: "danger", onclick: guard(async () => { if (confirm("Roll back to the previous version?")) { await api("/api/rollback", {}); route(true); } }) }, "Roll back") : null,
       d.can_promote.map((v) => h("button", { class: "primary", onclick: guard(async () => {
@@ -902,7 +902,11 @@ function pageHelp() {
 
 // ---- Router ----
 async function route(keep) {
-  if (!keep) onPoll = null;
+  if (!keep) {
+    onPoll = null;
+    // An error belongs to the page that raised it, so it should not follow you to the next one.
+    document.querySelectorAll("#toasts .toast.err").forEach((el) => el.remove());
+  }
   const [, name, arg] = (location.hash || "#/connect").split("/");
   renderNav();
   try {
