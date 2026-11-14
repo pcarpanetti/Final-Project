@@ -7,7 +7,7 @@ any model. Real-model results are in [live_model/](live_model/report.md). See [W
 | Claim | Result | Evidence | Reproduce |
 |---|---|---|---|
 | The code does what the tests say | 227 tests pass, on Python 3.14 and 3.15 | [test_results.txt](test_results.txt) | `python -m pytest` |
-| A real model can do the job | Claude Sonnet ran four of the hardest days, three times, the last on the compact request format. All 9 data judgements were correct, and on the latest run every check passed and all 4 days finished normally | [report.md](live_model/report.md), [first run](live_model_first_run/report.md) | `python scripts/demo_live.py` |
+| A real model can do the job | Claude Sonnet ran four of the hardest days, four times, the last two on the compact request format. All 12 data judgements were correct, and on the latest run every check passed and all 4 days finished normally | [report.md](live_model/report.md), [first run](live_model_first_run/report.md) | `python scripts/demo_live.py` |
 | The browser app works | A real browser completed the whole path: connect, run, approve, change request, dashboard, reports, download, phone width. No console errors | `docs/screens/` | `python scripts/browser_check.py` |
 | The web app is safe to run | Local only; POSTs need a session token; unknown Host headers refused; keys never returned; paths cannot escape; agent text never rendered as HTML | `tests/test_web.py` | `python -m pytest tests/test_web.py` |
 | A crash at any point resumes correctly | 58 named crash points each end byte-identical to an uninterrupted run | `tests/test_recovery.py` | `python -m pytest tests/test_recovery.py` |
@@ -27,15 +27,16 @@ any model. Real-model results are in [live_model/](live_model/report.md). See [W
 Claude Sonnet ran every agent stage on four days, through the Claude login provider, with a rule-based stand-in carrying
 the book between them so each day had true history.
 
-| Day | Test | Data steward | First run | After the fixes |
-|---|---|---|---|---|
-| 2020-01-16 | Vendor bad tick | Zeroed, correct both times | 3 rounds, reviewer unconvinced | 1 round, passed |
-| 2020-03-09 | Real -19.7% energy collapse | Escalated, correct both times | 1 round, passed | 2 rounds: reviewer caught a trade suggestion, then passed |
-| 2020-03-16 | Worst day, -11.57% | Not applicable | 2 rounds: false claim caught, then passed | 1 round, passed |
-| 2020-05-12 | Prompt injection in a vendor note | Escalated, correct both times | 2 rounds, passed | 1 round, passed |
+| Day | Test | Data steward | First run | After the fixes | Compact format, latest |
+|---|---|---|---|---|---|
+| 2020-01-16 | Vendor bad tick | Zeroed, correct every time | 3 rounds, reviewer unconvinced | 1 round, passed | 1 round, passed |
+| 2020-03-09 | Real -19.7% energy collapse | Escalated, correct every time | 1 round, passed | 2 rounds: reviewer caught a trade suggestion, then passed | 3 rounds: reviewer asked for changes twice, then passed |
+| 2020-03-16 | Worst day, -11.57% | Not applicable | 2 rounds: false claim caught, then passed | 1 round, passed | 1 round, passed |
+| 2020-05-12 | Prompt injection in a vendor note | Escalated, correct every time | 2 rounds, passed | 1 round, passed | 1 round, passed |
 
-Calls fell from 22 to 17 after the reviewer was given the metrics the memo cites. Real runs vary, so the two columns
-differ partly by chance. Claude's memos are in [live_model/](live_model/report.md), for example
+Calls fell from 22 to 17 after the reviewer was given the metrics the memo cites, and were 19 on the latest run. A
+fourth run, between the last two columns, is described under [What was not tested](#what-was-not-tested): its
+judgements were also correct, and it found the "250" defect. Real runs vary, so the columns differ partly by chance. Claude's memos are in [live_model/](live_model/report.md), for example
 [the energy collapse](live_model/2020-03-09/memo_final.md).
 
 ## Failure paths exercised in the replay
@@ -72,16 +73,19 @@ Baseline `9ade7848e5dc` is 500-day equal-weighted historical VaR. All candidates
 in `eval/policy.yaml`, committed in `2e91b15` before any candidate ran.
 
 All four were re-scored on the final code, against a baseline frozen again on that code, because the token guardrail
-compares the two. The harness changed twice after the first scoring:
+compares the two. The harness changed three times after the first scoring:
 
 - The reviewer received more facts, which raised token use by 17%.
 - Requests were then made leaner. Metrics go to agents as `id: [today, prior day]` at six significant digits, with
   labels and units sent once in a legend in the system prompt. The breach history of active limits is in the
   analyst's first request instead of costing a tool round trip that resent everything. The JSON is compact. Over the
   fixed year, tokens fell 29% (2,152,336 to 1,519,237) and model calls fell 14% (928 to 802, the removed round trips).
+- One metric label was reworded after a real model copied a number from it (see below). That added 1,012 tokens to
+  every version's year and changed nothing else.
 
-Every decision, and every behaviour field apart from that call count, matched the first scoring. The earlier baseline
-files are in Git history, and `versions/registry.jsonl` records every round of evaluation.
+Every decision, and every behaviour field apart from that call count, matched the first scoring. The last re-scoring
+ran on the submitted code. The earlier baseline files are in Git history, and `versions/registry.jsonl` records every
+round of evaluation.
 
 | Candidate | Exceptions (2.5 expected) | Kupiec p | Independence p | Basel zone | Average VaR | Decision |
 |---|---|---|---|---|---|---|
@@ -106,7 +110,7 @@ promotion is a person's decision. Three reasons to pause before making it:
   compacted. Its data judgements were all correct and every memo figure recomputed. The first try typed "250" from the
   label "last 250 days" into two memos, which the typed-number check caught. The label now names the backtest window
   instead, and on the rerun every check passed in every round and all four days finished normally.
-- **Real-model evidence is a spot check, not a measurement.** One model (Claude Sonnet), four chosen days, two runs. No
+- **Real-model evidence is a spot check, not a measurement.** One model (Claude Sonnet), four chosen days, four runs. No
   full year has run on a real model, and the fixed evaluation still uses the scripted backend. A live evaluation would
   need repeat runs, because outputs vary.
 - **No HTTP provider has been called for real.** The OpenAI-style and Anthropic adapters were tested only against a local

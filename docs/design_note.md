@@ -180,14 +180,15 @@ real model exposed more that no rule-based stand-in could. Each became a regress
 | First real model | A memo passing all 13 checks was thrown away for a template because the reviewer stayed unconvinced | Verified memos go to the approver with open concerns attached | See `git log` |
 | First real model | The reviewer rejected true statements as unsupported, because it could not see the metrics they cited | It now receives the metrics, what is new, and prior values | See `git log` |
 | First real model | "3.0 days against a warning of 3.0 days" hid a value of 3.04 | Two decimals | See `git log` |
+| Compact-format real-model run | After metrics were compacted, the analyst copied "250" from the label "last 250 days" into memos, failing the typed-number check until one day ran out of rounds | The label names the backtest window instead | `55f7ade` |
 | Clean-install test | First launch failed on Python 3.15 without a C compiler, because PyYAML had no prebuilt package | The launcher installs the pure-Python build | See `git log` |
 
 Against the baseline, three of four candidates were rejected under the rules fixed beforehand, including a real coverage
 improvement that breached the VaR guardrail. The accepted candidate is **not** live, for reasons set out in
 [evidence/README.md](../evidence/README.md), which also lists what was not tested.
 
-On a real model (Claude Sonnet), the data steward made all six judgements correctly across two runs of the hardest days,
-including escalating the energy collapse that the first rule-based steward had overwritten. After the fixes above, all four
-days finished normally. This is a spot check, not a measurement: the recorded year and the evaluations use the stand-in.
+On a real model (Claude Sonnet), the data steward made all twelve judgements correctly across four runs of the hardest days,
+including escalating the energy collapse that the first rule-based steward had overwritten. On the latest run, with the
+compact request format and the fixes above, every check passed and all four days finished normally. This is a spot check, not a measurement: the recorded year and the evaluations use the stand-in.
 
 ![VaR backtest](var_backtest.png)

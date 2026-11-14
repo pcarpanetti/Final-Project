@@ -22,6 +22,6 @@ Baseline `9ade7848e5dc`, candidate `72d87728f9e4`, backend `scripted:rules-v1`.
 | approvals_requested | 109 | 109 |
 | memos_published | 252 | 252 |
 | llm_calls | 802 | 802 |
-| llm_tokens | 1519237 | 1529194 |
+| llm_tokens | 1520249 | 1530206 |
 
 Leakage perturbation test: passed on 3 days.
