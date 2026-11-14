@@ -350,7 +350,7 @@ def metric_legend(metrics: dict) -> str:
 def metrics_with_backtest(ctx) -> dict:
     metrics = ctx.read_json("metrics.json")
     bt = ctx.read_json("backtest.json")
-    metrics["var_exceptions_250"] = {"value": bt["exceptions"], "unit": "count", "label": "VaR exceptions, last 250 days"}
+    metrics["var_exceptions_250"] = {"value": bt["exceptions"], "unit": "count", "label": "VaR exceptions in the backtest window"}
     metrics["backtest_zone"] = {"value": bt["zone"], "unit": "text", "label": "Basel traffic-light zone"}
     return metrics
 

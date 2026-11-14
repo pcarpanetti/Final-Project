@@ -1,4 +1,9 @@
 {
- "issues": [],
- "verdict": "pass"
+ "issues": [
+  {
+   "fix": "Rewrite as: 'Volatility crossed the hard limit today, rising from 33.8% (warning level, not yet breached) to 44.3% on the -7.80% loss.' Keep the wording consistent with the Limits section.",
+   "problem": "The [F:F1] driver says volatility 'was already in breach and rose further'. The facts show prior-day EWMA volatility was 33.8%, above the 25% warning but below the 40% hard limit. Today (44.3%) is a new hard breach. The Limits section ('escalated today') and the delta, which lists vol as escalated and not continuing, both contradict the driver line. A reader would think the breach is persistent and not a fresh one-day crossing."
+  }
+ ],
+ "verdict": "revise"
 }

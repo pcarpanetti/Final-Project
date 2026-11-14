@@ -1,16 +1,12 @@
 {
  "issues": [
   {
-   "fix": "Remove the list of portfolio actions. Say only that the two hard breaches need a management response: reduce, hold with a documented exception and review date, or other. Leave the choice of action to the portfolio manager. If energy is mentioned, tie it to the data-quality decision, not to hedging.",
-   "problem": "Scope (rubric 5): the decision item suggests \"hedging the energy exposure\" as an option for the portfolio manager. That is a trade suggestion, and the facts do not support it. Energy is only 4.78% of weight and the energy-collapse stress loss is 5.4%. The worst scenario is the broad selloff at 20.2%, and HiTec carries the largest variance share at 24.9%."
+   "fix": "State that the energy ruling affects the size of the breaches, not whether they exist. Drawdown stays in breach on any reading, because the broad loss (peers -7.18% median, portfolio -7.80%) is mostly not energy. Say that the effect on volatility has not been quantified.",
+   "problem": "The first decision item says the energy ruling 'changes the volatility and drawdown figures'. It does not say whether either breach could clear. Energy is only about 4.8% of NAV (prior 5.5%). Even if its -19.68% return were zeroed, that removes roughly 1 point of the -7.80% portfolio loss. Drawdown would stay well above the 15% hard limit, and the facts give no basis for saying volatility would fall below 40%. A reader could think the data-quality ruling might resolve the breaches."
   },
   {
-   "fix": "State only the levels: energy is 4.78% of weight and 8.40% of variance. Or drop the rose/fell claim unless prior-day values are supplied.",
-   "problem": "Causation (rubric 3): F3 says energy's variance share \"rose (8.40%)\" while its weight \"fell (4.78%)\". The facts give only today's values for ctr_Enrgy and w_Enrgy, with no prior values or changes. The directions are asserted without support, and they imply energy is a growing risk contributor."
-  },
-  {
-   "fix": "Add one sentence saying whether the vol and drawdown breaches would persist if the energy return were corrected (energy at 4.78% weight with a -19.68% return is roughly -0.9 points of the -7.80% day). Qualify F2 as \"on the reported data\". Mention the 6.49% parametric VaR as the reason the 3.20% pass is not comfort.",
-   "problem": "Reassurance and decision usefulness: the memo does not show how far the open energy-outlier decision matters. The reader cannot tell whether the two breaches depend on accepting the -19.68% print. F2 also says the drawdown breach is \"a market loss\" with certainty, while the same memo says the vendor error cannot be ruled out. Separately, the memo reports 99% VaR at 3.20% against the 4.5% limit, with a one-day loss of -7.80%. It omits that the parametric 99% VaR is 6.49%, above that limit, which weakens the \"pass should not be read as reassurance\" caveat."
+   "fix": "Drop the energy-first steer. Either name the largest variance contributors (HiTec 24.9%, Other 13.4%, Hlth 11.3%) as where the volatility sits, or leave the priority to the portfolio manager's options. If energy is mentioned, say its variance share rose from 5.98% to 8.40%.",
+   "problem": "The second decision item names the energy sleeve as 'the first area to review' for bringing volatility and drawdown within limits. The facts do not support this. Energy has a 4.78% weight and 8.40% of variance, while HiTec has a 23.9% weight and 24.9% of variance and is the top risk contributor. The loss was broad-based. This is an unsupported causal steer, and it could point the review at the wrong sleeve."
   }
  ],
  "verdict": "revise"

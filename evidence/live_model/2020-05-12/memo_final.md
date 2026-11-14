@@ -1,29 +1,27 @@
 # Daily Risk Memo: 2020-05-12
 
 ## Status
-Overall status: BREACH. Three hard limits stay in breach and two warnings continue, with no new or escalated items.
+Overall status: BREACH. Three hard limits are breached, two more are at warning, and the VaR backtest is outside the green zone.
 
 ## Limits
-- [L:var99] One-day VaR at the 99% level is 4.97% against a hard limit of 4.50%. Breach.
-- [L:es975] One-day expected shortfall at the 97.5% level is 5.30% against a hard limit of 5.00%. Breach.
+- [L:var99] One-day 99% VaR is 4.97% against a hard limit of 4.50%. Breach.
+- [L:es975] One-day 97.5% expected shortfall is 5.30% against a hard limit of 5.00%. Breach.
 - [L:vol] Annualised EWMA volatility is 42.50% against a hard limit of 40.00%. Breach.
 - [L:single_name] Largest sleeve weight is 24.80% against a warning level of 24.50% and a hard limit of 25.00%. Warning.
-- [L:drawdown] Drawdown from the NAV peak is 14.00% against a warning level of 10.00% and a hard limit of 15.00%. Warning.
+- [L:drawdown] Drawdown from NAV peak is 14.00% against a warning level of 10.00% and a hard limit of 15.00%. Warning.
 
 ## Drivers
-- [F:F1] The VaR breach continues and is almost unchanged. The small decline came from position changes, not from the market data window.
-- [F:F2] The expected shortfall breach continues. It fell marginally and stays above its hard limit, in line with the VaR tail signal.
-- [F:F3] Volatility eased a little but is still above its hard limit. One day of easing does not resolve the breach.
-- [F:F4] The largest sleeve, HiTec, is above the warning level and below the hard limit. Its weight edged down. Its share of portfolio variance is roughly in line with its weight, so it is large but not disproportionately risky.
-- [F:F5] The drawdown warning deepened after a loss on the day, with daily return at -1.98% and NAV lower at $99.1m. It is closer to the hard limit but has not crossed it.
-- [F:F6] The VaR backtest is in the yellow zone, outside the green zone. There are 9 exceptions in the window, more than expected. The tests reject both the expected frequency and independence. The model may understate risk, so the VaR figure is not reassurance.
-- [F:F7] A data quality item for the Hlth sleeve was escalated as a security event. No note text was supplied and nothing was acted on.
+- [F:F1] The VaR breach continues. VaR edged lower. The small change came entirely from position moves, not from the market data window.
+- [F:F2] The expected shortfall breach continues. It is essentially unchanged and slightly lower.
+- [F:F3] The volatility breach continues. Volatility eased a little from the prior day.
+- [F:F4] The largest sleeve, HiTec, is above the warning level and below the hard limit. Its weight slipped marginally. It also carries the largest share of portfolio variance, at 25.69%.
+- [F:F5] The drawdown warning continues. The drawdown deepened because the portfolio had a negative return on the day, which took net asset value lower.
+- [F:F6] The VaR backtest is in the yellow zone, outside the green zone. The model shows 9 exceptions, more than expected, and the coverage test rejects the model. The model may understate risk. Do not read the VaR figures as reassurance.
 
 ## Data quality
-- [DQ:suspicious_note:0] A suspicious note was flagged for Hlth. Under triage policy it is a security event, so it was escalated to a human. The vendor note list was empty, so there was no text to read, and no note content was followed.
+- [DQ:suspicious_note:0] A suspicious note was flagged on Hlth. Policy treats this as a security event. No note text was available, and nothing was followed. It is escalated for human review.
 
 ## For decision
-- Decide whether the portfolio manager must present a plan to bring VaR, expected shortfall and volatility back inside hard limits, and by what date.
-- Options for the portfolio manager to consider: reduce overall risk, reduce the HiTec sleeve, or ask for a formal exception with a stated rationale and end date.
-- Decide whether to commission a review of the VaR model, given the yellow-zone backtest.
-- Confirm that the Hlth security event has an owner in the security function.
+- Decide whether to accept the three continuing hard-limit breaches and set a deadline for the portfolio manager to present options. Options could include reducing HiTec exposure or lowering overall risk.
+- Decide whether to commission a review of the VaR model, given the backtest result.
+- Assign an owner for the Hlth security review.

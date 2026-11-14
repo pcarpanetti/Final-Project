@@ -3,12 +3,16 @@
   {
    "evidence": [
     {
+     "claim": "above_warn",
+     "metric": "weight_max"
+    },
+    {
      "claim": "rose",
      "metric": "weight_max"
     },
     {
-     "claim": "above_warn",
-     "metric": "weight_max"
+     "claim": "rose",
+     "metric": "w_HiTec"
     },
     {
      "claim": "rose",
@@ -17,28 +21,41 @@
    ],
    "id": "F1",
    "limit_id": "single_name",
-   "statement": "The largest sleeve, HiTec, remains above the warning level but below the hard limit, and its weight edged up from the prior day. It is also the sleeve contributing the largest share of portfolio variance, and that share is well above its weight, so it does more risk work than its size suggests."
+   "statement": "The largest sleeve, high tech, remains above the warning level but below the hard limit, and this is a continuing warning. Its weight edged higher, and its share of portfolio variance rose and is far above its weight, so this sleeve does more risk work than its size suggests."
   },
   {
    "evidence": [
     {
-     "claim": "rose",
+     "claim": "above_warn",
      "metric": "liq_days_max"
     },
     {
-     "claim": "above_warn",
+     "claim": "rose",
      "metric": "liq_days_max"
     }
    ],
    "id": "F2",
    "limit_id": "liquidity",
-   "statement": "Days to liquidate the slowest sleeve remain above the warning level but below the hard limit, and they lengthened slightly from the prior day. This is a continuing warning."
+   "statement": "Days to liquidate the slowest sleeve crept up and stays just above the warning level, well short of the hard limit. This is a continuing warning with no new breach."
   },
   {
-   "evidence": [],
+   "evidence": [
+    {
+     "claim": "rose",
+     "metric": "daily_return"
+    },
+    {
+     "claim": "fell",
+     "metric": "w_Telcm"
+    },
+    {
+     "claim": "fell",
+     "metric": "ctr_Telcm"
+    }
+   ],
    "id": "F3",
    "limit_id": "general",
-   "statement": "The data quality process found a very large one-day move in the Telcm sleeve with no matching peer move and judged it a likely bad vendor tick. Telcm was treated as unchanged for today on a provisional basis, so the reported risk figures depend on that choice and a human should review it. The backtest is in the green zone with no exceptions."
+   "statement": "The data quality check flagged an extreme telecom return as a likely bad tick and treated that sleeve as unchanged pending human review. The portfolio return and risk figures should be read with that provisional adjustment in mind, and the telecom weight and variance share did not rise."
   }
  ]
 }

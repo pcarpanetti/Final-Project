@@ -21,7 +21,7 @@
    ],
    "id": "F1",
    "limit_id": "var99",
-   "statement": "This is a new warning. The rise in value at risk came almost entirely from the market data window, not from the book, since position moves slightly reduced it. The model also shows signs of understating risk, with exceptions above expectation, a clustering signal, and a yellow zone, so passing the hard limit is not reassurance."
+   "statement": "This is a new warning, and the move comes from the market data window, not from the book. The position-driven change was slightly negative, while the window change was positive and accounts for the whole rise."
   },
   {
    "evidence": [
@@ -36,7 +36,7 @@
    ],
    "id": "F2",
    "limit_id": "es975",
-   "statement": "The expected shortfall warning continues and worsened, consistent with the same loss-heavy data window, and it sits close to its hard limit."
+   "statement": "The expected shortfall warning continues and has worsened since the prior day, in line with the larger tail losses now in the data window."
   },
   {
    "evidence": [
@@ -55,7 +55,7 @@
    ],
    "id": "F3",
    "limit_id": "vol",
-   "statement": "The volatility breach continues and has widened, after a large negative portfolio return on the day. Volatility is well beyond its hard limit."
+   "statement": "The volatility breach continues and has risen further. It stays far above the hard limit after a large negative portfolio return on the day."
   },
   {
    "evidence": [
@@ -70,30 +70,22 @@
     {
      "claim": "negative",
      "metric": "daily_return"
-    },
-    {
-     "claim": "fell",
-     "metric": "nav_usd"
     }
    ],
    "id": "F4",
    "limit_id": "drawdown",
-   "statement": "The drawdown breach continues and deepened, as the day's large loss pushed net asset value further below its peak. It is far beyond the hard limit."
+   "statement": "The drawdown breach continues and deepened sharply because of a large loss on the day. The drawdown is well beyond the hard limit."
   },
   {
    "evidence": [
     {
      "claim": "positive",
      "metric": "var_exceptions_250"
-    },
-    {
-     "claim": "positive",
-     "metric": "top_risk_contrib"
     }
    ],
    "id": "F5",
    "limit_id": "general",
-   "statement": "Today was a value at risk exception, and the backtest shows more exceptions than expected, with both the coverage and independence tests rejecting. The model may be understating risk, and the technology sleeve holds the largest variance share while also being the largest weight."
+   "statement": "The backtest is in the yellow zone, with a VaR exception today and more exceptions than expected. The tests reject both the exception count and the independence of exceptions, so the model may be understating risk and the VaR figures should not be read as reassurance."
   }
  ]
 }

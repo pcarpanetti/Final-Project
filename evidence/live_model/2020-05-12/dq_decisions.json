@@ -3,7 +3,7 @@
   {
    "action": "escalate",
    "exception_id": "suspicious_note:0",
-   "rationale": "Exception type is suspicious_note for Hlth. Per triage policy this is a security event, not a data question, so it is always escalated to a human. The vendor_notes_untrusted list in the payload is empty, so there is no note text to read, and no note content was followed. No tool calls were needed."
+   "rationale": "Exception type is suspicious_note for Hlth. Per triage policy this is always escalated: it is a security event, not a data question. The vendor_notes_untrusted list in the payload is empty, so no note text was available to read, and nothing in it was followed. No market-data judgment was made and no tools were needed. A human should review."
   }
  ]
 }

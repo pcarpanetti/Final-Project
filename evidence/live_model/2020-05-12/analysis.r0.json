@@ -17,7 +17,7 @@
    ],
    "id": "F1",
    "limit_id": "var99",
-   "statement": "The one-day VaR breach is continuing and is essentially unchanged, slipping slightly. The tiny move came entirely from position changes, with no contribution from the market data window, so the book and the sample both stayed put while the measure remains above its hard limit."
+   "statement": "The VaR breach is continuing and is still above the hard limit. It edged slightly lower, and the small change came entirely from position moves, with no contribution from the market data window."
   },
   {
    "evidence": [
@@ -32,7 +32,7 @@
    ],
    "id": "F2",
    "limit_id": "es975",
-   "statement": "The expected shortfall breach is continuing, with a marginal decline from the prior day. It remains above its hard limit, consistent with the tail risk that VaR shows."
+   "statement": "The expected shortfall breach is continuing and remains above the hard limit, essentially unchanged from the prior day and slightly lower."
   },
   {
    "evidence": [
@@ -47,7 +47,7 @@
    ],
    "id": "F3",
    "limit_id": "vol",
-   "statement": "Annualised EWMA volatility eased a little but is still a continuing breach above the hard limit. The portfolio is running at a high risk level, and a one-day easing does not resolve it."
+   "statement": "The volatility breach is continuing. Annualised EWMA volatility is still above the hard limit, though it eased a little from the prior day."
   },
   {
    "evidence": [
@@ -61,12 +61,12 @@
     },
     {
      "claim": "fell",
-     "metric": "ctr_HiTec"
+     "metric": "top_risk_contrib"
     }
    ],
    "id": "F4",
    "limit_id": "single_name",
-   "statement": "The largest sleeve, HiTec, remains above the warning level but below the hard limit, and its weight edged down. HiTec also carries the largest share of portfolio variance, which is roughly in line with its weight, so it is large rather than disproportionately risky."
+   "statement": "The largest sleeve, HiTec, remains above the warning level but below the hard limit, and its weight slipped marginally. HiTec also carries the largest share of portfolio variance, well above a quarter of the total and roughly in line with its weight."
   },
   {
    "evidence": [
@@ -89,7 +89,7 @@
    ],
    "id": "F5",
    "limit_id": "drawdown",
-   "statement": "The drawdown warning continues and deepened because the portfolio had a sizeable loss on the day and net asset value fell. It is now closer to the hard limit but has not crossed it."
+   "statement": "The drawdown warning is continuing and the drawdown deepened because the portfolio had a negative return on the day, taking net asset value lower."
   },
   {
    "evidence": [
@@ -100,13 +100,7 @@
    ],
    "id": "F6",
    "limit_id": "general",
-   "statement": "The backtest is in the yellow zone with more VaR exceptions than expected, and the exception tests reject both the expected frequency and independence. The model may be understating risk, so the VaR figure should not be taken as reassurance."
-  },
-  {
-   "evidence": [],
-   "id": "F7",
-   "limit_id": "general",
-   "statement": "A data quality item for the Hlth sleeve was flagged as a suspicious note and escalated to a human as a security event. No note text was supplied, and nothing from it was acted on."
+   "statement": "The backtest is in the yellow zone with more VaR exceptions than expected, and the coverage test rejects the model. The model may be understating risk, so the VaR figures should not be read as reassurance. Separately, a data-quality item on Hlth was escalated for human review as a security event, and no note text was available."
   }
  ]
 }

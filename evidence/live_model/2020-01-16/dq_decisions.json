@@ -3,7 +3,7 @@
   {
    "action": "zero_return",
    "exception_id": "outlier:Telcm",
-   "rationale": "Telcm returned 18.7% (z=45.62). Its residual_z is 38.38, well above the ~8 threshold, with expected_ret of only 0.30%. The peers are quiet, with a peer_median of 0.62%, which is within 2%. A move this large with no peer move is most likely a bad vendor tick, not a real market move. I treat the sleeve as unchanged for today, provisionally, for human review. There were no vendor notes, so there was nothing untrusted to disregard."
+   "rationale": "Telcm ret is 18.7% (z 45.62) against expected_ret of about 0.30%, giving residual_z 38.38, far above the ~8 threshold. Peers are quiet, with peer_median 0.62%, within the ~2% band. No shared market move explains it, so this is likely a bad tick. Treat the sleeve as unchanged provisionally for human review. No vendor notes were supplied, so there was nothing to ignore."
   }
  ]
 }

@@ -7,7 +7,7 @@ any model. Real-model results are in [live_model/](live_model/report.md). See [W
 | Claim | Result | Evidence | Reproduce |
 |---|---|---|---|
 | The code does what the tests say | 187 tests pass, on Python 3.14 and 3.15 | [test_results.txt](test_results.txt) | `python -m pytest` |
-| A real model can do the job | Claude Sonnet ran four of the hardest days, twice. All 6 data judgements were correct, and after the fixes all 4 days finished normally | [report.md](live_model/report.md), [first run](live_model_first_run/report.md) | `python scripts/demo_live.py` |
+| A real model can do the job | Claude Sonnet ran four of the hardest days, three times, the last on the compact request format. All 9 data judgements were correct, and on the latest run every check passed and all 4 days finished normally | [report.md](live_model/report.md), [first run](live_model_first_run/report.md) | `python scripts/demo_live.py` |
 | The browser app works | A real browser completed the whole path: connect, run, approve, change request, dashboard, reports, download, phone width. No console errors | `docs/screens/` | `python scripts/browser_check.py` |
 | The web app is safe to run | Local only; POSTs need a session token; unknown Host headers refused; keys never returned; paths cannot escape; agent text never rendered as HTML | `tests/test_web.py` | `python -m pytest tests/test_web.py` |
 | A crash at any point resumes correctly | 58 named crash points each end byte-identical to an uninterrupted run | `tests/test_recovery.py` | `python -m pytest tests/test_recovery.py` |
@@ -102,9 +102,10 @@ promotion is a person's decision. Three reasons to pause before making it:
 
 ## What was not tested
 
-- **The leaner request format has not met a real model.** The four real-model days ran before metrics were compacted.
-  The stand-in confirms the workflow behaves identically, but whether a real model reads `[today, prior day]` as well
-  as the labelled form is untested.
+- **The leaner request format has met a real model only on the four test days.** Sonnet reread them after metrics were
+  compacted. Its data judgements were all correct and every memo figure recomputed. The first try typed "250" from the
+  label "last 250 days" into two memos, which the typed-number check caught. The label now names the backtest window
+  instead, and on the rerun every check passed in every round and all four days finished normally.
 - **Real-model evidence is a spot check, not a measurement.** One model (Claude Sonnet), four chosen days, two runs. No
   full year has run on a real model, and the fixed evaluation still uses the scripted backend. A live evaluation would
   need repeat runs, because outputs vary.

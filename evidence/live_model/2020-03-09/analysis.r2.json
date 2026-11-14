@@ -1,0 +1,104 @@
+{
+ "findings": [
+  {
+   "evidence": [
+    {
+     "claim": "rose",
+     "metric": "vol_ann_ewma"
+    },
+    {
+     "claim": "above_warn",
+     "metric": "vol_ann_ewma"
+    },
+    {
+     "claim": "above_hard",
+     "metric": "vol_ann_ewma"
+    },
+    {
+     "claim": "negative",
+     "metric": "daily_return"
+    },
+    {
+     "claim": "fell",
+     "metric": "daily_return"
+    },
+    {
+     "claim": "rose",
+     "metric": "ctr_Enrgy"
+    },
+    {
+     "claim": "fell",
+     "metric": "w_Enrgy"
+    }
+   ],
+   "id": "F1",
+   "limit_id": "vol",
+   "statement": "Annualised volatility was already in breach and has escalated further, rising sharply on a large one-day portfolio loss. The energy sleeve now explains a larger share of variance even though its weight shrank, so it is doing more than its size suggests."
+  },
+  {
+   "evidence": [
+    {
+     "claim": "rose",
+     "metric": "drawdown"
+    },
+    {
+     "claim": "above_warn",
+     "metric": "drawdown"
+    },
+    {
+     "claim": "above_hard",
+     "metric": "drawdown"
+    },
+    {
+     "claim": "negative",
+     "metric": "daily_return"
+    },
+    {
+     "claim": "fell",
+     "metric": "nav_usd"
+    },
+    {
+     "claim": "negative",
+     "metric": "var99_change_positions"
+    }
+   ],
+   "id": "F2",
+   "limit_id": "drawdown",
+   "statement": "Drawdown from the NAV peak has deepened and escalated past the hard limit, driven by the large one-day loss, and net asset value fell. The book did not change materially, as the position-driven change in VaR was small."
+  },
+  {
+   "evidence": [
+    {
+     "claim": "positive",
+     "metric": "var_exceptions_250"
+    },
+    {
+     "claim": "rose",
+     "metric": "var99_param"
+    },
+    {
+     "claim": "rose",
+     "metric": "var99_1d"
+    }
+   ],
+   "id": "F3",
+   "limit_id": "general",
+   "statement": "The backtest is in the yellow zone with another exception today, and the independence test gives only weak support against clustering. The historical VaR limit passing should not be read as reassurance, since the model may be understating risk. The parametric VaR rose well above the historical measure."
+  },
+  {
+   "evidence": [
+    {
+     "claim": "rose",
+     "metric": "ctr_Enrgy"
+    },
+    {
+     "claim": "fell",
+     "metric": "w_Enrgy"
+    }
+   ],
+   "id": "F4",
+   "limit_id": "general",
+   "statement": "The data quality check flagged the energy sleeve return as a very large outlier and escalated it for a human decision. Peers also fell sharply, so it may be a genuine sector loss, but the magnitude is in doubt. The energy figures should be treated with caution until it is reviewed."
+  }
+ ]
+}

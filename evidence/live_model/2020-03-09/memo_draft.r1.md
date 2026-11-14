@@ -1,22 +1,23 @@
 # Daily Risk Memo: {{as_of}}
 
 ## Status
-Overall status: {{status}}. Two hard limits are breached, volatility and drawdown, after a one-day portfolio return of {{m:daily_return}}.
+Overall status: {{status}}. Volatility and drawdown are both past their hard limits after a large one-day portfolio loss.
 
 ## Limits
-- [L:vol] Annualised EWMA volatility is {{m:vol_ann_ewma}} against a warning of {{w:vol}} and a hard limit of {{h:vol}}. Breach.
-- [L:drawdown] Drawdown from the NAV peak is {{m:drawdown}} against a warning of {{w:drawdown}} and a hard limit of {{h:drawdown}}. Breach.
-- All other limits are within their warning levels. One-day VaR at the top confidence level is {{m:var99_1d}} against a hard limit of {{h:var99}}.
+- [L:drawdown] Drawdown from NAV peak is {{m:drawdown}} against a hard limit of {{h:drawdown}} (warning {{w:drawdown}}). It escalated today.
+- [L:vol] Annualised EWMA volatility is {{m:vol_ann_ewma}} against a hard limit of {{h:vol}} (warning {{w:vol}}). It escalated today.
+- All other limits are within their warning levels.
 
 ## Drivers
-- [F:F1] Volatility moved into a hard breach as the large one-day loss fed the volatility estimate. The energy return is an open data item (see Data quality). The VaR backtest is in the {{m:backtest_zone}} zone, so the model may understate risk.
-- [F:F2] On the reported data, drawdown is in a hard breach because NAV fell on the day. Position sizes barely moved. The loss is in market value, not in positioning.
-- [F:F3] The energy return is flagged as an outlier. Peers also fell sharply, so a vendor error cannot be established. Energy is {{m:w_Enrgy}} of weight and {{m:ctr_Enrgy}} of variance. The VaR limit passes, but the parametric VaR is {{m:var99_param}}, above the hard limit of {{h:var99}}. VaR exceptions are clustering, with a new one today and {{m:var_exceptions_250}} in the window. The pass is not comfort. The VaR rise came from the market data window, not from positions.
-- Sensitivity: at the energy weight, the flagged return explains only a small part of the day's {{m:daily_return}}. The drawdown breach would very likely persist if the energy return were corrected. The volatility margin is narrower, so rerun it once the data decision is made.
+- [F:F2] Drawdown deepened past the hard limit on the large one-day loss. The daily return was {{m:daily_return}}. NAV fell. The book did not change materially, since the position-driven change in VaR was {{m:var99_change_positions}}.
+- [F:F1] Volatility was already in breach and rose further on the same loss. The largest contributors to risk are HiTec ({{m:ctr_HiTec}}), Other ({{m:ctr_Other}}) and Hlth ({{m:ctr_Hlth}}). The energy sleeve contribution ({{m:ctr_Enrgy}}) rose even though its weight fell to {{m:w_Enrgy}}.
+- [F:F3] The VaR backtest is in the yellow zone, with {{m:var_exceptions_250}} exceptions in the window and another exception today. The independence test gives only weak support against clustering. The historical VaR limit passing ({{m:var99_1d}}) should not be read as reassurance. Parametric VaR is higher at {{m:var99_param}}, so the model may understate risk.
+- [F:F4] The energy sleeve return was flagged as a very large outlier. Peers also fell sharply, so it may be a genuine sector loss, but the magnitude is in doubt. Treat energy figures with caution until reviewed.
 
 ## Data quality
-- [DQ:outlier:Enrgy] The energy return was flagged as an extreme outlier. The peer median also fell sharply and the expected return points the same way. No vendor notes were supplied. Overwriting the value could hide a real loss, so it was escalated and left unchanged pending a human decision.
+- [DQ:outlier:Enrgy] The energy return was flagged as an extreme outlier, with a very large residual against its beta-implied move. Peers are also down sharply, so this is not a quiet-peer bad tick. Zeroing the return could hide a real loss. It was escalated for a human decision. No vendor notes were supplied.
 
 ## For decision
-- Decide how to treat the energy return: accept it as reported, or override it. Rerun the metrics after the decision.
-- The two hard breaches need a management response. Options are to reduce risk, to hold with a documented exception and review date, or another course. The portfolio manager chooses the action.
+- Rule on the energy return: accept it as a genuine move, or correct it. The ruling changes the size of the volatility and drawdown figures, not whether the breaches exist. Drawdown stays in breach on any reading, because the broad loss was mostly not energy. The effect on volatility has not been quantified.
+- Both breaches need a response from the portfolio manager. Options for the portfolio manager to consider include reducing risk in the largest variance contributors, or accepting the breaches with a time-bound plan. The priority is the portfolio manager's call.
+- Note the yellow backtest zone when weighing any reliance on the historical VaR figure.
