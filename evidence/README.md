@@ -6,7 +6,7 @@ any model. Real-model results are in [live_model/](live_model/report.md). See [W
 
 | Claim | Result | Evidence | Reproduce |
 |---|---|---|---|
-| The code does what the tests say | 187 tests pass, on Python 3.14 and 3.15 | [test_results.txt](test_results.txt) | `python -m pytest` |
+| The code does what the tests say | 226 tests pass, on Python 3.14 and 3.15 | [test_results.txt](test_results.txt) | `python -m pytest` |
 | A real model can do the job | Claude Sonnet ran four of the hardest days, three times, the last on the compact request format. All 9 data judgements were correct, and on the latest run every check passed and all 4 days finished normally | [report.md](live_model/report.md), [first run](live_model_first_run/report.md) | `python scripts/demo_live.py` |
 | The browser app works | A real browser completed the whole path: connect, run, approve, change request, dashboard, reports, download, phone width. No console errors | `docs/screens/` | `python scripts/browser_check.py` |
 | The web app is safe to run | Local only; POSTs need a session token; unknown Host headers refused; keys never returned; paths cannot escape; agent text never rendered as HTML | `tests/test_web.py` | `python -m pytest tests/test_web.py` |
