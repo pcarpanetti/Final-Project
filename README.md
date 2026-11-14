@@ -2,8 +2,8 @@
 
 **Author:** Pablo Carpanetti, student ID 25210660154
 **Course:** AI Coding in Finance, Fall 2026, final project
-**Repository URL:** not applicable. This project is submitted as a local Git repository, and all files and history
-are in this ZIP.
+**Repository URL:** https://github.com/pcarpanetti/Final-Project. All files and the full Git history are also in this
+ZIP, so nothing here depends on access to the hosted repository.
 
 ## What this is
 
